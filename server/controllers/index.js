@@ -1,13 +1,10 @@
-
-
-function initial() {
+const initial = () => {
   return 'Routes are working';
-}
+};
 
-
-module.exports = Object.freeze({
-//   createTodo,
-//   readTodos,
-//   deleteTodo
-  initial
-});
+export default Object.freeze({
+  //   createTodo,
+  //   readTodos,
+  //   deleteTodo
+    initial
+  });
