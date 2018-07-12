@@ -4,7 +4,9 @@
   "description": "Engagement Support Automation ",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon bin/www",
+    "start": "npm run build && node ./build/index.js",
+    "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
+    "build": "babel ./server -d ./build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,6 +28,9 @@
     "sequelize": "^4.37.10"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
     "nodemon": "^1.17.5"
   }
 }

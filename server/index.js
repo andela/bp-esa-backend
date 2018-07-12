@@ -16,9 +16,9 @@
 //   console.log(`Listening on port ${config.port}`);
 // });
 
-const express = require('express');
-const logger = require('morgan');
-const bodyParser = require('body-parser');
+import express from 'express';
+import logger from 'morgan';
+import bodyParser from 'body-parser';
 
 // const config = require('./config');
 
@@ -37,4 +37,11 @@ app.get('*', (req, res) => res.status(200).send({
   message: 'Welcome to the beginning of nothingness.',
 }));
 
-module.exports = app;
+const port = parseInt(process.env.PORT, 10) || 8000;
+app.set('port', port);
+
+app.listen(port, () => {
+    console.log(`App listening on port ${app.get('port')}`);
+});
+  
+export default app;
