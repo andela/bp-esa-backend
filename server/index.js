@@ -1,26 +1,7 @@
-// const express = require('express');
-// const morgan = require('morgan');
-
-// const config = require('./config');
-// // const apiRouter = require('./routes');
-
-// const app = express();
-
-// app.use(morgan('dev'));
-
-// // app.use('/', express.static('./src/static'));
-
-// app.use('/api', apiRouter);
-
-// const server = app.listen(config.port, () => {
-//   console.log(`Listening on port ${config.port}`);
-// });
-
 import express from 'express';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
-
-// const config = require('./config');
+import router from './routes/index';
 
 // Set up the express app
 const app = express();
@@ -36,6 +17,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.get('*', (req, res) => res.status(200).send({
   message: 'Welcome to the beginning of nothingness.',
 }));
+
+app.use('/api/v1', router);
 
 const port = parseInt(process.env.PORT, 10) || 8000;
 app.set('port', port);
