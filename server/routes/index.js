@@ -13,16 +13,17 @@ const getChannelID = async (name) => {
   return group_id;
 }
 
-router.post('/staffed/:email',  (req, res) => {
+router.post('/staffed/:channel/:email',  (req, res) => {
   // const emailPrefix = req.params.email;
   // const emailSuffix = '@andela.com';
   // const email = emailPrefix + emailSuffix;
-  const email = req.params.email
+  const channel = req.params.channel;
+  const email = req.params.email;
 
   web.users.lookupByEmail({ token: process.env.SLACK_TOKEN, email: email })
   .then(async (result) => {
-    const channel_id = await getChannelID('private-channel');
-    console.log(channel_id);
+    const channel_id = await getChannelID(channel);
+    // console.log(channel_id);
     // res.send({
     //   slack_handle: result.user.profile.display_name,
     //   real_name: result.user.real_name,
@@ -54,14 +55,15 @@ router.post('/staffed/:email',  (req, res) => {
   });
 });
 
-router.post('/rolloff/:email', (req, res) => {
+router.post('/rolloff/:channel/:email', (req, res) => {
+  const channel = req.params.channel;
   const email = req.params.email;
   web.users.lookupByEmail({
     token: process.env.SLACK_TOKEN,
     email: email
   })
   .then(async (result) => {
-    const channel_id = await getChannelID('private-channel');
+    const channel_id = await getChannelID(channel);
     web.groups.kick({
       token: process.env.SLACK_TOKEN,
       channel: channel_id,
