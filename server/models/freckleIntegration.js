@@ -26,7 +26,7 @@ export default (sequelize, DataTypes) => {
         field: 'partner_id',
       },
     });
-  }
+  };
 
   return FreckleIntegration;
-}
+};
