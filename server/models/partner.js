@@ -9,10 +9,10 @@ export default (sequelize, DataTypes) => {
   });
 
   Partner.associate = (models) => {
-    Partner.hasMany(models.EmaiIntegration);
-    Partner.hasMany(models.FreckleIntegrstion);
+    Partner.hasMany(models.EmailIntegration);
+    Partner.hasMany(models.FreckleIntegration);
     Partner.hasMany(models.SlackIntegration);
   }
 
-  return User;
+  return Partner;
 }

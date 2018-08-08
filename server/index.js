@@ -1,26 +1,9 @@
-// const express = require('express');
-// const morgan = require('morgan');
-
-// const config = require('./config');
-// // const apiRouter = require('./routes');
-
-// const app = express();
-
-// app.use(morgan('dev'));
-
-// // app.use('/', express.static('./src/static'));
-
-// app.use('/api', apiRouter);
-
-// const server = app.listen(config.port, () => {
-//   console.log(`Listening on port ${config.port}`);
-// });
-
 import express from 'express';
 import logger from 'morgan';
 import bodyParser from 'body-parser';
 
-// const config = require('./config');
+import models from "./models";
+
 
 // Set up the express app
 const app = express();
@@ -28,7 +11,6 @@ const app = express();
 // Log requests to the console.
 app.use(logger('dev'));
 
-// Parse incoming requests data (https://github.com/expressjs/body-parser)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -40,8 +22,11 @@ app.get('*', (req, res) => res.status(200).send({
 const port = parseInt(process.env.PORT, 10) || 8000;
 app.set('port', port);
 
-app.listen(port, () => {
-    console.log(`App listening on port ${app.get('port')}`);
-});
+models.sequelize.sync().then(() => {
+    app.listen(port, () => {
+      console.log(`App listening on port ${app.get('port')}`);
+    });
+  }
+)
   
 export default app;

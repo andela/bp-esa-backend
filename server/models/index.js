@@ -1,7 +1,9 @@
 import Sequelize from 'sequelize'
 
+import configObject from '../config/config'
+
 const env = process.env.NODE_ENV || 'development';
-const config = require(`${__dirname}/../config/config.json`)[env];
+const config = configObject[env];
 
 let sequelize;
 if (config.use_env_variable) {
@@ -12,7 +14,8 @@ if (config.use_env_variable) {
       dialect: 'postgres',
       define: {
         underscored: true,
-      }
+      },
+      logging: false,
     }
   );
 }
@@ -20,7 +23,7 @@ if (config.use_env_variable) {
 const db = {
   User: sequelize.import('./user'),
   Partner: sequelize.import('./partner'),
-  FreckleIntergration: sequelize.import('./freckleIntegration'),
+  FreckleIntegration: sequelize.import('./freckleIntegration'),
   SlackIntegration: sequelize.import('./slackIntegration'),
   EmailIntegration: sequelize.import('./emailIntegration'),
 }
