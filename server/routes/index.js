@@ -13,6 +13,11 @@ const getChannelID = async (name) => {
   return group_id;
 }
 
+const userExists = async (user_id) => {
+  const member_list = await web.groups.info.members;
+  return (member_list.indexOf(user_id) > -1) ? true : false;
+}
+
 router.post('/staffed/:channel/:email',  (req, res) => {
   const channel = req.params.channel;
   const email = req.params.email;
