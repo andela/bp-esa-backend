@@ -1,8 +1,6 @@
-'use strict';
-
 module.exports = {
   up: (queryInterface, DataTypes) => {
-    return queryInterface.createTable('emailIntegrations', {
+    return queryInterface.createTable('email_integrations', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -25,19 +23,18 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
       user_id: {
         type: DataTypes.INTEGER,
-        onDelete: 'CASCADE',
         references: {
           model: 'users',
           key: 'id',
@@ -46,7 +43,6 @@ module.exports = {
       },
       partner_id: {
         type: DataTypes.INTEGER,
-        onDelete: 'CASCADE',
         references: {
           model: 'partners',
           key: 'id',
@@ -57,6 +53,6 @@ module.exports = {
   },
 
   down: (queryInterface, DataTypes) => {
-    return queryInterface.dropTable('emailIntegrations');
+    return queryInterface.dropTable('email_integrations');
   }
 };
