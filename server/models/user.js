@@ -6,14 +6,14 @@ export default (sequelize, DataTypes) => {
     email: {
       type: DataTypes.STRING,
       unique: true,
-    }
+    },
   });
 
   User.associate = (models) => {
     User.hasMany(models.EmailIntegration);
     User.hasMany(models.FreckleIntegration);
     User.hasMany(models.SlackIntegration);
-  }
+  };
 
   return User;
-}
+};
