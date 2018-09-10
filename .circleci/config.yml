@@ -5,6 +5,10 @@
 version: 2
 jobs:
   build:
+    branches:
+      only:
+        - develop
+        - add-models-tests
     docker:
       # specify the version you desire here
       - image: circleci/node:10.8.0
