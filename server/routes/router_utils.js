@@ -39,7 +39,7 @@ const remove_from_channel = async (slack_token, user_info_result_obj, channel_id
       user: user_info_result_obj.user.id
     });
   }
-  return
+  return Promise.reject(`User ${user_info_result_obj.user.profile.email} not in one of the required channels`);
 }
 
 const invite_to_channel = async (slack_token, user_info_result_obj, channel_id) => {
@@ -51,7 +51,7 @@ const invite_to_channel = async (slack_token, user_info_result_obj, channel_id) 
       user: user_info_result_obj.user.id
     });
   }
-  return
+  return;
 }
 
 const searchUserByEmail = (email, slack_token) => {
@@ -69,8 +69,8 @@ const staffing_slack_operation = async (slack_token, user_info_result_obj, partn
   // Get channels to add user to or remove them from
   const partner_channel_id = await getChannelID(slack_token, partner_channel_name);
   const available_devs_channel_id = await getChannelID(slack_token, core_channels.AVAILABLE_DEVS);
-  const placed_ops_channel_id = await getChannelID(SLACK_TOKEN, core_channels.PLACED_OPS);
-  const rack_city_channel_id = await getChannelID(SLACK_TOKEN, core_channels.RACK_CITY);
+  const placed_ops_channel_id = await getChannelID(slack_token, core_channels.PLACED_OPS);
+  const rack_city_channel_id = await getChannelID(slack_token, core_channels.RACK_CITY);
 
   return Promise.all([
     // Kick of user from available-devs channel
@@ -80,10 +80,10 @@ const staffing_slack_operation = async (slack_token, user_info_result_obj, partn
     invite_to_channel(slack_token, user_info_result_obj, partner_channel_id),
 
     // Invite user to rack-city
-    invite_to_channel(SLACK_TOKEN, user_info_result_obj, rack_city_channel_id),
+    invite_to_channel(slack_token, user_info_result_obj, rack_city_channel_id),
 
     // Invite to placed-fellows-ops
-    invite_to_channel(SLACK_TOKEN, user_info_result_obj, placed_ops_channel_id)
+    invite_to_channel(slack_token, user_info_result_obj, placed_ops_channel_id)
   ])
 }
 

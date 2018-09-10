@@ -84,8 +84,8 @@ router.post('/rolloff', async (req, res) => {
         // res.send({ values: values });
         res.send({ success: "Operational completed successfully for all the specified users"})
         return
-      }).catch(err => {
-        res.send({ error: err.message + ' : Error while removing or adding user(s) to channels' })
+      }).catch(values => {
+        res.send({ error: values + ' : Error while removing or adding user(s) to channels' })
         return
       })
     }).catch(err => {
