@@ -1,5 +1,5 @@
 # bp-esa-backend
-[![CircleCI](https://circleci.com/gh/andela/bp-esa-backend.svg?style=svg)](https://circleci.com/gh/andela/bp-esa-backend)
+[![CircleCI](https://circleci.com/gh/andela/bp-esa-backend/tree/add-models-tests.svg?style=svg)](https://circleci.com/gh/andela/bp-esa-backend/tree/add-models-tests)
 ### How To Install And Run The Application
 
 * Clone this Repo and `cd` into it
