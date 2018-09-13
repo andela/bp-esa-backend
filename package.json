@@ -6,9 +6,9 @@
   "scripts": {
     "start": "npm run build && node ./build/index.js",
     "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
-    "build:dev": "babel ./server -d ./build",
-    "test": "mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
-    "lint": "eslint ."
+    "build": "babel ./server -d ./build",
+    "test:dev": "mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
+    "lint:dev": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -27,7 +27,9 @@
     "morgan": "^1.9.0",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^4.38.0"
+    "sequelize": "^4.38.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
