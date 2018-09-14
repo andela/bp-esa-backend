@@ -1,8 +1,6 @@
-'use strict';
-
 module.exports = {
   up: (queryInterface, DataTypes) => {
-    return queryInterface.createTable('freckleIntegrations', {
+    return queryInterface.createTable('freckle_integrations', {
       id: {
         primaryKey: true,
         type: DataTypes.INTEGER,
@@ -21,19 +19,18 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
       user_id: {
         type: DataTypes.INTEGER,
-        onDelete: 'CASCADE',
         references: {
           model: 'users',
           key: 'id',
@@ -42,7 +39,6 @@ module.exports = {
       },
       partner_id: {
         type: DataTypes.INTEGER,
-        onDelete: 'CASCADE',
         references: {
           model: 'partners',
           key: 'id',
