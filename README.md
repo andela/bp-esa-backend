@@ -2,7 +2,7 @@
 Develop Branch :
 [![CircleCI](https://circleci.com/gh/andela/bp-esa-backend/tree/develop.svg?style=svg)](https://circleci.com/gh/andela/bp-esa-backend/tree/develop)
 
-A server for an automated system to help Andela perform on-boarding and off-boarding processes for fellows joining or leaving engagements.
+A service for an automated system to help Andela perform on-boarding and off-boarding processes for fellows joining or leaving engagements.
 
 ## Technologies Used
 - Node js
