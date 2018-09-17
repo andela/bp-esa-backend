@@ -31,9 +31,8 @@
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.38.0",
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
-    "sequelize-cli": "^4.0.0"
+    "babel-core": "^6.26.3"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
