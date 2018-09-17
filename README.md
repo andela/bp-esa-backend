@@ -5,7 +5,7 @@ Develop Branch :
 A service for an automated system to help Andela perform on-boarding and off-boarding processes for fellows joining or leaving engagements.
 
 ## Technologies Used
-- Node js
+- Node.js
 - Express
 - PostgreSQL DB
 
