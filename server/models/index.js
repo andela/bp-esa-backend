@@ -6,8 +6,8 @@ const env = process.env.NODE_ENV || 'development';
 const config = configObject[env];
 
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable]);
+if (config.url) {
+  sequelize = new Sequelize(config.url, { });
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, {
     dialect: 'postgres',
