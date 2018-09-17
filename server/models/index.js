@@ -11,6 +11,7 @@ if (config.use_env_variable) {
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, {
     dialect: 'postgres',
+    host: config.host || '127.0.0.1',
     define: {
       underscored: true,
     },
