@@ -16,5 +16,7 @@ module.exports = {
   test: Object.assign(baseConfig, {
     database: process.env.DB_TEST_NAME,
   }),
-  production: Object.assign(baseConfig, {}),
+  production: Object.assign(baseConfig, {
+    url: process.env.DATABASE_URL,
+  }),
 };
