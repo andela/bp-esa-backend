@@ -6,7 +6,9 @@
   "scripts": {
     "start": "npm run build && node ./build/index.js",
     "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
-    "build": "babel ./server -d ./build",
+    "build-babel": "babel -d ./build ./server -s",
+    "clean": "rm -rf build && mkdir build",
+    "build": "npm run clean && npm run build-babel",
     "test:dev": "mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
     "lint:dev": "eslint ."
   },
