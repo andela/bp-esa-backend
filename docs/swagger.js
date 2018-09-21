@@ -8,7 +8,7 @@ const swaggerDefinition = {
   info: {
     title: 'REST API for Engagement Support Automation',
     version: '0.0.1',
-    description: 'This is the REST API for Authors Haven',
+    description: 'This is the REST API for Engagement Support Automation',
   },
   host: process.env.DOC_HOST,
   // basePath: '/api',
