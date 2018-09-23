@@ -4,8 +4,6 @@ import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerConfig from '../docs/swagger';
 
-import models from './models';
-
 // Set up the express app
 const app = express();
 
@@ -25,10 +23,8 @@ app.get('*', (req, res) => res.status(200).send({
 const port = parseInt(process.env.PORT, 10) || 8000;
 app.set('port', port);
 
-models.sequelize.sync().then(() => {
-  app.listen(port, () => {
-    console.log(`App listening on port ${app.get('port')}`);
-  });
+app.listen(port, () => {
+  console.log(`App listening on port ${app.get('port')}`);
 });
 
 export default app;
