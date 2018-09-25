@@ -25,4 +25,4 @@ const options = {
 };
 // initialize swagger-jsdoc
 // export default swaggerJSDoc(options);
-module.exports =  swaggerJSDoc(options);
+module.exports = swaggerJSDoc(options);
