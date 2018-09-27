@@ -6,7 +6,6 @@ const env = process.env.NODE_ENV || 'development';
 const config = configObject[env];
 
 const sequelize = new Sequelize(config.url, {
-  host: config.host || '127.0.0.1',
   define: {
     underscored: true,
   },
