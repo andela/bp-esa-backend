@@ -101,8 +101,14 @@ export const developerEmailTransport = (developerEmail, developerName, partnerNa
   return emailTransport.sendMail(mailOptions);
 };
 
-export const opsEmailTransport = (developerEmail, developerName, develperLocation, partnerName,
-  partnerLocation, startDate) => {
+export const opsEmailTransport = (
+  developerEmail,
+  developerName,
+  develperLocation,
+  partnerName,
+  partnerLocation,
+  startDate,
+) => {
   const mailOptions = {
     from: user,
     to: opsEmail,
@@ -121,7 +127,7 @@ export const opsEmailTransport = (developerEmail, developerName, develperLocatio
       </p>
       
       Their expected start date is ${startDate}
-      
+      ~~
       Please do provide them with any support they need to ensure smooth transition to their Partner Engagement.
       
       

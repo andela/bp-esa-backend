@@ -8,7 +8,8 @@
     "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
     "build": "babel ./server -d ./build",
     "test": "mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "migrations": "sequelize db:migrate"
   },
   "repository": {
     "type": "git",
@@ -29,7 +30,10 @@
     "nodemailer": "^4.6.8",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^4.38.0"
+    "sequelize": "^4.38.0",
+    "sequelize-cli": "^4.0.0",
+    "swagger-jsdoc": "^3.2.3",
+    "swagger-ui-express": "^4.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

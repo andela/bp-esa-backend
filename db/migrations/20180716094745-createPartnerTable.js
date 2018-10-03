@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = {
   up: (queryInterface, DataTypes) => {
     return queryInterface.createTable('partners', {
@@ -13,16 +11,16 @@ module.exports = {
         allowNull: false,
         type: DataTypes.STRING,
       },
-      partnerID: {
+      partner_id: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
