@@ -126,14 +126,16 @@ export const opsEmailTransport = (
         has been placed with ${partnerName} ,${partnerLocation}.
       </p>
       
-      Their expected start date is ${startDate}
-      ~~
-      Please do provide them with any support they need to ensure smooth transition to their Partner Engagement.
+      <p>Their expected start date is ${startDate}</p>
+      <p>
+        Please do provide them with any support they need to ensure smooth transition to their 
+        Partner Engagement.
+      </p>
       
       
-      Regards,
+      <p><b>Regards,</b></p>
       
-      Success
+      <p><b>Success</b></p>
       
     `,
   };
