@@ -10,10 +10,10 @@ dotenv.config();
 
 const { OAuth2 } = google.auth;
 
-const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-const redirectUrl = process.env.REDIRECT_URL;
-const refreshToken = process.env.REFRESH_TOKEN;
+const clientId = process.env.GMAIL_CLIENT_ID;
+const clientSecret = process.env.GMAIL_CLIENT_SECRET;
+const redirectUrl = process.env.GMAIL_REDIRECT_URL;
+const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
 const user = process.env.EMAIL_USER;
 const opsEmail = process.env.OPS_EMAIL;
 
