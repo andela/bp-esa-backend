@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Bopchy/bp-esa-backend#readme",
   "dependencies": {
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
@@ -30,6 +31,7 @@
     "nodemailer": "^4.6.8",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
+    "redis": "^2.8.0",
     "sequelize": "^4.38.0",
     "sequelize-cli": "^4.0.0",
     "swagger-jsdoc": "^3.2.3",
