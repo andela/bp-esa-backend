@@ -14,8 +14,8 @@ client.on('error', (err) => {
 });
 
 // axios base URL and Authorization header setup
-axios.defaults.baseURL = 'https://api.andela.com/';
-axios.defaults.headers.common = { Authorization: `bearer ${process.env.ANDELA_USER_JWT}` };
+axios.defaults.baseURL = 'https://api-prod.andela.com/';
+axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 export const placementStatus = {
   rollingOff: 'External Engagements - Rolling Off',
