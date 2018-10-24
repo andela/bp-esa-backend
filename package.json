@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Bopchy/bp-esa-backend#readme",
   "dependencies": {
+    "@slack/client": "^4.8.0",
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
