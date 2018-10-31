@@ -6,11 +6,10 @@
   "scripts": {
     "start": "npm run build && node ./build/index.js",
     "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
-    "build-babel": "babel -d ./build ./server -s",
-    "clean": "rm -rf build && mkdir build",
-    "build": "npm run clean && npm run build-babel",
-    "test:dev": "mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
-    "lint:dev": "eslint ."
+    "build": "babel ./server -d ./build",
+    "test": "mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
+    "lint": "eslint .",
+    "migrations": "sequelize db:migrate"
   },
   "repository": {
     "type": "git",
@@ -23,16 +22,20 @@
   },
   "homepage": "https://github.com/Bopchy/bp-esa-backend#readme",
   "dependencies": {
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
+    "googleapis": "^33.0.0",
     "morgan": "^1.9.0",
+    "nodemailer": "^4.6.8",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
+    "redis": "^2.8.0",
     "sequelize": "^4.38.0",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-core": "^6.26.3"
+    "sequelize-cli": "^4.0.0",
+    "swagger-jsdoc": "^3.2.3",
+    "swagger-ui-express": "^4.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

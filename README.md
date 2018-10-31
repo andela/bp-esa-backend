@@ -1,7 +1,6 @@
 # Engagement Support Automation Backend
 Develop Branch :
-[![CircleCI](https://circleci.com/gh/andela/bp-esa-backend/tree/develop.svg?style=svg)](https://circleci.com/gh/andela/bp-esa-backend/tree/develop) [![Maintainability](https://api.codeclimate.com/v1/badges/7ca38aaad866dd17a948/maintainability)](https://codeclimate.com/github/andela/bp-esa-backend/maintainability)
-
+[![CircleCI](https://circleci.com/gh/andela/bp-esa-backend/tree/develop.svg?style=svg)](https://circleci.com/gh/andela/bp-esa-backend/tree/develop) [![Maintainability](https://api.codeclimate.com/v1/badges/7ca38aaad866dd17a948/maintainability)](https://codeclimate.com/github/andela/bp-esa-backend/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/7ca38aaad866dd17a948/test_coverage)](https://codeclimate.com/github/andela/bp-esa-backend/test_coverage)
 <hr>
 
 A service for an automated system to help Andela perform on-boarding and off-boarding processes for fellows joining or leaving engagements.
@@ -22,11 +21,23 @@ The following should be installed in your machine
 * Clone this Repo and `cd` into it
 * Install all the dependancies by running the `npm install` command (or `yarn install` if you prefer)
 * Create a `.env` file and use `.env.example` as a guide on the environment variables required
+* Run `npm run migrations` to setup the database tables.
 * Start the application by running the `npm start` command(`npm start:dev` for 'watch' mode. You can also use `yarn` if you prefer)
 
 ## How To Test The Application
 
 * To run tests use the `npm test` command.
+
+## API Documentation
+*  API documentation is a concise reference manual containing all the information required to work with the API, with details about the functions, classes, return types, arguments and more, supported by tutorials and examples. We take API Documentation Seriously.
+* Engagement Support Automation(ESA) API is documented using [swagger](https://swagger.io/) and abides to the [**OpenAPI Specification**](https://swagger.io/specification/)
+### How to Access the API Documentation
+* Local development setup; After a complete and successful setup of the application, you can access the API Documentation at:
+> http:<host_url>:<host_port>/api-docs
+### How to Access and contribute ESA API Documentation
+* You can access the API documentation on `~<project_root_folder>/docs/swagger/{here}`
+* Each file represents and endpoint and it's configuration.
+* Swagger uses `YAML` syntax. You can write documentation to a particular endpoint and add it to the already existing endpoints here `~<project_root_folder>/docs/swagger/{here}`
 
 ## How To Contribute
 

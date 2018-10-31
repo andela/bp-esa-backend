@@ -1,4 +1,6 @@
 build
-.env
 node_modules/
+test.js
+.env
 package-lock.json
+.vscode/
