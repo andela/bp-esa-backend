@@ -1,15 +1,20 @@
 # Javascript Node CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
-# Just testing to see if this triggers a build 
+# Just testing to see if this triggers a build
 version: 2
 defaults: &defaults
     docker:
       # specify the version you desire here
-      - image: circleci/node:10.8.0      
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
+      - image: circleci/node:10.8.0
+      # - image: redis
+      #   environment:
+      #     REDIS_PORT: 6379
+      #     REDIS_HOST: 127.0.0.1
+
     working_directory: ~/repo
 jobs:
   build:

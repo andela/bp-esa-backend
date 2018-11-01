@@ -1,8 +1,11 @@
 import express from 'express';
 import logger from 'morgan';
+import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerConfig from '../docs/swagger';
+
+dotenv.config();
 
 // Set up the express app
 const app = express();
