@@ -4,8 +4,10 @@ import makeChannelNames from '../../helpers/slackHelpers';
 import slackMocks from '../../../test/mocks/slack';
 import allocationsMocks from '../../../test/mocks/allocations';
 
+
 const { SLACK_TOKEN } = process.env;
 const slackClient = new WebClient(SLACK_TOKEN);
+
 
 /**
  * @function createChannel
@@ -24,6 +26,7 @@ const createChannel = async (name) => {
     return error;
   }
 };
+
 
 /**
  * @function createPartnerChannels
@@ -59,8 +62,10 @@ export const createPartnerChannels = async (partnerId) => {
       createInternal = await createChannel(internalChannel);
     }
 
-    const generalDuplicate = createGeneral.message !== undefined ? createGeneral.data.error : null;
-    const internalDuplicate = createInternal.message !== undefined ? createInternal.data.error : null;
+    const generalDuplicate = createGeneral.message !== undefined
+      ? createGeneral.data.error : null;
+    const internalDuplicate = createInternal.message !== undefined
+      ? createInternal.data.error : null;
 
     if (generalDuplicate === 'name_taken') {
       throw new Error(`The channel '${generalChannel}' already exists`);
@@ -85,6 +90,7 @@ export const createPartnerChannels = async (partnerId) => {
     return error.message;
   }
 };
+
 
 /**
  * @function getSlackUser
@@ -111,6 +117,7 @@ const getSlackUser = async (email) => {
     return { error };
   }
 };
+
 
 /**
  * @function addToChannel
