@@ -1,4 +1,4 @@
-import { createPartnerChannels } from '../../server/modules/slackIntegration';
+import { createPartnerChannels, addToChannel } from '../../server/modules/slack/slackIntegration';
 import allocationsMocks from '../mocks/allocations';
 
 describe('Slack Integration Test Suite', async () => {
@@ -18,5 +18,13 @@ describe('Slack Integration Test Suite', async () => {
     };
     expect(createResult.generalChannel.id).to.equal(expectedResult.generalChannel.id);
     expect(createResult.internalChannel.id).to.equal(expectedResult.internalChannel.id);
+  });
+
+  it('Should add developers to respective channels', async () => {
+    const email = 'johndoe@mail.com';
+    const channel = 'GDL7RDC5V';
+
+    const inviteResult = await addToChannel(email, channel);
+    expect(inviteResult.message).to.equal('User added to channel successfully');
   });
 });

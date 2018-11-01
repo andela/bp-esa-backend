@@ -9,9 +9,9 @@ const makeChannelNames = (partnerName) => {
   const shortened = partnerName.toLowerCase().replace(/llc|inc/g, '');
   const formattedName = shortened.replace(/[^a-zA-Z0-9]/g, '');
 
-  // For all the participants of the engagement
+  // For all the participants of the engagement - Andelans & Partners
   const generalChannel = `p-${formattedName}`;
-  // For Andelans in the engagement
+  // For only Andelans in the engagement
   const internalChannel = `p-${formattedName}-int`;
 
   return { generalChannel, internalChannel };
