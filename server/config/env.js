@@ -1,7 +1,3 @@
-const dotenv = require('dotenv');
-
-dotenv.config();
-
 const baseConfig = {
   url: process.env.DB_URL,
   dialect: process.env.DB_DIALECT,

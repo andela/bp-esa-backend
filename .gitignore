@@ -5,3 +5,4 @@ test.js
 package-lock.json
 .vscode/
 coverage
+.nyc_output
