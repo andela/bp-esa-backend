@@ -1,8 +1,9 @@
 # Engagement Support Automation Backend
-Develop Branch :
-[![CircleCI](https://circleci.com/gh/andela/bp-esa-backend/tree/develop.svg?style=svg)](https://circleci.com/gh/andela/bp-esa-backend/tree/develop)
+[![CircleCI](https://circleci.com/gh/andela/bp-esa-backend/tree/develop.svg?style=svg)](https://circleci.com/gh/andela/bp-esa-backend/tree/develop) [![Maintainability](https://api.codeclimate.com/v1/badges/7ca38aaad866dd17a948/maintainability)](https://codeclimate.com/github/andela/bp-esa-backend/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/7ca38aaad866dd17a948/test_coverage)](https://codeclimate.com/github/andela/bp-esa-backend/test_coverage)
+<hr>
 
 A service for an automated system to help Andela perform on-boarding and off-boarding processes for fellows joining or leaving engagements.
+<hr>
 
 ## Technologies Used
 - Node.js
