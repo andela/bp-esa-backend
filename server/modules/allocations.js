@@ -53,3 +53,18 @@ export const fetchPlacementsByStatus = (status, callback) => {
     .catch(error => callback(error, []))
     .finally(() => client.quit());
 };
+
+export const fetchNewKickoffAllocation = (callback) => {
+  fetchPlacementsByStatus(placementStatus.onboarding, (err, response) => {
+    if (err) {
+      callback(err, []);
+      return;
+    }
+    const currentDate = new Date(Date.now());
+    const fromDate = currentDate.setDate(
+      currentDate.getDate() - Number(process.env.NUMBER_OF_DAYS),
+    ); // Specify desired date relative to present day
+    const newKickofEngagements = response.filter(data => (Date.parse(data.updated_at) >= fromDate));
+    callback(null, newKickofEngagements);
+  });
+};
