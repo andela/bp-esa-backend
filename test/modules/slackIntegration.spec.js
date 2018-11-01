@@ -1,4 +1,8 @@
-import { createPartnerChannels, addToChannel } from '../../server/modules/slack/slackIntegration';
+import {
+  createPartnerChannels,
+  addToChannel,
+  removeFromChannel,
+} from '../../server/modules/slack/slackIntegration';
 import allocationsMocks from '../mocks/allocations';
 
 describe('Slack Integration Test Suite', async () => {
@@ -26,5 +30,13 @@ describe('Slack Integration Test Suite', async () => {
 
     const inviteResult = await addToChannel(email, channel);
     expect(inviteResult.message).to.equal('User added to channel successfully');
+  });
+
+  it('Should remove developers from channels', async () => {
+    const email = 'johndoe@mail.com';
+    const channel = 'GDL7RDC5V';
+
+    const inviteResult = await removeFromChannel(email, channel);
+    expect(inviteResult.message).to.equal('User removed from channel successfully');
   });
 });

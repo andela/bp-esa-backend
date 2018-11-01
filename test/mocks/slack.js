@@ -161,6 +161,9 @@ const slackMocks = {
       priority: 0,
     },
   },
+  removeUser: {
+    ok: true,
+  },
 };
 
 export default slackMocks;

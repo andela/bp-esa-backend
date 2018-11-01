@@ -7,7 +7,7 @@
     "start": "npm run build && node ./build/index.js",
     "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
     "build": "babel ./server -d ./build",
-    "test": "nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
+    "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:babel-core/register --timeout 10000 --exit",
     "lint": "eslint .",
     "migrations": "sequelize db:migrate"
   },
