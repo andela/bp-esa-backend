@@ -4,3 +4,4 @@ test.js
 .env
 package-lock.json
 .vscode/
+coverage

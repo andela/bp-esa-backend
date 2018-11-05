@@ -7,7 +7,7 @@
     "start": "npm run build && node ./build/index.js",
     "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
     "build": "babel ./server -d ./build",
-    "test": "mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
+    "test": "nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
     "lint": "eslint .",
     "migrations": "sequelize db:migrate"
   },
@@ -48,6 +48,7 @@
     "expect": "^23.5.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.17.5",
+    "nyc": "^13.1.0",
     "prettier-eslint": "^8.8.2",
     "sequelize-test-helpers": "^1.0.3",
     "sinon": "^6.1.5",
