@@ -10,10 +10,10 @@ defaults: &defaults
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
       - image: circleci/node:10.8.0
-      # - image: redis
-      #   environment:
-      #     REDIS_PORT: 6379
-      #     REDIS_HOST: 127.0.0.1
+      - image: redis
+        environment:
+          REDIS_PORT: 6379
+          REDIS_HOST: 127.0.0.1
 
     working_directory: ~/repo
 jobs:
