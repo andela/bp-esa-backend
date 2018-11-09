@@ -7,7 +7,7 @@
     "start": "npm run build && node ./build/index.js",
     "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
     "build": "babel ./server -d ./build",
-    "test": "nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:babel-core/register --timeout 10000",
+    "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:babel-core/register --timeout 10000 --exit",
     "lint": "eslint .",
     "migrations": "sequelize db:migrate"
   },
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Bopchy/bp-esa-backend#readme",
   "dependencies": {
+    "@slack/client": "^4.8.0",
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
@@ -51,7 +52,7 @@
     "nyc": "^13.1.0",
     "prettier-eslint": "^8.8.2",
     "sequelize-test-helpers": "^1.0.3",
-    "sinon": "^6.1.5",
+    "sinon": "^6.3.5",
     "sinon-chai": "^3.2.0"
   }
 }

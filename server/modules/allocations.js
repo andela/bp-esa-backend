@@ -1,11 +1,8 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 import redis from 'redis';
 
-dotenv.config();
-
 // redis setup
-const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
+export const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
 client.on('connect', () => {
   console.log('Redis client connected');
 });
@@ -39,7 +36,7 @@ export const findPartnerById = partnerId => new Promise((resolve, reject) => {
     if (error) {
       reject(error);
     }
-    resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId));
+    resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
   });
 });
 
