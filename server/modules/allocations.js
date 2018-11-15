@@ -1,5 +1,8 @@
 import axios from 'axios';
 import redis from 'redis';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // redis setup
 export const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
@@ -21,7 +24,8 @@ export const placementStatus = {
 
 // Updates the local redis store with latest Partner List
 export const updatePartnerStore = async () => {
-  axios.get('api/v1/partners')
+  axios
+    .get('api/v1/partners')
     .then((response) => {
       client.set('partners', JSON.stringify(response.data), redis.print);
     })
@@ -40,28 +44,27 @@ export const findPartnerById = partnerId => new Promise((resolve, reject) => {
   });
 });
 
+/**
+ *@desc Fetches placements from allocations, based on the status specified
+ *
+ * @param {string} status - The status of placements to fetch
+ *
+ * @returns {Promise} - Promise of the returned placements from allocations
+ */
+const fetchPlacementsByStatus = status => axios.get(`api/v1/placements?status=${status}`);
 
-// fetches placements based on status you passed
-export const fetchPlacementsByStatus = (status, callback) => {
-  axios.get(`api/v1/placements?status=${status}`)
-    .then((response) => {
-      callback(null, response.data.values);
-    })
-    .catch(error => callback(error, []))
-    .finally(() => client.quit());
-};
-
-export const fetchNewKickoffAllocation = (callback) => {
-  fetchPlacementsByStatus(placementStatus.onboarding, (err, response) => {
-    if (err) {
-      callback(err, []);
-      return;
-    }
-    const currentDate = new Date(Date.now());
-    const fromDate = currentDate.setDate(
-      currentDate.getDate() - Number(process.env.NUMBER_OF_DAYS),
-    ); // Specify desired date relative to present day
-    const newKickofEngagements = response.filter(data => (Date.parse(data.updated_at) >= fromDate));
-    callback(null, newKickofEngagements);
-  });
-};
+/**
+ * @desc Fetches new placements based on status, from the past numberOfDays
+ *
+ * @param {string} status - The status of placements to fetch from allocations
+ * @param {number} numberOfDays - The range of days from which to get new placements
+ *
+ * @returns {Promise} - Promise which resolves to a list of placements
+ * from the past numberOfDays provided, or throws an error if unsuccessful
+ */
+export const fetchNewPlacements = (status, numberOfDays = 1) => fetchPlacementsByStatus(status).then((res) => {
+  const placements = res.data.values;
+  const currentDate = new Date(Date.now());
+  const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);
+  return placements.filter(data => Date.parse(data.created_at) >= fromDate);
+});
