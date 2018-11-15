@@ -4,14 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// redis setup
-export const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
-client.on('connect', () => {
-  console.log('Redis client connected');
-});
-client.on('error', (err) => {
-  console.log(`Something went wrong ${err}`);
-});
+import client from '../helpers/redis';
 
 // axios base URL and Authorization header setup
 axios.defaults.baseURL = 'https://api-prod.andela.com/';

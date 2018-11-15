@@ -3,7 +3,11 @@ import logger from 'morgan';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
+import ms from 'ms';
+
 import swaggerConfig from '../docs/swagger';
+import routes from './routes';
+import worker from './modules/worker';
 
 dotenv.config();
 
@@ -17,6 +21,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
+
+// add worker if on production environment
+if (process.env.NODE_ENV === 'production') {
+  setInterval(async () => {
+    worker();
+  }, ms(process.env.TIMER_INTERVAL));
+}
+
+routes(app);
 
 // Setup a default catch-all route that sends back a welcome message in JSON format.
 app.get('*', (req, res) => res.status(200).send({
