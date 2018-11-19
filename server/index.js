@@ -22,13 +22,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
 
-// add worker if on production environment
-if (process.env.NODE_ENV === 'production') {
-  setInterval(async () => {
-    worker();
-  }, ms(process.env.TIMER_INTERVAL));
-}
-
 routes(app);
 
 // Setup a default catch-all route that sends back a welcome message in JSON format.
@@ -41,6 +34,12 @@ app.set('port', port);
 
 app.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
+
+  // Start worker
+  setInterval(() => {
+    worker.init();
+    worker.exec();
+  }, ms(process.env.TIMER_INTERVAL) || ms('1d'));
 });
 
 export default app;
