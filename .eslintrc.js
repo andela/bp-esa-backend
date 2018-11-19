@@ -6,5 +6,18 @@ module.exports = {
   },
   globals: {
     expect: true,
+  },
+  rules: {
+    "require-jsdoc": ["error",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": false,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+        }
+      }
+    ],
+    "valid-jsdoc": "error"
   }
 };

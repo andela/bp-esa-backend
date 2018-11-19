@@ -96,7 +96,7 @@ export const createPartnerChannels = async (partnerId) => {
  * @function getSlackUser
  * @desc search for a slack user by email
  *
- * @param email - the user's email
+ * @param {String} email - the user's email
  * @returns {string} slackID - the slack user's id
  */
 export const getSlackUser = async (email) => {

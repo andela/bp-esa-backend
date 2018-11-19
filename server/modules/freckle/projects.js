@@ -8,6 +8,12 @@ dotenv.config();
 const freckleUrl = 'https://api.letsfreckle.com/v2';
 const freckleToken = process.env.FRECKLE_ADMIN_TOKEN;
 
+/**
+ * @function
+ * @desc - An asynchronous function to get all projects from freckle.
+ * @returns {Array} - If freckle-api transaction success, it returns a list of project.
+ * @returns {Object} - If freckle-api transaction fail, it returns the transaction error.
+ */
 export async function getAllProjects() {
   try {
     const projects = await axios.get(`${freckleUrl}/projects?freckle_token=${freckleToken}`);
@@ -17,14 +23,28 @@ export async function getAllProjects() {
   }
 }
 
-function verifyExistingProject(projects, projectName) {
+/**
+ * @function
+ * @desc - A function to check/verify if a project already exist in a list of freckle projects.
+ * @param {Array} projects - The list of freckle projects.
+ * @param {String} projectName - The name of the project to check.
+ * @returns {Boolean} - A truthy value representing if the project exist or not.
+ */
+const verifyExistingProject = (projects, projectName) => {
   const project = projects.filter(eachProject => eachProject.name === projectName);
   if (!project.length) {
     return false;
   }
   return true;
-}
+};
 
+/**
+ * @function
+ * @desc - An asynchronous function to create a new project on freckle.
+ * @param {String} projectName The name of the project to be created.
+ * @returns {Object} If freckle-api transaction success, it return a success response object.
+ * @returns {Object} - If freckle-api transaction fail, it return an error response object.
+ */
 export const createProject = async (projectName) => {
   try {
     const projects = await getAllProjects();
