@@ -98,3 +98,35 @@ export const itEmailTransport = (developerName, developerEmail, developerLocatio
 
   return sendMail(mailOptions);
 };
+
+/**
+ * Function for sending email to the success offboarding department
+ *
+ * @param {string} developerName - Name of developer offboarding
+ * @param {string} parnerName - Name of partner
+ * @param {string} developerEmail - Email of the developer
+ * @param {string} developerLocation - location of developer
+ * @param {stirng} parnerLocation - location of partner
+ * @param {string} rollOffDate - date for developer to roll off
+ *
+ * @returns {object}  Promise
+ */
+export const opsOffBoardingEmailTransport = (...args) => {
+  const [
+    developerName,
+    partnerName,
+    developerEmail,
+    developerLocation,
+    partnerLocation,
+    rollOffDate,
+  ] = args;
+  const mailOptions = {
+    from: user,
+    to: opsEmail,
+    subject: `${developerName} Placed with ${partnerName}`,
+    generateTextFromHTML: true,
+    html: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
+  };
+
+  return sendMail(mailOptions);
+};
