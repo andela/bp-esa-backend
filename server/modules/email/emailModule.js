@@ -6,6 +6,8 @@ import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
 
+import response from '../../helpers/response';
+
 dotenv.config();
 
 const { OAuth2 } = google.auth;
@@ -16,12 +18,13 @@ const redirectUrl = process.env.GMAIL_REDIRECT_URL;
 const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
 const user = process.env.EMAIL_USER;
 const opsEmail = process.env.OPS_EMAIL;
+const itEmail = process.env.IT_EMAIL;
 
 const oath2Client = new OAuth2(clientId, clientSecret, redirectUrl);
 
 const developerOnboardingTemplatePath = path.join(__dirname, 'developer-onboarding-email.html');
 const successOnboardingTemplatePath = path.join(__dirname, 'success-onboarding-email.html');
-
+const itOffboardingPath = path.join(__dirname, 'it-offboarding-email.html');
 
 oath2Client.setCredentials({
   refresh_token: refreshToken,
@@ -41,6 +44,15 @@ const emailTransport = nodemailer.createTransport({
   },
 });
 
+const sendMail = async (mailOptions) => {
+  try {
+    await emailTransport.sendMail(mailOptions);
+    return response(false, 'email sent successfully');
+  } catch (error) {
+    return response(true, error.message);
+  }
+};
+
 export const developerEmailTransport = (developerEmail, developerName, partnerName) => {
   const mailOptions = {
     from: user,
@@ -50,14 +62,14 @@ export const developerEmailTransport = (developerEmail, developerName, partnerNa
     html: eval(`\`${fs.readFileSync(developerOnboardingTemplatePath).toString()}\``),
   };
 
-  return emailTransport.sendMail(mailOptions);
+  return sendMail(mailOptions);
 };
 
 export const opsEmailTransport = (
-  developerEmail,
   developerName,
-  develperLocation,
   partnerName,
+  developerEmail,
+  developerLocation,
   partnerLocation,
   startDate,
 ) => {
@@ -69,5 +81,17 @@ export const opsEmailTransport = (
     html: eval(`\`${fs.readFileSync(successOnboardingTemplatePath).toString()}\``),
   };
 
-  return emailTransport.sendMail(mailOptions);
+  return sendMail(mailOptions);
+};
+
+export const itEmailTransport = (developerName, developerEmail, developerLocation, rollOffDate) => {
+  const mailOptions = {
+    from: user,
+    to: itEmail,
+    subject: `Subject: ${developerName} Engagement Roll Off (${developerLocation})`,
+    generateTextFromHTML: true,
+    html: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
+  };
+
+  return sendMail(mailOptions);
 };
