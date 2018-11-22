@@ -22,9 +22,12 @@ const itEmail = process.env.IT_EMAIL;
 
 const oath2Client = new OAuth2(clientId, clientSecret, redirectUrl);
 
-const developerOnboardingTemplatePath = path.join(__dirname, 'developer-onboarding-email.html');
-const successOnboardingTemplatePath = path.join(__dirname, 'success-onboarding-email.html');
-const itOffboardingPath = path.join(__dirname, 'it-offboarding-email.html');
+const getEmailTemplatePath = emailTemplate => path.join(__dirname, `emailTemplates/${emailTemplate}`);
+
+const developerOnboardingTemplatePath = getEmailTemplatePath('developer-onboarding-email.html');
+const successOnboardingTemplatePath = getEmailTemplatePath('success-onboarding-email.html');
+const itOffboardingPath = getEmailTemplatePath('it-offboarding-email.html');
+const successOffboardingTemplatePath = getEmailTemplatePath('success-offboarding-email.html');
 
 oath2Client.setCredentials({
   refresh_token: refreshToken,
@@ -91,6 +94,38 @@ export const itEmailTransport = (developerName, developerEmail, developerLocatio
     subject: `Subject: ${developerName} Engagement Roll Off (${developerLocation})`,
     generateTextFromHTML: true,
     html: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
+  };
+
+  return sendMail(mailOptions);
+};
+
+/**
+ * Function for sending email to the success offboarding department
+ *
+ * @param {string} developerName - Name of developer offboarding
+ * @param {string} parnerName - Name of partner
+ * @param {string} developerEmail - Email of the developer
+ * @param {string} developerLocation - location of developer
+ * @param {stirng} parnerLocation - location of partner
+ * @param {string} rollOffDate - date for developer to roll off
+ *
+ * @returns {object}  Promise
+ */
+export const opsOffBoardingEmailTransport = (...args) => {
+  const [
+    developerName,
+    partnerName,
+    developerEmail,
+    developerLocation,
+    partnerLocation,
+    rollOffDate,
+  ] = args;
+  const mailOptions = {
+    from: user,
+    to: opsEmail,
+    subject: `${developerName} Placed with ${partnerName}`,
+    generateTextFromHTML: true,
+    html: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
   };
 
   return sendMail(mailOptions);
