@@ -3,7 +3,11 @@ import logger from 'morgan';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
+import ms from 'ms';
+
 import swaggerConfig from '../docs/swagger';
+import routes from './routes';
+import worker from './modules/worker';
 
 dotenv.config();
 
@@ -18,6 +22,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
 
+routes(app);
+
 // Setup a default catch-all route that sends back a welcome message in JSON format.
 app.get('*', (req, res) => res.status(200).send({
   message: 'Welcome to the beginning of nothingness.',
@@ -28,6 +34,12 @@ app.set('port', port);
 
 app.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
+
+  // Start worker
+  setInterval(() => {
+    worker.init();
+    worker.exec();
+  }, ms(process.env.TIMER_INTERVAL) || ms('1d'));
 });
 
 export default app;

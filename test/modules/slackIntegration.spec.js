@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import * as slack from '../../server/modules/slack/slackIntegration';
-import { client } from '../../server/modules/allocations';
+import client from '../../server/helpers/redis';
 import { allocationsMocks, rawAllocations } from '../mocks/allocations';
 import slackMocks from '../mocks/slack';
 

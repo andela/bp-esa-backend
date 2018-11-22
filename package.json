@@ -4,8 +4,8 @@
   "description": "Engagement Support Automation ",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build && node ./build/index.js",
-    "start:dev": "nodemon ./server/index --exec babel-node --watch ./server",
+    "start": "NODE_ENV=production npm run build && node ./build/index.js",
+    "start:dev": "NODE_ENV=development nodemon ./server/index --exec babel-node --watch ./server",
     "build": "babel ./server -d ./build",
     "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:babel-core/register --timeout 10000 --exit",
     "lint": "eslint .",
@@ -24,11 +24,15 @@
   "dependencies": {
     "@slack/client": "^4.8.0",
     "axios": "^0.18.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
     "body-parser": "^1.18.3",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "googleapis": "^33.0.0",
     "morgan": "^1.9.0",
+    "ms": "^2.1.1",
     "nodemailer": "^4.6.8",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",
@@ -39,9 +43,6 @@
     "swagger-ui-express": "^4.0.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^13.0.0",
