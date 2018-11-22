@@ -22,9 +22,12 @@ const itEmail = process.env.IT_EMAIL;
 
 const oath2Client = new OAuth2(clientId, clientSecret, redirectUrl);
 
-const developerOnboardingTemplatePath = path.join(__dirname, 'developer-onboarding-email.html');
-const successOnboardingTemplatePath = path.join(__dirname, 'success-onboarding-email.html');
-const itOffboardingPath = path.join(__dirname, 'it-offboarding-email.html');
+const getEmailTemplatePath = emailTemplate => path.join(__dirname, `emailTemplates/${emailTemplate}`);
+
+const developerOnboardingTemplatePath = getEmailTemplatePath('developer-onboarding-email.html');
+const successOnboardingTemplatePath = getEmailTemplatePath('success-onboarding-email.html');
+const itOffboardingPath = getEmailTemplatePath('it-offboarding-email.html');
+const successOffboardingTemplatePath = getEmailTemplatePath('success-offboarding-email.html');
 
 oath2Client.setCredentials({
   refresh_token: refreshToken,
