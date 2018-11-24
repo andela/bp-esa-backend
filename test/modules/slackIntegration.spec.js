@@ -92,14 +92,15 @@ describe('Slack Integration Test Suite', async () => {
     expect(validChannel).to.equal(exists);
   });
   it('addOrRemove method should return error when response status is false', async () => {
-    const failedInvite = { status: 'error', message: 'Could not add user to channel' };
+    const failedInvite = 'Error: Could not add user to channel';
     const fakeFailedInvite = sinon.stub(slack.slackClient.groups, 'invite').callsFake(() => ({
       ok: false,
     }));
-
-    const response = await slack.addOrRemove('anaeze@andela.com', 'lagos-all', 'invite');
-    expect(response.status).to.equal(failedInvite.status);
-    expect(response.message).to.equal(failedInvite.message);
+    try {
+      await slack.addOrRemove('anaeze@andela.com', 'lagos-all', 'invite');
+    } catch (error) {
+      expect(error.message).to.equal(failedInvite);
+    }
     fakeFailedInvite.restore();
   });
 });

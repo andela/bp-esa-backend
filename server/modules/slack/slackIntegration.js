@@ -125,10 +125,10 @@ export const addOrRemove = async (email, channel, context) => {
     const invited = context === 'invite';
     const slackAction = slackClient.groups[context];
     const user = await getSlackUser(email);
-    const status = slackAction({ user, channel });
+    const status = await slackAction({ user, channel });
     const error = invited ? 'Could not add user to channel' : 'Could not remove user from channel';
     if (status.ok === false) {
-      return { status: 'error', message: error };
+      throw new Error(error);
     }
     const success = invited
       ? 'User added to channel successfully'
@@ -136,7 +136,7 @@ export const addOrRemove = async (email, channel, context) => {
     return { status: 'success', message: success };
   } catch (error) {
     // istanbul ignore next
-    return { status: 'error', message: error };
+    throw new Error(error);
   }
 };
 
@@ -148,7 +148,7 @@ export const addOrRemove = async (email, channel, context) => {
  *
  * @returns {Object} - The result after a user has been added to a channel
  */
-export const addToChannel = async (fellowEmail, channel) => addOrRemove(fellowEmail, channel, 'invite');
+export const addToChannel = (fellowEmail, channel) => addOrRemove(fellowEmail, channel, 'invite');
 
 /**
  * @function removeFromChannel
@@ -159,4 +159,4 @@ export const addToChannel = async (fellowEmail, channel) => addOrRemove(fellowEm
  *
  * @returns {Object} - The result after a user has been removed from a channel
  */
-export const removeFromChannel = async (fellowEmail, channel) => addOrRemove(fellowEmail, channel, 'kick');
+export const removeFromChannel = (fellowEmail, channel) => addOrRemove(fellowEmail, channel, 'kick');

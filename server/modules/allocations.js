@@ -2,9 +2,9 @@ import axios from 'axios';
 import redis from 'redis';
 import dotenv from 'dotenv';
 
-dotenv.config();
-
 import client from '../helpers/redis';
+
+dotenv.config();
 
 // axios base URL and Authorization header setup
 axios.defaults.baseURL = 'https://api-prod.andela.com/';

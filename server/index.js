@@ -7,7 +7,7 @@ import ms from 'ms';
 
 import swaggerConfig from '../docs/swagger';
 import routes from './routes';
-import worker from './modules/worker';
+import worker from './jobs/worker';
 
 dotenv.config();
 
@@ -32,14 +32,13 @@ app.get('*', (req, res) => res.status(200).send({
 const port = parseInt(process.env.PORT, 10) || 8000;
 app.set('port', port);
 
+// Start worker
+worker.init();
+const duration = process.env.TIMER_INTERVAL;
+
 app.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
-
-  // Start worker
-  setInterval(() => {
-    worker.init();
-    worker.exec();
-  }, ms(process.env.TIMER_INTERVAL) || ms('1d'));
+  setInterval(() => worker.exec(), ms(duration) || ms('1d'));
 });
 
 export default app;
