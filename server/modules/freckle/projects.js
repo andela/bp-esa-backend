@@ -61,19 +61,46 @@ export const createProject = async (projectName) => {
 };
 
 /**
+ * @desc Get a user id with their email address on freckle
+ *
+ * @param {string} email - user email address be assigned to a project
+ *
+ * @returns {promise} - Axios response for request to get userId from email
+ */
+const getUserIdByEmail = async (email) => {
+  const url = `${freckleUrl}/users?freckle_token=${freckleToken}`;
+  try {
+    const users = await axios.get(url);
+    const { id } = users.data.filter(user => user.email === email)[0];
+
+    if (id) {
+      return id;
+    }
+    return null;
+  } catch (_) {
+    return null;
+  }
+};
+
+/**
  * @desc Assign a user to a project on freckle
  *
- * @param {number} userId - Id of the user to be assigned to a project
+ * @param {string} email - email of the user to be assigned to a project
  * @param {array} projectIds - Array of integer projectIds to be assigned to the user.
  *
  * @returns {promise} - Axios response for request to assign user to freckle project
  */
-export const assignProject = (userId, projectIds) => {
-  const url = `${freckleUrl}/users/${userId}/give_access_to_projects?freckle_token=${freckleToken}`;
-  return axios
-    .put(url, {
-      project_ids: projectIds,
-    })
-    .then(() => response(false, 'Successfully added developer to the project'))
-    .catch(error => response(true, error));
+export const assignProject = async (email, projectIds) => {
+  try {
+    const userId = await getUserIdByEmail('johnson.okoro@andela.com');
+    if (userId) {
+      const url = `${freckleUrl}/users/${userId}/give_access_to_projects?freckle_token=${freckleToken}`;
+      await axios.put(url, { project_ids: [projectIds] });
+      return response(false, 'Successfully added developer to the project');
+    }
+
+    return response(true, 'Cannot add invalid user to project');
+  } catch (error) {
+    return response(true, error);
+  }
 };
