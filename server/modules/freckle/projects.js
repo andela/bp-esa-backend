@@ -63,9 +63,10 @@ export const createProject = async (projectName) => {
 /**
  * @desc Get a user id with their email address on freckle
  *
- * @param {string} email - user email address be assigned to a project
+ * @param {string} email user email address be assigned to a project
  *
- * @returns {promise} - Axios response for request to get userId from email
+ * @returns {number} Returns the freckle id of the user
+ * @returns {null} Returns null if there is an error or the user does not exist on freckle
  */
 export const getUserIdByEmail = async (email) => {
   const url = `${freckleUrl}/users?freckle_token=${freckleToken}&email=${email}`;
@@ -85,9 +86,9 @@ export const getUserIdByEmail = async (email) => {
  * @desc Assign a user to a project on freckle
  *
  * @param {string} email - email of the user to be assigned to a project
- * @param {number} projectId - Array of integer projectIds to be assigned to the user.
+ * @param {number} projectId - The ID of the project to be assigned to the user.
  *
- * @returns {object} - Axios response for request to assign user to freckle project
+ * @returns {object} - A response object.
  */
 export const assignProject = async (email, projectId) => {
   try {
