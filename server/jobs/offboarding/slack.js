@@ -4,7 +4,7 @@ import { removeFromChannel, addToChannel } from '../../modules/slack/slackIntegr
 /**
  * @desc Automates developer offboarding on slack
  *
- * @param {array} placement Placement record whose developer is to be offboarded
+ * @param {object} placement Placement record whose developer is to be offboarded
  * @param {object} automationResult Result of automation job
  * @returns {void}
  */

@@ -23,17 +23,19 @@ export const updatePartnerStore = async () => {
       client.set('partners', JSON.stringify(response.data), redis.print);
     })
     .catch(error => error.message)
-    .finally(() => client.quit());
 };
 
 // Finds a partner using partnerId
 export const findPartnerById = partnerId => new Promise((resolve, reject) => {
   client.get('partners', (error, result) => {
-    client.quit();
     if (error) {
       reject(error);
     }
-    resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
+    if (result) {
+      resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
+    } else {
+      resolve(null);
+    }
   });
 });
 

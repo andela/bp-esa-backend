@@ -1,6 +1,10 @@
 import { WebClient } from '@slack/client';
-import { findPartnerById } from '../allocations';
+import dotenv from 'dotenv';
+import { findPartnerById, updatePartnerStore } from '../allocations';
 import makeChannelNames from '../../helpers/slackHelpers';
+import response from '../../helpers/response';
+
+dotenv.config();
 
 const { SLACK_TOKEN } = process.env;
 export const slackClient = new WebClient(SLACK_TOKEN);
@@ -74,7 +78,12 @@ export const returnValidChannels = (...args) => {
  */
 export const createPartnerChannels = async (partnerId) => {
   try {
-    const partner = await findPartnerById(partnerId);
+    let partner;
+    partner = await findPartnerById(partnerId);
+    if (!partner) {
+      await updatePartnerStore();
+      partner = await findPartnerById(partnerId);
+    }
     if (partner === undefined) throw new Error('Partner record was not found');
 
     const { generalChannel, internalChannel } = makeChannelNames(partner.name);
