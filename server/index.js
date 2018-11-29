@@ -34,11 +34,10 @@ app.set('port', port);
 
 // Start worker
 worker.init();
-const duration = process.env.TIMER_INTERVAL;
 
 app.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
-  setInterval(() => worker.exec(), ms(duration) || ms('1d'));
+  setInterval(() => worker.exec(), ms(process.env.TIMER_INTERVAL || '1d'));
 });
 
 export default app;
