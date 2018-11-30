@@ -11,30 +11,21 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
  * @param {object} placement Placement record whose developer is to be onboarded
  * @param {object} automationResult results of the automation job
  *
- * @returns {void}
+ * @returns {undefined}
  */
-export default function slackOnBoarding(placement, automationResult) {
+const slackOnBoarding = async (placement, automationResult) => {
   const { fellow } = placement;
   const { client_id: partnerId } = placement;
-  let partnerChannelInfo;
-  return removeFromChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID)
-    .then(() => createPartnerChannels(partnerId)
-      .then((res) => {
-        const { generalChannel: { id: partnerChannelId } } = res;
-        partnerChannelInfo = partnerChannelId;
-        automationResult.slackOnBoarding = 'success';
-      })
-      .catch(() => {
-        automationResult.slackOnBoarding = 'failure';
-      }))
-    .then(() => addToChannel(fellow.email, partnerChannelInfo)
-      .then(() => {
-        automationResult.slackOnBoarding = 'success';
-      })
-      .catch(() => {
-        automationResult.slackOnBoarding = 'failure';
-      }))
-    .catch(() => {
-      automationResult.slackOnBoarding = 'failure';
-    });
-}
+
+  try {
+    await removeFromChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID);
+    const partnerChannels = await createPartnerChannels(partnerId);
+    const { generalChannel: { id: partnerChannelId } } = partnerChannels;
+    await addToChannel(fellow.email, partnerChannelId);
+    automationResult.slackOnBoarding = 'success';
+  } catch (error) {
+    automationResult.slackOnBoarding = 'failure';
+  }
+};
+
+export default slackOnBoarding;
