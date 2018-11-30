@@ -10,11 +10,6 @@ dotenv.config();
 axios.defaults.baseURL = 'https://api-prod.andela.com/';
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
-export const placementStatus = {
-  rollingOff: 'External Engagements - Rolling Off',
-  onboarding: 'Placed - Awaiting Onboarding',
-};
-
 // Updates the local redis store with latest Partner List
 export const updatePartnerStore = async () => {
   axios
