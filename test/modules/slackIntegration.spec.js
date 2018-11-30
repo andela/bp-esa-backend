@@ -7,19 +7,15 @@ import slackMocks from '../mocks/slack';
 const fakeClientGet = sinon
   .stub(client, 'get')
   .callsFake((value, cb) => cb.apply(this, [null, rawAllocations]));
-
 const fakeLookupByEmail = sinon
   .stub(slack.slackClient.users, 'lookupByEmail')
   .callsFake(() => slackMocks.slackUser);
-
 const fakeInvite = sinon
   .stub(slack.slackClient.groups, 'invite')
   .callsFake(() => slackMocks.inviteUser);
-
 const fakeKick = sinon
   .stub(slack.slackClient.groups, 'kick')
   .callsFake(() => slackMocks.removeUser);
-
 describe('Slack Integration Test Suite', async () => {
   it('Should create internal slack channels for a new partner', async () => {
     const fakeCreate = sinon
@@ -37,7 +33,6 @@ describe('Slack Integration Test Suite', async () => {
     expect(createResult.internalChannel.id).to.equal(expectedResult.internalChannel.id);
     fakeCreate.restore();
   });
-
   it('Should create general slack channels for a new partner', async () => {
     const fakeCreate = sinon
       .stub(slack.slackClient.groups, 'create')
@@ -54,20 +49,16 @@ describe('Slack Integration Test Suite', async () => {
     expect(createResult.generalChannel.id).to.equal(expectedResult.generalChannel.id);
     fakeCreate.restore();
   });
-
   it('Should add developers to respective channels', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GDL7RDC5V';
-
     const inviteResult = await slack.addToChannel(email, channel);
     expect(inviteResult.message).to.equal('User added to channel successfully');
     fakeInvite.restore();
   });
-
   it('Should remove developers from channels', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GDL7RDC5V';
-
     const inviteResult = await slack.removeFromChannel(email, channel);
     expect(inviteResult.message).to.equal('User removed from channel successfully');
     fakeKick.restore();
@@ -82,7 +73,6 @@ describe('Slack Integration Test Suite', async () => {
     const exists = { status: 'error', message: 'The channel already exists' };
     const createGeneral = { ok: true };
     const createInternal = { ok: true };
-
     const validChannel = slack.returnValidChannels(
       'partnerId',
       exists,
