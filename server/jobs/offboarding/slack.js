@@ -12,18 +12,15 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
  * @param {object} automationResult Result of automation job
  * @returns {undefined}
  */
-export default function slackOffboarding(placement, automationResult) {
+export default async function slackOffboarding(placement, automationResult) {
   const { fellow } = placement;
-
-  return addToChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID)
-    .then(() => removeFromChannel(fellow.email, 'partnerChannelId')
-      .then(() => {
-        automationResult.slackAutomation = 'success';
-      })
-      .catch(() => {
-        automationResult.slackAutomation = 'failure';
-      }))
-    .catch(() => {
-      automationResult.slackAutomation = 'failure';
-    });
+  try {
+    await Promise.all([
+      addToChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID),
+      removeFromChannel(fellow.email, 'partnerChannelId'),
+    ]);
+    automationResult.slackAutomation = 'success';
+  } catch (error) {
+    automationResult.slackAutomation = error.message || 'failure';
+  }
 }

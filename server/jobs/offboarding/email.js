@@ -1,29 +1,31 @@
-
 /* eslint-disable no-param-reassign */
-import { itEmailTransport, opsOffBoardingEmailTransport } from '../../modules/email/emailModule';
+import { sendITOffboardingMail, sendSOPOffboardingMail } from '../../modules/email/emailModule';
 
 /**
- * @desc Automates developer offboarding on slack
+ * @desc Automates developer offboarding via email
  *
- * @param {array} placement Placement record whose developer is to be offboarded
+ * @param {object} placement Placement record whose developer is to be offboarded
  * @param {object} automationResult Result of automation job
  * @returns {void}
  */
-export default function emailOffboarding(placement, automationResult) {
+export default async function emailOffboarding(placement, automationResult) {
   const {
-    fellow: { name, email, location },
-    end_date: endDate,
+    fellow: { name: developerName, email: developerEmail, location: developerLocation },
+    end_date: rollOffDate,
     client_name: partnerName,
   } = placement;
-  return itEmailTransport(name, email, location, endDate)
-    .then(() => opsOffBoardingEmailTransport(name, partnerName, email, location, endDate)
-      .then(() => {
-        automationResult.emailAutomation = 'success';
-      })
-      .catch(() => {
-        automationResult.emailAutomation = 'failure';
-      }))
-    .catch(() => {
-      automationResult.emailAutomation = 'failure';
-    });
+  const mailInfo = {
+    developerName,
+    partnerName,
+    developerEmail,
+    developerLocation,
+    rollOffDate,
+    partnerLocation: 'Nairobi',
+  };
+  try {
+    await Promise.all([sendSOPOffboardingMail(mailInfo), sendITOffboardingMail(mailInfo)]);
+    automationResult.emailAutomation = 'success';
+  } catch (error) {
+    automationResult.emailAutomation = error.message || 'failure';
+  }
 }
