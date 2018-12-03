@@ -2,24 +2,18 @@
 import { createProject, assignProject } from '../../modules/freckle/projects';
 
 /**
- * @desc Automates developer offboarding on slack
+ * @desc Automates freckle developer onboarding.
  *
- * @param {array} placement Placement record whose developer is to be offboarded
+ * @param {object} placement Placement record whose developer is to be onboarded
  * @param {object} automationResult Result of automation job
- * @returns {void}
+ * @returns {undefined}
  */
 export default async (placement, automationResult) => {
   const { fellow } = placement;
   try {
     const project = await createProject(placement.client_name);
-    const response = await assignProject(fellow.email, project.id);
-
-    if (!response.error) {
-      automationResult.freckleAutomation = 'success';
-    }
-    if (response.error) {
-      automationResult.freckleAutomation = 'failure';
-    }
+    await assignProject(fellow.email, project.id);
+    automationResult.freckleAutomation = 'success';
   } catch (e) {
     automationResult.freckleAutomation = 'failure';
   }

@@ -86,9 +86,8 @@ export const assignProject = async (email, projectId) => {
       await axios.put(url, { project_ids: [projectId] });
       return response(false, 'Successfully added developer to the project');
     }
-
-    return response(true, `${email} have not been added to Andela freckle workspace`);
+    throw Error(`${email} have not been added to Andela freckle workspace`);
   } catch (error) {
-    return response(true, `Error occurred adding ${email} to freckle`);
+    throw Error(`Error occurred adding ${email} to freckle`);
   }
 };
