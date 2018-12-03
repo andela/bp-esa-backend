@@ -87,6 +87,16 @@ export const opsEmailTransport = (
   return sendMail(mailOptions);
 };
 
+/**
+ * @desc Sends an email to IT to wipe the machine of the developer
+ *
+ * @param {any} developerName Name of the roller off developer
+ * @param {any} developerEmail Email of the developer
+ * @param {any} developerLocation Location of the developer: Lagos || Nairobi || Kampala
+ * @param {any} rollOffDate Date the developer rolled off
+ *
+ * @returns {Promise} Promise which resolves to success message or error if email fails
+ */
 export const itEmailTransport = (developerName, developerEmail, developerLocation, rollOffDate) => {
   const mailOptions = {
     from: user,
@@ -95,7 +105,6 @@ export const itEmailTransport = (developerName, developerEmail, developerLocatio
     generateTextFromHTML: true,
     html: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
   };
-
   return sendMail(mailOptions);
 };
 
@@ -106,7 +115,6 @@ export const itEmailTransport = (developerName, developerEmail, developerLocatio
  * @param {string} parnerName - Name of partner
  * @param {string} developerEmail - Email of the developer
  * @param {string} developerLocation - location of developer
- * @param {stirng} parnerLocation - location of partner
  * @param {string} rollOffDate - date for developer to roll off
  *
  * @returns {object}  Promise
@@ -117,7 +125,6 @@ export const opsOffBoardingEmailTransport = (...args) => {
     partnerName,
     developerEmail,
     developerLocation,
-    partnerLocation,
     rollOffDate,
   ] = args;
   const mailOptions = {
