@@ -10,33 +10,19 @@ const freckleToken = process.env.FRECKLE_ADMIN_TOKEN;
 
 /**
  * @function
- * @desc - An asynchronous function to get all projects from freckle.
- * @returns {Array} - If freckle-api transaction success, it returns a list of project.
- * @returns {Object} - If freckle-api transaction fail, it returns the transaction error.
+ * @desc - An asynchronous function to get a project from freckle.
+ * @param {string} name - name of freckle project
+ * @returns {object} - If freckle-api transaction success, it returns a record of project.
+ * @returns {boolean} - If freckle-api transaction fail, it returns false.
  */
-export async function getAllProjects() {
+export async function getProjectByName(name) {
   try {
-    const projects = await axios.get(`${freckleUrl}/projects?freckle_token=${freckleToken}`);
-    return projects.data;
+    const project = await axios.get(`${freckleUrl}/projects?freckle_token=${freckleToken}&name=${name}`);
+    return project.data;
   } catch (e) {
-    return e.data;
-  }
-}
-
-/**
- * @function
- * @desc - A function to check/verify if a project already exist in a list of freckle projects.
- * @param {Array} projects - The list of freckle projects.
- * @param {String} projectName - The name of the project to check.
- * @returns {Boolean} - A truthy value representing if the project exist or not.
- */
-const verifyExistingProject = (projects, projectName) => {
-  const project = projects.filter(eachProject => eachProject.name === projectName);
-  if (!project.length) {
     return false;
   }
-  return true;
-};
+}
 
 /**
  * @function
@@ -47,16 +33,18 @@ const verifyExistingProject = (projects, projectName) => {
  */
 export const createProject = async (projectName) => {
   try {
-    const projects = await getAllProjects();
-    if (projects && projects.length > 0 && !verifyExistingProject(projects, projectName)) {
-      await axios.post(`${freckleUrl}/projects?freckle_token=${freckleToken}`, {
-        name: projectName,
-      });
-      return response(false, `${projectName} project successfully added`);
+    let [project] = await getProjectByName(projectName);
+    if (project) {
+      return project;
     }
-    return response(false, `${projectName} project already created`);
+    await axios.post(`${freckleUrl}/projects?freckle_token=${freckleToken}`, {
+      name: projectName,
+    });
+
+    project = await getProjectByName(projectName);
+    return project;
   } catch (e) {
-    return response(true, `Error occurred creating ${projectName} project`);
+    throw new Error('Error occurred creating project');
   }
 };
 
@@ -98,9 +86,8 @@ export const assignProject = async (email, projectId) => {
       await axios.put(url, { project_ids: [projectId] });
       return response(false, 'Successfully added developer to the project');
     }
-
-    return response(true, 'Cannot add invalid user to project');
+    throw Error(`${email} have not been added to Andela freckle workspace`);
   } catch (error) {
-    return response(true, error);
+    throw Error(`Error occurred adding ${email} to freckle`);
   }
 };

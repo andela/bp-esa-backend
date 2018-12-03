@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { developerEmailTransport, opsEmailTransport } from '../../modules/email/emailModule';
+import { sendDevOnboardingMail, sendSOPOnboardingMail } from '../../modules/email/emailModule';
 /**
  * @desc Automates developer onboarding on email
  *
@@ -12,9 +12,9 @@ const emailOnboarding = async (placement, automationResult) => {
     fellow, client_name: partnerName, start_date: startDate,
   } = placement;
   try {
-    await developerEmailTransport(fellow.email, fellow.name, partnerName);
+    await sendDevOnboardingMail(fellow.email, fellow.name, partnerName);
     // eslint-disable-next-line max-len
-    opsEmailTransport(fellow.name, partnerName, fellow.email, fellow.location, 'Kenya', startDate);
+    await sendSOPOnboardingMail(fellow.name, partnerName, fellow.email, fellow.location, 'Kenya', startDate);
     automationResult.emailAutomation = 'success';
   } catch (error) {
     automationResult.emailAutomation = 'failure';

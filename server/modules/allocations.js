@@ -52,9 +52,10 @@ const fetchPlacementsByStatus = status => axios.get(`api/v1/placements?status=${
  * @returns {Promise} - Promise which resolves to a list of placements
  * from the past numberOfDays provided, or throws an error if unsuccessful
  */
-export const fetchNewPlacements = (status, numberOfDays = 1) => fetchPlacementsByStatus(status).then((res) => {
-  const placements = res.data.values;
-  const currentDate = new Date(Date.now());
-  const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);
-  return placements.filter(data => Date.parse(data.created_at) >= fromDate);
-});
+export const fetchNewPlacements = (status, numberOfDays = 1) => fetchPlacementsByStatus(status)
+  .then((res) => {
+    const placements = res.data.values;
+    const currentDate = new Date(Date.now());
+    const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);
+    return placements.filter(data => Date.parse(data.created_at) >= fromDate);
+  });
