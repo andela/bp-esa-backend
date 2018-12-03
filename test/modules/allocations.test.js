@@ -17,7 +17,7 @@ describe('Partner and Allocations Test Suite', async () => {
     // being called within the function
     const fakeCurrentDate = sinon.stub(Date, 'now').callsFake(() => 1542376484108);
 
-    const result = await resource.fetchNewPlacements(resource.placementStatus.onboarding, 3);
+    const result = await resource.fetchNewPlacements('Placed - Awaiting Onboarding', 3);
     // In mock data, there are two records for each created_at date from 2018-11-13 to 2018-11-16
     const last3days = Date.parse('2018-11-13');
     expect(result.every(item => Date.parse(item.created_at) >= last3days)).to.equal(true);

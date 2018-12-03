@@ -6,7 +6,7 @@
 import fs from 'fs';
 import ms from 'ms';
 
-import { placementStatus, fetchNewPlacements } from '../modules/allocations';
+import { fetchNewPlacements } from '../modules/allocations';
 import client from '../helpers/redis';
 
 /**
@@ -25,14 +25,14 @@ const getJobs = (folderName) => {
 const jobs = {
   offboarding: {
     jobList: getJobs('offboarding'),
-    allocationStatus: 'rollingOff',
+    placementStatus: 'External Engagements - Rolling Off',
     automationResult: {
       type: 'Offboarding',
     },
   },
   onboarding: {
     jobList: getJobs('onboarding'),
-    allocationStatus: 'onboarding',
+    placementStatus: 'Placed - Awaiting Onboarding',
     automationResult: {
       type: 'Onboarding',
     },
@@ -47,10 +47,9 @@ const jobs = {
  * @returns {void}
  */
 export default function executeJobs(type) {
-  const { jobList, allocationStatus, automationResult } = jobs[type];
-  const status = placementStatus[allocationStatus];
+  const { jobList, placementStatus, automationResult } = jobs[type];
   let fetchPlacementError;
-  return fetchNewPlacements(status, 1)
+  return fetchNewPlacements(placementStatus, 1)
     .catch(() => {
       fetchPlacementError = 'error';
       setTimeout(() => executeJobs(type), ms('5m'));

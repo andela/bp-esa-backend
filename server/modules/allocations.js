@@ -10,11 +10,6 @@ dotenv.config();
 axios.defaults.baseURL = 'https://api-prod.andela.com/';
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
-export const placementStatus = {
-  rollingOff: 'External Engagements - Rolling Off',
-  onboarding: 'Placed - Awaiting Onboarding',
-};
-
 // Updates the local redis store with latest Partner List
 export const updatePartnerStore = async () => {
   axios
@@ -23,17 +18,19 @@ export const updatePartnerStore = async () => {
       client.set('partners', JSON.stringify(response.data), redis.print);
     })
     .catch(error => error.message)
-    .finally(() => client.quit());
 };
 
 // Finds a partner using partnerId
 export const findPartnerById = partnerId => new Promise((resolve, reject) => {
   client.get('partners', (error, result) => {
-    client.quit();
     if (error) {
       reject(error);
     }
-    resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
+    if (result) {
+      resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
+    } else {
+      resolve(null);
+    }
   });
 });
 

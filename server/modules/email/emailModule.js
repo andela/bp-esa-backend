@@ -1,26 +1,15 @@
-/* eslint no-eval: 0 */
-/* eslint no-unused-vars: 0 */
 import fs from 'fs';
 import path from 'path';
-import nodemailer from 'nodemailer';
-import { google } from 'googleapis';
 import dotenv from 'dotenv';
+import emailTransport from './emailTransport';
 
 import response from '../../helpers/response';
 
 dotenv.config();
 
-const { OAuth2 } = google.auth;
-
-const clientId = process.env.GMAIL_CLIENT_ID;
-const clientSecret = process.env.GMAIL_CLIENT_SECRET;
-const redirectUrl = process.env.GMAIL_REDIRECT_URL;
-const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
 const user = process.env.EMAIL_USER;
 const opsEmail = process.env.OPS_EMAIL;
 const itEmail = process.env.IT_EMAIL;
-
-const oath2Client = new OAuth2(clientId, clientSecret, redirectUrl);
 
 const getEmailTemplatePath = emailTemplate => path.join(__dirname, `emailTemplates/${emailTemplate}`);
 
@@ -29,111 +18,162 @@ const successOnboardingTemplatePath = getEmailTemplatePath('success-onboarding-e
 const itOffboardingPath = getEmailTemplatePath('it-offboarding-email.html');
 const successOffboardingTemplatePath = getEmailTemplatePath('success-offboarding-email.html');
 
-oath2Client.setCredentials({
-  refresh_token: refreshToken,
-});
-
-const accessToken = oath2Client.refreshAccessToken().then(res => res.credentials.access_token);
-
-const emailTransport = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user,
-    clientId,
-    clientSecret,
-    refreshToken,
-    accessToken,
-  },
-});
 
 const sendMail = async (mailOptions) => {
+  await emailTransport.sendMail(mailOptions);
+  return response(false, 'email sent successfully');
+};
+
+/**
+ * @func constructMailOptions
+ * @desc An helper to help construct the mail options to be passed to the mail transport.
+ *
+ * @param {object} options The options to be added to the default options.
+ * @param {string} options.htmlString The email in HTML format
+ * @param {string} options.sendTo The email address of the recipient
+ * @param {string} options.emailSubject The subject of the email
+ *
+ * @returns {object} The mail options
+ */
+const constructMailOptions = ({ htmlString, sendTo, emailSubject }) => ({
+  from: user,
+  to: sendTo,
+  subject: emailSubject,
+  generateTextFromHTML: true,
+  html: htmlString,
+});
+
+
+/* eslint-disable no-eval */
+/* eslint-disable no-unused-vars */
+
+/**
+ * @function sendDevOnboardingMail
+ * @desc A function to help send email to a developer about an onboarding placement.
+ *
+ * @param {object} mailInfo Info about the mail to be sent
+ * @param {string} mailInfo.developerName Name of the developer onboarded
+ * @param {string} mailInfo.developerEmail Email of the developer onboarded
+ * @param {string} mailInfo.partnerName Name of the partner
+ *
+ * @returns {object} The result of sending the mail.
+ * @throws Will throw an error if sending email fails.
+ */
+export const sendDevOnboardingMail = async (mailInfo) => {
+  const { developerEmail, developerName, partnerName } = mailInfo;
+
+  const mailOptions = constructMailOptions({
+    sendTo: developerEmail,
+    emailSubject: `${partnerName} Engagement Support`,
+    template: eval(`\`${fs.readFileSync(developerOnboardingTemplatePath).toString()}\``),
+  });
+
   try {
-    await emailTransport.sendMail(mailOptions);
-    return response(false, 'email sent successfully');
+    const mailResponse = await sendMail(mailOptions);
+    return mailResponse;
   } catch (error) {
-    return response(true, error.message);
+    throw new Error('Unable to send developer placement guide');
   }
 };
 
-export const developerEmailTransport = (developerEmail, developerName, partnerName) => {
-  const mailOptions = {
-    from: user,
-    to: developerEmail,
-    subject: `${partnerName} Engagement Support`,
-    generateTextFromHTML: true,
-    html: eval(`\`${fs.readFileSync(developerOnboardingTemplatePath).toString()}\``),
-  };
+/**
+ * @function sendITOffboardingMail
+ * @desc A function to help send email to IT about an offboarding placement.
+ *
+ * @param {object} mailInfo Info about the mail to be sent
+ * @param {string} mailInfo.developerName Name of the developer offboarded
+ * @param {string} mailInfo.developerEmail Email of the developer offboarded
+ * @param {string} mailInfo.developerLocation Location of developer offboarded
+ * @param {string} mailInfo.rollOffDate The roll off date
+ *
+ * @returns {object} The result of sending the mail.
+ * @throws Will throw an error if sending email fails.
+ */
+export const sendITOffboardingMail = async (mailInfo) => {
+  const {
+    developerName, developerEmail, developerLocation, rollOffDate,
+  } = mailInfo;
 
-  return sendMail(mailOptions);
-};
+  const mailOptions = constructMailOptions({
+    sendTo: itEmail,
+    emailSubject: `${developerName} Engagement Roll Off (${developerLocation})`,
+    template: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
+  });
 
-export const opsEmailTransport = (
-  developerName,
-  partnerName,
-  developerEmail,
-  developerLocation,
-  partnerLocation,
-  startDate,
-) => {
-  const mailOptions = {
-    from: user,
-    to: opsEmail,
-    subject: `${developerName} Placed with ${partnerName}`,
-    generateTextFromHTML: true,
-    html: eval(`\`${fs.readFileSync(successOnboardingTemplatePath).toString()}\``),
-  };
-
-  return sendMail(mailOptions);
+  try {
+    const mailResponse = await sendMail(mailOptions);
+    return mailResponse;
+  } catch (error) {
+    throw new Error('Unable to send IT offboaridng email');
+  }
 };
 
 /**
- * @desc Sends an email to IT to wipe the machine of the developer
+ * @function sendSOPOnboardingMail
+ * @desc A function to help send email to success-ops about an onboarding placement.
  *
- * @param {any} developerName Name of the roller off developer
- * @param {any} developerEmail Email of the developer
- * @param {any} developerLocation Location of the developer: Lagos || Nairobi || Kampala
- * @param {any} rollOffDate Date the developer rolled off
+ * @param {object} mailInfo Info about the mail to be sent
+ * @param {string} mailInfo.developerName Name of the developer onboarded
+ * @param {string} mailInfo.developerEmail Email of the developer onboarded
+ * @param {string} mailInfo.developerLocation Location of developer onboarded
+ * @param {string} mailInfo.partnerName Name of the partner
+ * @param {stirng} mailInfo.parnerLocation Location of partner
+ * @param {string} mailInfo.startDate The placement start date
  *
- * @returns {Promise} Promise which resolves to success message or error if email fails
+ * @returns {object} The result of sending the mail.
+ * @throws Will throw an error if sending email fails.
  */
-export const itEmailTransport = (developerName, developerEmail, developerLocation, rollOffDate) => {
-  const mailOptions = {
-    from: user,
-    to: itEmail,
-    subject: `Subject: ${developerName} Engagement Roll Off (${developerLocation})`,
-    generateTextFromHTML: true,
-    html: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
-  };
-  return sendMail(mailOptions);
+export const sendSOPOnboardingMail = async (mailInfo) => {
+  const {
+    developerName, developerEmail, developerLocation,
+    partnerName, partnerLocation, startDate,
+  } = mailInfo;
+
+  const mailOptions = constructMailOptions({
+    sendTo: opsEmail,
+    emailSubject: `${developerName} Placed with ${partnerName}`,
+    template: eval(`\`${fs.readFileSync(successOnboardingTemplatePath).toString()}\``),
+  });
+
+  try {
+    const mailResponse = await sendMail(mailOptions);
+    return mailResponse;
+  } catch (error) {
+    throw Error('Unable to send success ops onboaridng email');
+  }
 };
 
 /**
- * Function for sending email to the success offboarding department
+ * @function sendSOPOnboardingMail
+ * @desc A function to help send email to success-ops about an offboarding placement.
  *
- * @param {string} developerName - Name of developer offboarding
- * @param {string} parnerName - Name of partner
- * @param {string} developerEmail - Email of the developer
- * @param {string} developerLocation - location of developer
- * @param {string} rollOffDate - date for developer to roll off
+ * @param {object} mailInfo Info about the mail to be sent
+ * @param {string} mailInfo.developerName Name of the developer offboarding
+ * @param {string} mailInfo.developerEmail Email of the developer offboarding
+ * @param {string} mailInfo.developerLocation Location of developer offboarding
+ * @param {string} mailInfo.partnerName Name of the partner
+ * @param {stirng} mailInfo.parnerLocation Location of partner
+ * @param {string} mailInfo.rollOffDate The roll off date
  *
- * @returns {object}  Promise
+ * @returns {object} The result of sending the mail.
+ * @throws Will throw an error if sending email fails.
  */
-export const opsOffBoardingEmailTransport = (...args) => {
-  const [
-    developerName,
-    partnerName,
-    developerEmail,
-    developerLocation,
-    rollOffDate,
-  ] = args;
-  const mailOptions = {
-    from: user,
-    to: opsEmail,
-    subject: `${developerName} Placed with ${partnerName}`,
-    generateTextFromHTML: true,
-    html: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
-  };
+export const sendSOPOffboardingMail = async (mailInfo) => {
+  const {
+    developerName, developerEmail, developerLocation,
+    partnerName, partnerLocation, rollOffDate,
+  } = mailInfo;
 
-  return sendMail(mailOptions);
+  const mailOptions = constructMailOptions({
+    sendTo: opsEmail,
+    emailSubject: `${developerName} Placed with ${partnerName}`,
+    template: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
+  });
+
+  try {
+    const mailResponse = await sendMail(mailOptions);
+    return mailResponse;
+  } catch (error) {
+    throw new Error('Unable to send success ops offboarding email');
+  }
 };
