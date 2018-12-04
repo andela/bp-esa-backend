@@ -24,7 +24,7 @@ const slackOnBoarding = async (placement, automationResult) => {
     await addToChannel(fellow.email, partnerChannelId);
     automationResult.slackOnBoarding = 'success';
   } catch (error) {
-    automationResult.slackOnBoarding = 'failure';
+    automationResult.slackOnBoarding = error.message || 'failure';
   }
 };
 

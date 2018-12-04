@@ -8,7 +8,7 @@ export default {
     client.set('numberOfJobs', 0);
   },
   exec: () => {
-    // executeJobs('offboarding');
+    executeJobs('offboarding');
     executeJobs('onboarding');
   },
 };
