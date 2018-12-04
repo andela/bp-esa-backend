@@ -9,9 +9,9 @@
  */
 const sampleJob = (placement, result) => {
   // Do something with the placement data
-  const { fellowName } = placement;
+  const { fellow } = placement;
   // Write the result of the job to the result object
-  result.sampleOffboarding = `Sample offboarding job was executed for ${fellowName}`;
+  result.sampleOffboarding = `Sample offboarding job was executed for ${fellow.name}`;
 };
 
 export default sampleJob;

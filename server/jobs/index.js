@@ -44,7 +44,7 @@ const jobs = {
  *
  * @param {string} type Type of job to execute: offboarding || onboarding
  *
- * @returns {void}
+ * @returns {Promise} Promise to fetch new placements and execute automations
  */
 export default function executeJobs(type) {
   const { jobList, placementStatus, automationResult } = jobs[type];

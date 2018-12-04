@@ -155,7 +155,7 @@ export const addOrRemove = async (email, channel, context) => {
  * @param {string} fellowEmail - user's email
  * @param {string} channel - the channel id
  *
- * @returns {Object} - The result after a user has been added to a channel
+ * @returns {Promise} Promise to add a user to a channel
  */
 export const addToChannel = (fellowEmail, channel) => addOrRemove(fellowEmail, channel, 'invite');
 
@@ -166,6 +166,6 @@ export const addToChannel = (fellowEmail, channel) => addOrRemove(fellowEmail, c
  * @param {string} fellowEmail - user's email
  * @param {string} channel - the channel id
  *
- * @returns {Object} - The result after a user has been removed from a channel
+ * @returns {Promise} Promise to remove a user from a channel
  */
 export const removeFromChannel = (fellowEmail, channel) => addOrRemove(fellowEmail, channel, 'kick');
