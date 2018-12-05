@@ -10,12 +10,11 @@ const makeChannelNames = (partnerName) => {
   const formattedName = shortened.replace(/[^a-zA-Z0-9]/g, '');
 
   // For all the participants of the engagement - Andelans & Partners
-  const generalChannel = `p-${formattedName}`;
+  const generalChannel = `p-${formattedName.substring(0, 19)}`;
   // For only Andelans in the engagement
-  const internalChannel = `p-${formattedName}-int`;
+  const internalChannel = `p-${formattedName.substring(0, 15)}-int`;
 
   return { generalChannel, internalChannel };
 };
-
 
 export default makeChannelNames;
