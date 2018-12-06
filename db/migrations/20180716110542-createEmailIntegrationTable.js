@@ -41,14 +41,6 @@ module.exports = {
           as: 'userId'
         }
       },
-      partner_id: {
-        type: DataTypes.INTEGER,
-        references: {
-          model: 'partners',
-          key: 'id',
-          as: 'partnerId'
-        }
-      }
     });
   },
 
