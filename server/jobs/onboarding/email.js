@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { sendDevOnboardingMail, sendSOPOnboardingMail } from '../../modules/email/emailModule';
+import { getMailInfo } from '../helpers';
+
 /**
  * @desc Automates developer onboarding on email
  *
@@ -8,16 +10,12 @@ import { sendDevOnboardingMail, sendSOPOnboardingMail } from '../../modules/emai
  * @returns {void}
  */
 const emailOnboarding = async (placement, automationResult) => {
-  const {
-    fellow, client_name: partnerName, start_date: startDate,
-  } = placement;
   try {
-    await sendDevOnboardingMail(fellow.email, fellow.name, partnerName);
-    // eslint-disable-next-line max-len
-    await sendSOPOnboardingMail(fellow.name, partnerName, fellow.email, fellow.location, 'Kenya', startDate);
+    const mailInfo = await getMailInfo(placement);
+    await Promise.all([sendDevOnboardingMail(mailInfo), sendSOPOnboardingMail(mailInfo)]);
     automationResult.emailAutomation = 'success';
   } catch (error) {
-    automationResult.emailAutomation = 'failure';
+    automationResult.emailAutomation = error.message || 'failure';
   }
 };
 

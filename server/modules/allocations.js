@@ -11,28 +11,50 @@ axios.defaults.baseURL = 'https://api-prod.andela.com/';
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 // Updates the local redis store with latest Partner List
-export const updatePartnerStore = async () => {
-  axios
-    .get('api/v1/partners')
-    .then((response) => {
-      client.set('partners', JSON.stringify(response.data), redis.print);
-    })
-    .catch(error => error.message)
+export const updatePartnerStore = () => axios.get('api/v1/partners').then((response) => {
+  client.set('partners', JSON.stringify(response.data), redis.print);
+});
+
+const resolvePartner = (partnerId, result, resolve) => {
+  if (result) {
+    return resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
+  }
+  return resolve(null);
 };
 
-// Finds a partner using partnerId
-export const findPartnerById = partnerId => new Promise((resolve, reject) => {
+/**
+ * @desc Fetch partner data from external api
+ *
+ * @param {string} partnerId ID of the partner
+ *
+ * @returns {Promise} Promise of the partner data to be fetched
+ */
+
+const retrievePartner = partnerId => new Promise((resolve, reject) => {
   client.get('partners', (error, result) => {
     if (error) {
       reject(error);
     }
-    if (result) {
-      resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
-    } else {
-      resolve(null);
-    }
+    return resolvePartner(partnerId, result, resolve);
   });
 });
+
+/**
+ * @desc Get partner details from radis db or fetch new partner data
+ *
+ * @param {string} partnerId ID of the partner
+ *
+ * @returns {object} Data of the partner
+ */
+export async function findPartnerById(partnerId) {
+  let partner = await retrievePartner(partnerId);
+  if (!partner) {
+    await updatePartnerStore();
+    partner = await retrievePartner(partnerId);
+    if (!partner) throw new Error('Partner record was not found');
+  }
+  return partner;
+}
 
 /**
  *@desc Fetches placements from allocations, based on the status specified
@@ -52,10 +74,9 @@ const fetchPlacementsByStatus = status => axios.get(`api/v1/placements?status=${
  * @returns {Promise} - Promise which resolves to a list of placements
  * from the past numberOfDays provided, or throws an error if unsuccessful
  */
-export const fetchNewPlacements = (status, numberOfDays = 1) => fetchPlacementsByStatus(status)
-  .then((res) => {
-    const placements = res.data.values;
-    const currentDate = new Date(Date.now());
-    const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);
-    return placements.filter(data => Date.parse(data.created_at) >= fromDate);
-  });
+export const fetchNewPlacements = (status, numberOfDays = 1) => fetchPlacementsByStatus(status).then((res) => {
+  const placements = res.data.values;
+  const currentDate = new Date(Date.now());
+  const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);
+  return placements.filter(data => Date.parse(data.created_at) >= fromDate);
+});

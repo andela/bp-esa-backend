@@ -35,12 +35,12 @@ const sendMail = async (mailOptions) => {
  *
  * @returns {object} The mail options
  */
-const constructMailOptions = ({ htmlString, sendTo, emailSubject }) => ({
+const constructMailOptions = ({ emailBody, sendTo, emailSubject }) => ({
   from: user,
   to: sendTo,
   subject: emailSubject,
   generateTextFromHTML: true,
-  html: htmlString,
+  html: emailBody,
 });
 
 
@@ -65,7 +65,7 @@ export const sendDevOnboardingMail = async (mailInfo) => {
   const mailOptions = constructMailOptions({
     sendTo: developerEmail,
     emailSubject: `${partnerName} Engagement Support`,
-    template: eval(`\`${fs.readFileSync(developerOnboardingTemplatePath).toString()}\``),
+    emailBody: eval(`\`${fs.readFileSync(developerOnboardingTemplatePath).toString()}\``),
   });
 
   try {
@@ -97,7 +97,7 @@ export const sendITOffboardingMail = async (mailInfo) => {
   const mailOptions = constructMailOptions({
     sendTo: itEmail,
     emailSubject: `${developerName} Engagement Roll Off (${developerLocation})`,
-    template: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
+    emailBody: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
   });
 
   try {
@@ -132,7 +132,7 @@ export const sendSOPOnboardingMail = async (mailInfo) => {
   const mailOptions = constructMailOptions({
     sendTo: opsEmail,
     emailSubject: `${developerName} Placed with ${partnerName}`,
-    template: eval(`\`${fs.readFileSync(successOnboardingTemplatePath).toString()}\``),
+    emailBody: eval(`\`${fs.readFileSync(successOnboardingTemplatePath).toString()}\``),
   });
 
   try {
@@ -167,7 +167,7 @@ export const sendSOPOffboardingMail = async (mailInfo) => {
   const mailOptions = constructMailOptions({
     sendTo: opsEmail,
     emailSubject: `${developerName} Placed with ${partnerName}`,
-    template: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
+    emailBody: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
   });
 
   try {
