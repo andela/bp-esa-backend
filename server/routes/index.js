@@ -10,8 +10,8 @@ export default (app) => {
       });
     }
 
-    const startTime = new Date(JSON.parse(response[0]));
-    const [message, numberOfJobs] = response;
+    const [startTimeRaw, message, numberOfJobs] = response;
+    const startTime = new Date(JSON.parse(startTimeRaw));
 
     return res.status(200).send({
       message,
