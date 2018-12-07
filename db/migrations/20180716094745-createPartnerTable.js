@@ -7,25 +7,33 @@ module.exports = {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
+      freckleProjectId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       name: {
-        allowNull: false,
-        type: DataTypes.STRING,
-      },
-      partner_id: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      created_at: {
+      partnerId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      slackChannels: {
+        type: DataTypes.JSON,
+        allowNull: false,
+      },
+      createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
-      }
-    })
+      },
+    });
   },
 
   down: (queryInterface, DataTypes) => {

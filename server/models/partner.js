@@ -1,18 +1,17 @@
 export default (sequelize, DataTypes) => {
   const Partner = sequelize.define('partners', {
+    freckleProjectId: {
+      type: DataTypes.STRING,
+    },
     name: {
       type: DataTypes.STRING,
     },
-    partnerID: {
+    partnerId: {
       type: DataTypes.STRING,
     },
+    slackChannels: {
+      type: DataTypes.JSON,
+    },
   });
-
-  Partner.associate = (models) => {
-    Partner.hasMany(models.EmailIntegration);
-    Partner.hasMany(models.FreckleIntegration);
-    Partner.hasMany(models.SlackIntegration);
-  };
-
   return Partner;
 };
