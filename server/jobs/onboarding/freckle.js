@@ -14,7 +14,7 @@ export default async (placement, automationResult) => {
     const project = await createProject(placement.client_name);
     await assignProject(fellow.email, project.id);
     automationResult.freckleAutomation = 'success';
-  } catch (e) {
-    automationResult.freckleAutomation = 'failure';
+  } catch (error) {
+    automationResult.freckleAutomation = error.message || 'failure';
   }
 };

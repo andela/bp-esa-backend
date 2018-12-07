@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { sendITOffboardingMail, sendSOPOffboardingMail } from '../../modules/email/emailModule';
+import { getMailInfo } from '../helpers';
 
 /**
  * @desc Automates developer offboarding via email
@@ -9,20 +10,8 @@ import { sendITOffboardingMail, sendSOPOffboardingMail } from '../../modules/ema
  * @returns {void}
  */
 export default async function emailOffboarding(placement, automationResult) {
-  const {
-    fellow: { name: developerName, email: developerEmail, location: developerLocation },
-    end_date: rollOffDate,
-    client_name: partnerName,
-  } = placement;
-  const mailInfo = {
-    developerName,
-    partnerName,
-    developerEmail,
-    developerLocation,
-    rollOffDate,
-    partnerLocation: 'Nairobi',
-  };
   try {
+    const mailInfo = await getMailInfo(placement);
     await Promise.all([sendSOPOffboardingMail(mailInfo), sendITOffboardingMail(mailInfo)]);
     automationResult.emailAutomation = 'success';
   } catch (error) {

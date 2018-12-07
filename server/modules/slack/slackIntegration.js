@@ -1,8 +1,7 @@
 import { WebClient } from '@slack/client';
 import dotenv from 'dotenv';
-import { findPartnerById, updatePartnerStore } from '../allocations';
+import { findPartnerById } from '../allocations';
 import makeChannelNames from '../../helpers/slackHelpers';
-import response from '../../helpers/response';
 
 dotenv.config();
 
@@ -13,7 +12,7 @@ if (!SLACK_TOKEN) {
   throw 'The slack token is not available';
 }
 export const slackClient = new WebClient(SLACK_TOKEN);
-console.log('====================');
+
 /**
  * @function createChannel
  * @desc Create slack channel
@@ -78,32 +77,20 @@ export const returnValidChannels = (...args) => {
  * @function createPartnerChannels
  * @desc Create slack channels for a partner engagement
  *
- * @param {string} partnerId - ID of the partner
- * @returns {Object} - An object containing details of the created channels
+ * @param {string} partnerId ID of the partner
+ * @returns {Object} An object containing details of the created channels
  */
 export const createPartnerChannels = async (partnerId) => {
-  try {
-    let partner;
-    partner = await findPartnerById(partnerId);
-    if (!partner) {
-      await updatePartnerStore();
-      partner = await findPartnerById(partnerId);
-    }
-    if (partner === undefined) throw new Error('Partner record was not found');
+  const partner = await findPartnerById(partnerId);
+  const { generalChannel, internalChannel } = makeChannelNames(partner.name);
+  const createGeneral = await createChannel(generalChannel);
+  const createInternal = await createChannel(internalChannel);
 
-    const { generalChannel, internalChannel } = makeChannelNames(partner.name);
-    const createGeneral = await createChannel(generalChannel);
-    const createInternal = await createChannel(internalChannel);
-
-    const generalDuplicate = createGeneral.message ? createGeneral.data.error : null;
-    const internalDuplicate = createInternal.message ? createInternal.data.error : null;
-    const generalExists = generalDuplicate === 'name_taken';
-    const exists = channelExists(generalExists, internalDuplicate, generalChannel, internalChannel);
-    return returnValidChannels(partnerId, exists, createGeneral, createInternal);
-  } catch (error) {
-    // istanbul ignore next
-    return error.message;
-  }
+  const generalDuplicate = createGeneral.message ? createGeneral.data.error : null;
+  const internalDuplicate = createInternal.message ? createInternal.data.error : null;
+  const generalExists = generalDuplicate === 'name_taken';
+  const exists = channelExists(generalExists, internalDuplicate, generalChannel, internalChannel);
+  return returnValidChannels(partnerId, exists, createGeneral, createInternal);
 };
 
 /**

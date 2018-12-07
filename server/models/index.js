@@ -5,12 +5,25 @@ import configObject from '../config/config';
 const env = process.env.NODE_ENV || 'development';
 const config = configObject[env];
 
-const sequelize = new Sequelize(config.url, {
-  define: {
-    underscored: true,
-  },
-  logging: false,
-});
+let sequelize;
+
+if (env !== 'development') {
+  sequelize = new Sequelize(config.url, {
+    logging: () => {},
+  });
+} else {
+  sequelize = new Sequelize(
+    config.database,
+    config.dialect,
+    config.password, {
+      host: config.host,
+      port: config.port,
+      dialect: config.dialect,
+      logging: () => {},
+    },
+  );
+}
+
 
 const db = {
   User: sequelize.import('./user'),
