@@ -7,8 +7,13 @@ import response from '../../helpers/response';
 dotenv.config();
 
 const { SLACK_TOKEN } = process.env;
-export const slackClient = new WebClient(SLACK_TOKEN);
 
+if (!SLACK_TOKEN) {
+  // eslint-disable-next-line no-throw-literal
+  throw 'The slack token is not available';
+}
+export const slackClient = new WebClient(SLACK_TOKEN);
+console.log('====================');
 /**
  * @function createChannel
  * @desc Create slack channel

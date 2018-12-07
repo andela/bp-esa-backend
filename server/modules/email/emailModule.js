@@ -11,6 +11,11 @@ const user = process.env.EMAIL_USER;
 const opsEmail = process.env.OPS_EMAIL;
 const itEmail = process.env.IT_EMAIL;
 
+if (!user || !opsEmail || !itEmail) {
+  // eslint-disable-next-line no-throw-literal
+  throw 'The required email credentials are not available';
+}
+
 const getEmailTemplatePath = emailTemplate => path.join(__dirname, `emailTemplates/${emailTemplate}`);
 
 const developerOnboardingTemplatePath = getEmailTemplatePath('developer-onboarding-email.html');
