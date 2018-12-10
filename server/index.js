@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import ms from 'ms';
-
+import validateEnvironmentVars from './validator';
 import swaggerConfig from '../docs/swagger';
 import routes from './routes';
 import worker from './jobs/worker';
@@ -24,6 +24,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerConfig));
 
 routes(app);
 
+validateEnvironmentVars();
 // Setup a default catch-all route that sends back a welcome message in JSON format.
 app.get('*', (req, res) => res.status(200).send({
   message: 'Welcome to the beginning of nothingness.',
