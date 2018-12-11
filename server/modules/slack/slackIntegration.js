@@ -4,10 +4,8 @@ import { findPartnerById } from '../allocations';
 import makeChannelNames from '../../helpers/slackHelpers';
 
 dotenv.config();
-
 const { SLACK_TOKEN } = process.env;
 export const slackClient = new WebClient(SLACK_TOKEN);
-
 /**
  * @function createChannel
  * @desc Create slack channel

@@ -7,7 +7,6 @@ dotenv.config();
 
 const freckleUrl = 'https://api.letsfreckle.com/v2';
 const freckleToken = process.env.FRECKLE_ADMIN_TOKEN;
-
 /**
  * @function
  * @desc - An asynchronous function to get a project from freckle.
