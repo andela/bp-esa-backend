@@ -27,6 +27,18 @@ The following should be installed in your machine
 
 * To run tests use the `npm test` command.
 
+## Docker Development Setup
+### Prerequisite
+* [Install docker](https://docs.docker.com/install/)
+* stop the local instances of *postgres* and *redis*. In macos, this is achieved by:
+    - brew services stop redis
+    - brew services stop postgres
+### Setup
+* Clone the application and change to it's directory
+* Create a `.env` file and use `.env.example` as a guide on the environment variables required
+* Run `docker-compose up --build`
+* Access the application on your machine `http://localhost:8000`
+
 ## API Documentation
 *  API documentation is a concise reference manual containing all the information required to work with the API, with details about the functions, classes, return types, arguments and more, supported by tutorials and examples. We take API Documentation Seriously.
 * Engagement Support Automation(ESA) API is documented using [swagger](https://swagger.io/) and abides to the [**OpenAPI Specification**](https://swagger.io/specification/)
