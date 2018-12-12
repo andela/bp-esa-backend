@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import * as slack from '../../server/modules/slack/slackIntegration';
 import client from '../../server/helpers/redis';
-import { allocationsMocks, rawAllocations } from '../mocks/allocations';
+import { allocationsMocks, rawAllocations, onboardingAllocations } from '../mocks/allocations';
 import slackMocks from '../mocks/slack';
 
 const fakeClientGet = sinon
@@ -16,13 +16,15 @@ const fakeInvite = sinon
 const fakeKick = sinon
   .stub(slack.slackClient.groups, 'kick')
   .callsFake(() => slackMocks.removeUser);
+
 describe('Slack Integration Test Suite', async () => {
   it('Should create internal slack channels for a new partner', async () => {
     const fakeCreate = sinon
       .stub(slack.slackClient.groups, 'create')
       .callsFake(() => slackMocks.createGroups.createInternal);
-    const { partner } = allocationsMocks;
-    const createResult = await slack.createPartnerChannels(partner.id);
+    const { data } = onboardingAllocations;
+    const { client_name: partnerName } = data.values[0];
+    const createResult = await slack.createPartnerChannel(partnerName, 'internal');
     const expectedResult = {
       partnerId: 'ABCDEFZYXWVU',
       internalChannel: {
@@ -31,14 +33,16 @@ describe('Slack Integration Test Suite', async () => {
       },
     };
     expect(createResult.internalChannel.id).to.equal(expectedResult.internalChannel.id);
+    expect(createResult.internalChannel.name).to.equal(expectedResult.internalChannel.name);
     fakeCreate.restore();
   });
   it('Should create general slack channels for a new partner', async () => {
     const fakeCreate = sinon
       .stub(slack.slackClient.groups, 'create')
       .callsFake(() => slackMocks.createGroups.createGeneral);
-    const { partner } = allocationsMocks;
-    const createResult = await slack.createPartnerChannels(partner.id);
+    const { data } = onboardingAllocations;
+    const { client_name: partnerName } = data.values[0];
+    const createResult = await slack.createPartnerChannel(partnerName, 'general');
     const expectedResult = {
       partnerId: 'ABCDEFZYXWVU',
       generalChannel: {
@@ -47,19 +51,20 @@ describe('Slack Integration Test Suite', async () => {
       },
     };
     expect(createResult.generalChannel.id).to.equal(expectedResult.generalChannel.id);
+    expect(createResult.generalChannel.name).to.equal(expectedResult.generalChannel.name);
     fakeCreate.restore();
   });
   it('Should add developers to respective channels', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GDL7RDC5V';
-    const inviteResult = await slack.addToChannel(email, channel);
+    const inviteResult = await slack.accessChannel(email, channel, 'invite');
     expect(inviteResult.message).to.equal('User added to channel successfully');
     fakeInvite.restore();
   });
   it('Should remove developers from channels', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GDL7RDC5V';
-    const inviteResult = await slack.removeFromChannel(email, channel);
+    const inviteResult = await slack.accessChannel(email, channel, 'kick');
     expect(inviteResult.message).to.equal('User removed from channel successfully');
     fakeKick.restore();
   });
@@ -69,7 +74,7 @@ describe('Slack Integration Test Suite', async () => {
       ok: false,
     }));
     try {
-      await slack.addOrRemove('anaeze@andela.com', 'lagos-all', 'invite');
+      await slack.accessChannel('anaeze@andela.com', 'lagos-all', 'invite');
     } catch (error) {
       expect(error.message).to.equal(failedInvite);
     }
