@@ -34,6 +34,7 @@ export const createProject = async (projectName) => {
   try {
     let [project] = await getProjectByName(projectName);
     if (project) {
+      project.existMessage = `${projectName} already exists as ${project.name}.`;
       return project;
     }
     await axios.post(`${freckleUrl}/projects?freckle_token=${freckleToken}`, {
