@@ -50,3 +50,26 @@ jobs:
       - store_artifacts:
           path: coverage
           prefix: coverage
+  deploy:
+    docker:
+      - image: circleci/node:9.8.0
+        environment:
+          GOOGLE_PROJECT_ID: bench-projects
+          GOOGLE_COMPUTE_ZONE: europe-west1-b
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and deploy application
+          command: chmod +x scripts/deploy.sh && scripts/deploy.sh
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+      - deploy:
+          filters:
+            branches:
+              only:
+                - develop
