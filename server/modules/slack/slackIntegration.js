@@ -1,10 +1,51 @@
 import { WebClient } from '@slack/client';
 import dotenv from 'dotenv';
 import makeChannelNames from '../../helpers/slackHelpers';
+import { createOrUpdateSlackAutomation, getSlackAutomation } from '../../../db/operations/automations';
 
 dotenv.config();
 const { SLACK_TOKEN } = process.env;
 export const slackClient = new WebClient(SLACK_TOKEN);
+
+/**
+ * @func createChannel
+ * @desc Create a slack channel(and store it in the database)
+ *
+ * @param {string} channelName The name of the channel to be created.
+ * @returns {object} The details of the slack channel created.
+ */
+const createChannel = async (channelName) => {
+  const result = await slackClient.groups.create({ name: channelName });
+  await createOrUpdateSlackAutomation({
+    automationId: process.env.AUTOMATION_ID,
+    slackUserId: null,
+    channelName,
+    channelId: result.group.id,
+    type: 'create',
+    status: 'success',
+    statusMessage: `${channelName} slack channel created`,
+  });
+  return result;
+};
+
+/**
+ * @func getExistingChannel
+ * @desc Get an existing slack channel(from the database)
+ * @param {string} channelName The name of the slack channel to get
+ *
+ * @returns {object} An object that would always contain
+ * a truthy value "channelExist" to tell if the channel exist or not.
+ */
+const getExistingChannel = async (channelName) => {
+  let channelExists = false;
+  let channelId = null;
+  const result = await getSlackAutomation({ channelName });
+  if (result) {
+    channelExists = true;
+    ({ channelId } = result);
+  }
+  return { channelExists, channelId };
+};
 
 /**
  * @function createPartnerChannel
@@ -17,29 +58,36 @@ export const slackClient = new WebClient(SLACK_TOKEN);
  */
 export const createPartnerChannel = async (partnerName, channelType) => {
   const channelName = makeChannelNames(partnerName, channelType);
-  const { create } = slackClient.groups;
-
   try {
-    const { group } = await create({ name: channelName });
-    // write channel<->partner automation success to database
-    const channelDetails = { id: group.id, name: group.name };
-    return group.name.endsWith('int')
-      ? { internalChannel: channelDetails }
-      : { generalChannel: channelDetails };
+    const { group } = await createChannel(channelName);
+    return { id: group.id, name: group.name };
   } catch (error) {
-    // write automation failure to database
-    return error;
+    let channelId;
+    let channelExists = false;
+    if (error.data && (error.data.error === 'name_taken')) {
+      ({ channelExists, channelId } = await getExistingChannel(channelName));
+    }
+    await createOrUpdateSlackAutomation({
+      automationId: process.env.AUTOMATION_ID,
+      slackUserId: null,
+      channelName,
+      channelId: channelId || null,
+      type: 'create',
+      status: channelExists ? 'success' : 'failure',
+      statusMessage: channelExists ? 'channel already exist' : `${error.message}`,
+    });
+    return { id: channelId, name: channelName };
   }
 };
 
 /**
- * @function getSlackUser
+ * @function getSlackUserId
  * @desc Search for a slack user by email
  *
  * @param {String} email The user's email
  * @returns {string} The slack user's id
  */
-export const getSlackUser = async (email) => {
+export const getSlackUserId = async (email) => {
   const { lookupByEmail } = slackClient.users;
   const { user } = await lookupByEmail({ email });
   return user.id;
@@ -58,16 +106,25 @@ export const getSlackUser = async (email) => {
 export const accessChannel = async (email, channel, context) => {
   try {
     const slackAction = slackClient.groups[context];
-    const user = await getSlackUser(email);
-    await slackAction({ user, channel });
+    const userId = await getSlackUserId(email);
+    await slackAction({ user: userId, channel });
 
-    const success = context === 'invite'
-      ? 'User added to channel successfully'
-      : 'User removed from channel successfully';
-    // write automation success to database
-    return { status: 'success', message: success };
+    await createOrUpdateSlackAutomation({
+      automationId: process.env.AUTOMATION_ID,
+      slackUserId: userId,
+      channelId: channel,
+      type: context,
+      status: 'success',
+      statusMessage: `${email} ${context === 'invite' ? 'invited to' : 'kicked from'} a channel`,
+    });
   } catch (error) {
-    // write automation failure to database
-    return error;
+    await createOrUpdateSlackAutomation({
+      automationId: process.env.AUTOMATION_ID,
+      slackUserId: null,
+      channelId: channel,
+      type: context,
+      status: 'failure',
+      statusMessage: `${error.message}`,
+    });
   }
 };

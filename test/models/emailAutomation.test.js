@@ -9,7 +9,7 @@ describe('server/models/emailAutomation', () => {
   const emailAutomationInstance = new EmailAutomation();
 
   context('model name', () => {
-    checkModelName(EmailAutomation)('EmailAutomation');
+    checkModelName(EmailAutomation)('emailAutomation');
   });
 
   context('model properties', () => {

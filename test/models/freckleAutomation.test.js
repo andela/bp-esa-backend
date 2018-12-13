@@ -9,7 +9,7 @@ describe('server/models/freckleAutomation', () => {
   const freckleAutomationInstance = new FlackAutomation();
 
   context('model name', () => {
-    checkModelName(FlackAutomation)('FreckleAutomation');
+    checkModelName(FlackAutomation)('freckleAutomation');
   });
 
   context('model properties', () => {

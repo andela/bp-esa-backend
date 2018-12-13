@@ -7,7 +7,7 @@ import client from '../helpers/redis';
 dotenv.config();
 
 // axios base URL and Authorization header setup
-axios.defaults.baseURL = 'https://api-prod.andela.com/';
+axios.defaults.baseURL = process.env.ANDELA_API_BASE_URL;
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 // Updates the local redis store with latest Partner List

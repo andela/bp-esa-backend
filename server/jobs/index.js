@@ -7,6 +7,7 @@ import fs from 'fs';
 import ms from 'ms';
 
 import { fetchNewPlacements } from '../modules/allocations';
+import { createAutomation } from '../../db/operations/automations';
 import client from '../helpers/redis';
 
 /**
@@ -57,15 +58,18 @@ export default function executeJobs(type) {
     .then(async (newPlacements) => {
       if (!fetchPlacementError) {
         for (const placement of newPlacements) {
-          const { fellow, client_name: clientName } = placement;
+          const {
+            fellow: { id: fellowId, name: fellowName },
+            client_name: partnerName, client_id: partnerId,
+          } = placement;
+          const { id: automationId } = await createAutomation({
+            fellowId, fellowName, partnerName, partnerId, type,
+          });
+          process.env.AUTOMATION_ID = automationId;
+
           await Promise.all(jobList.map(job => job(placement, automationResult)));
 
-          automationResult.fellowName = fellow.name;
-          automationResult.partnerName = clientName;
-          automationResult.createdAt = new Date();
-
           client.incr('numberOfJobs');
-          // save automationResult object to database
         }
       }
     });

@@ -1,12 +1,16 @@
 import { automationStatus } from './emailAutomation';
 
 export default (sequelize, DataTypes) => {
-  const SlackAutomation = sequelize.define('SlackAutomation', Object.assign(
+  const SlackAutomation = sequelize.define('slackAutomation', Object.assign(
     automationStatus(DataTypes),
     {
       channelId: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+      },
+      channelName: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       slackUserId: {
         type: DataTypes.STRING,
@@ -14,7 +18,7 @@ export default (sequelize, DataTypes) => {
       },
       type: {
         type: DataTypes.ENUM,
-        values: ['creation', 'removal', 'addition'],
+        values: ['create', 'kick', 'invite'],
         allowNull: false,
       },
     },

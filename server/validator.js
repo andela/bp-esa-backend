@@ -9,10 +9,9 @@ const validateEnvironmentVars = () => {
     'OPS_EMAIL',
     'IT_EMAIL',
     'ANDELA_ALLOCATIONS_API_TOKEN',
-    'ANDELA_USER_JWT',
-    'FRECKLE_API',
     'FRECKLE_ADMIN_TOKEN',
     'SLACK_AVAILABLE_DEVS_CHANNEL_ID',
+    'ANDELA_API_BASE_URL',
   ];
   const missingVariable = [];
   requiredEnvVariables.forEach((variable) => {

@@ -13,7 +13,7 @@ export const automationStatus = DataTypes => ({
 });
 
 export default (sequelize, DataTypes) => {
-  const EmailAutomation = sequelize.define('EmailAutomation', Object.assign(
+  const EmailAutomation = sequelize.define('emailAutomation', Object.assign(
     automationStatus(DataTypes),
     {
       body: {

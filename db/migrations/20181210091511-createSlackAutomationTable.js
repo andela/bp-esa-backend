@@ -8,7 +8,11 @@ module.exports = {
     },
     channelId: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+    },
+    channelName: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM,
@@ -26,7 +30,7 @@ module.exports = {
     },
     type: {
       type: DataTypes.ENUM,
-      values: ['creation', 'removal', 'addition'],
+      values: ['create', 'kick', 'invite'],
       allowNull: false,
     },
     automationId: {
