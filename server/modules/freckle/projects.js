@@ -4,90 +4,67 @@ import dotenv from 'dotenv';
 import response from '../../helpers/response';
 
 dotenv.config();
-
 const freckleUrl = 'https://api.letsfreckle.com/v2';
 const freckleToken = process.env.FRECKLE_ADMIN_TOKEN;
-/**
- * @function
- * @desc - An asynchronous function to get a project from freckle.
- * @param {string} name - name of freckle project
- * @returns {object} - If freckle-api transaction success, it returns a record of project.
- * @returns {boolean} - If freckle-api transaction fail, it returns false.
- */
-export async function getProjectByName(name) {
-  try {
-    const project = await axios.get(`${freckleUrl}/projects?freckle_token=${freckleToken}&name=${name}`);
-    return project.data;
-  } catch (e) {
-    return false;
-  }
-}
 
 /**
- * @function
- * @desc - An asynchronous function to create a new project on freckle.
- * @param {String} projectName The name of the project to be created.
- * @returns {Object} If freckle-api transaction success, it return a success response object.
- * @returns {Object} - If freckle-api transaction fail, it return an error response object.
+ * @desc Get existing project on freckle or create new if not exists
+ *
+ * @param {String} projectName The name of the project to be retrieved/created
+ *
+ * @returns {Object} If successful, return project details
+ * @returns {Object} If unsuccessful, return error object
  */
-export const createProject = async (projectName) => {
+export const getOrCreateProject = async (projectName) => {
   try {
-    let [project] = await getProjectByName(projectName);
-    if (project) {
-      project.existMessage = `${projectName} already exists as ${project.name}.`;
-      return project;
-    }
-    await axios.post(`${freckleUrl}/projects?freckle_token=${freckleToken}`, {
-      name: projectName,
-    });
-
-    project = await getProjectByName(projectName);
-    return project;
-  } catch (e) {
-    throw new Error('Error occurred creating project');
+    const name = { name: projectName };
+    let { data: projectDetails } = await axios.get(
+      `${freckleUrl}/projects?freckle_token=${freckleToken}&name=${projectName}`,
+    );
+    if (projectDetails.length) return projectDetails;
+    ({ data: projectDetails } = await axios.post(
+      `${freckleUrl}/projects?freckle_token=${freckleToken}`,
+      name,
+    ));
+    // write automation success to database
+    return projectDetails;
+  } catch (error) {
+    // write automation failure to database
+    return error;
   }
 };
 
 /**
- * @desc Get a user id with their email address on freckle
+ * @desc Gets a user id on freckle
  *
- * @param {string} email user email address be assigned to a project
+ * @param {string} email User email address whose id is to be retrieved
  *
- * @returns {number} Returns the freckle id of the user
- * @returns {null} Returns null if there is an error or the user does not exist on freckle
+ * @returns {number} The freckle id of the user
  */
 export const getUserIdByEmail = async (email) => {
   const url = `${freckleUrl}/users?freckle_token=${freckleToken}&email=${email}`;
-  try {
-    const user = await axios.get(url);
-    const { id } = user.data[0];
-    if (id) {
-      return id;
-    }
-    return null;
-  } catch (_) {
-    return null;
-  }
+  const { data } = await axios.get(url);
+  return data[0].id;
 };
 
 /**
  * @desc Assign a user to a project on freckle
  *
- * @param {string} email - email of the user to be assigned to a project
- * @param {number} projectId - The ID of the project to be assigned to the user.
+ * @param {string} email The email of the user to be assigned to a project
+ * @param {number} projectId The ID of the project to be assigned to the user
  *
- * @returns {object} - A response object.
+ * @returns {object} If successful, return success response
+ * @returns {object} If unsuccessful, return error response
  */
 export const assignProject = async (email, projectId) => {
   try {
     const userId = await getUserIdByEmail(email);
-    if (userId) {
-      const url = `${freckleUrl}/users/${userId}/give_access_to_projects?freckle_token=${freckleToken}`;
-      await axios.put(url, { project_ids: [projectId] });
-      return response(false, 'Successfully added developer to the project');
-    }
-    throw Error(`${email} have not been added to Andela freckle workspace`);
+    const url = `${freckleUrl}/users/${userId}/give_access_to_projects?freckle_token=${freckleToken}`;
+    await axios.put(url, { project_ids: [projectId] });
+    // write successful automation to database
+    return response(false, 'Successfully added developer to the project');
   } catch (error) {
-    throw Error(`Error occurred adding ${email} to freckle`);
+    // write unsuccessful automation to database
+    return error;
   }
 };
