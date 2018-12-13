@@ -1,0 +1,4 @@
+exclude_patterns:
+- "server/models/"
+- "db/migrations"
+- "test"

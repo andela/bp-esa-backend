@@ -1,9 +1,8 @@
 import dotenv from 'dotenv';
-import { removeFromChannel, createPartnerChannels, addToChannel } from '../../modules/slack/slackIntegration';
+import { accessChannel, createPartnerChannel } from '../../modules/slack/slackIntegration';
 
 dotenv.config();
 const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
-/* eslint-disable no-param-reassign */
 
 /**
  * @desc Automates developer onboarding on slack
@@ -13,19 +12,17 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
  *
  * @returns {undefined}
  */
-const slackOnBoarding = async (placement, automationResult) => {
+const slackOnBoarding = async (placement) => {
   const { fellow } = placement;
-  const { client_id: partnerId } = placement;
+  const { client_name: partnerName } = placement;
 
-  try {
-    await removeFromChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID);
-    const partnerChannels = await createPartnerChannels(partnerId);
-    const { generalChannel: { id: partnerChannelId } } = partnerChannels;
-    await addToChannel(fellow.email, partnerChannelId);
-    automationResult.slackOnBoarding = 'success';
-  } catch (error) {
-    automationResult.slackOnBoarding = error.message || 'failure';
-  }
+  accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'kick');
+  createPartnerChannel(partnerName, 'internal');
+  createPartnerChannel(partnerName, 'general').then((channel) => {
+    if (!channel.message) {
+      accessChannel(fellow.email, channel.id, 'invite');
+    }
+  });
 };
 
 export default slackOnBoarding;
