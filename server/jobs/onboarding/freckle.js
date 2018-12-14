@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { createProject, assignProject } from '../../modules/freckle/projects';
+import { getOrCreateProject, assignProject } from '../../modules/freckle/projects';
 
 /**
  * @desc Automates freckle developer onboarding.
@@ -8,13 +8,9 @@ import { createProject, assignProject } from '../../modules/freckle/projects';
  * @param {object} automationResult Result of automation job
  * @returns {undefined}
  */
-export default async (placement, automationResult) => {
+export default async (placement) => {
   const { fellow } = placement;
-  try {
-    const project = await createProject(placement.client_name);
-    await assignProject(fellow.email, project.id);
-    automationResult.freckleAutomation = 'success';
-  } catch (error) {
-    automationResult.freckleAutomation = error.message || 'failure';
-  }
+  getOrCreateProject(placement.client_name).then((project) => {
+    if (project.id) assignProject(fellow.email, project.id);
+  });
 };
