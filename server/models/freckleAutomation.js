@@ -1,7 +1,7 @@
 import { automationStatus } from './emailAutomation';
 
 export default (sequelize, DataTypes) => {
-  const FreckleAutomation = sequelize.define('FreckleAutomation', Object.assign(
+  const FreckleAutomation = sequelize.define('freckleAutomation', Object.assign(
     automationStatus(DataTypes),
     {
       freckleUserId: {

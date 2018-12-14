@@ -19,7 +19,7 @@ const slackOnBoarding = async (placement) => {
   accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'kick');
   createPartnerChannel(partnerName, 'internal');
   createPartnerChannel(partnerName, 'general').then((channel) => {
-    if (!channel.message) {
+    if (channel.id) {
       accessChannel(fellow.email, channel.id, 'invite');
     }
   });

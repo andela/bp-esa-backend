@@ -11,7 +11,7 @@ describe('server/models/automation', () => {
   const automationInstance = new AutomationModel();
 
   context('model name', () => {
-    checkModelName(AutomationModel)('Automation');
+    checkModelName(AutomationModel)('automation');
   });
 
   context('model properties', () => {

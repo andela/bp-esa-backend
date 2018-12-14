@@ -1,5 +1,4 @@
 import Sequelize from 'sequelize';
-
 import configObject from '../config/config';
 
 const env = process.env.NODE_ENV || 'development';
@@ -10,6 +9,9 @@ let sequelize;
 if (env !== 'development') {
   sequelize = new Sequelize(config.url, {
     logging: () => {},
+    define: {
+      freezeTableName: true,
+    },
   });
 } else {
   sequelize = new Sequelize(
@@ -20,17 +22,20 @@ if (env !== 'development') {
       port: config.port,
       dialect: config.dialect,
       logging: () => {},
+      define: {
+        freezeTableName: true,
+      },
     },
   );
 }
 
 
 const db = {
-  User: sequelize.import('./user'),
   Partner: sequelize.import('./partner'),
-  FreckleIntegration: sequelize.import('./freckleIntegration'),
-  SlackIntegration: sequelize.import('./slackIntegration'),
-  EmailIntegration: sequelize.import('./emailIntegration'),
+  Automation: sequelize.import('./automation'),
+  FreckleAutomation: sequelize.import('./freckleAutomation'),
+  SlackAutomation: sequelize.import('./slackAutomation'),
+  EmailAutomation: sequelize.import('./emailAutomation'),
 };
 
 Object.keys(db).forEach((modelName) => {

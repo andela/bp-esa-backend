@@ -7,6 +7,7 @@
     "start": "NODE_ENV=production npm run build && node ./build/index.js",
     "start:dev": "NODE_ENV=development nodemon ./server/index --exec babel-node --watch ./server",
     "build": "babel ./server -d ./build",
+    "pretest": "NODE_ENV=test npm run undo:all:migrations && NODE_ENV=test npm run migrations",
     "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:babel-core/register --timeout 10000 --exit",
     "lint": "eslint .",
     "migrations": "sequelize db:migrate",

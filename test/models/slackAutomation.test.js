@@ -9,11 +9,11 @@ describe('server/models/slackAutomation', () => {
   const slackAutomationInstance = new SlackAutomation();
 
   context('model name', () => {
-    checkModelName(SlackAutomation)('SlackAutomation');
+    checkModelName(SlackAutomation)('slackAutomation');
   });
 
   context('model properties', () => {
-    ['channelId', 'status', 'statusMessage', 'slackUserId', 'type'].forEach(
+    ['channelId', 'channelName', 'status', 'statusMessage', 'slackUserId', 'type'].forEach(
       checkPropertyExists(slackAutomationInstance),
     );
   });

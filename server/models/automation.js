@@ -1,5 +1,5 @@
 export default (sequelize, DataTypes) => {
-  const Automation = sequelize.define('Automation', {
+  const Automation = sequelize.define('automation', {
     fellowName: {
       type: DataTypes.STRING,
       allowNull: false,
