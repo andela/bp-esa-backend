@@ -41,6 +41,19 @@ const db = {
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
+    db[modelName].upsertById = (values) => {
+      if (values.id) {
+        return db[modelName]
+          .update(values, { where: { id: values.id }, returning: true })
+          .then((res) => {
+            if (res[0] !== 1) {
+              throw new Error('upsert should just update 1 row');
+            }
+            return [res[1][0], false];
+          });
+      }
+      return db[modelName].create(values).then(res => [res, true]);
+    };
   }
 });
 

@@ -24,6 +24,7 @@ export default (sequelize, DataTypes) => {
     FreckleAutomation.belongsTo(models.Automation, {
       foreignKey: {
         name: 'automationId',
+        allowNull: false,
       },
     });
   };

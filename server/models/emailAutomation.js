@@ -39,6 +39,7 @@ export default (sequelize, DataTypes) => {
     EmailAutomation.belongsTo(models.Automation, {
       foreignKey: {
         name: 'automationId',
+        allowNull: false,
       },
     });
   };

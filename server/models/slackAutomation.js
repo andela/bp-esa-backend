@@ -28,6 +28,7 @@ export default (sequelize, DataTypes) => {
     SlackAutomation.belongsTo(models.Automation, {
       foreignKey: {
         name: 'automationId',
+        allowNull: false,
       },
     });
   };

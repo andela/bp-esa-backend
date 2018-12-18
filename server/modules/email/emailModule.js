@@ -2,8 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import emailTransport from './emailTransport';
-
-import response from '../../helpers/response';
+import { createOrUpdateEmaillAutomation } from '../../../db/operations/automations';
 
 dotenv.config();
 
@@ -18,10 +17,36 @@ const successOnboardingTemplatePath = getEmailTemplatePath('success-onboarding-e
 const itOffboardingPath = getEmailTemplatePath('it-offboarding-email.html');
 const successOffboardingTemplatePath = getEmailTemplatePath('success-offboarding-email.html');
 
-
-const sendMail = async (mailOptions) => {
-  await emailTransport.sendMail(mailOptions);
-  return response(false, 'email sent successfully');
+/**
+ * @func sendAndSaveMail
+ * @desc Send an email then save details about the email as emailAutomation in the DB.
+ *
+ * @param {object} mailOptions The mail options.
+ * @returns {undefined}
+ */
+const sendAndSaveMail = async (mailOptions) => {
+  try {
+    await emailTransport.sendMail(mailOptions);
+    await createOrUpdateEmaillAutomation({
+      automationId: process.env.AUTOMATION_ID,
+      body: mailOptions.html,
+      recipient: mailOptions.to,
+      sender: mailOptions.from,
+      subject: mailOptions.subject,
+      status: 'success',
+      statusMessage: 'Email sent succesfully',
+    });
+  } catch (error) {
+    await createOrUpdateEmaillAutomation({
+      automationId: process.env.AUTOMATION_ID,
+      body: mailOptions.html,
+      recipient: mailOptions.to,
+      sender: mailOptions.from,
+      subject: mailOptions.subject,
+      status: 'failure',
+      statusMessage: error.message,
+    });
+  }
 };
 
 /**
@@ -67,13 +92,7 @@ export const sendDevOnboardingMail = async (mailInfo) => {
     emailSubject: `${partnerName} Engagement Support`,
     emailBody: eval(`\`${fs.readFileSync(developerOnboardingTemplatePath).toString()}\``),
   });
-
-  try {
-    const mailResponse = await sendMail(mailOptions);
-    return mailResponse;
-  } catch (error) {
-    throw new Error('Unable to send developer placement guide');
-  }
+  await sendAndSaveMail(mailOptions);
 };
 
 /**
@@ -99,13 +118,7 @@ export const sendITOffboardingMail = async (mailInfo) => {
     emailSubject: `${developerName} Engagement Roll Off (${developerLocation})`,
     emailBody: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
   });
-
-  try {
-    const mailResponse = await sendMail(mailOptions);
-    return mailResponse;
-  } catch (error) {
-    throw new Error('Unable to send IT offboaridng email');
-  }
+  await sendAndSaveMail(mailOptions);
 };
 
 /**
@@ -134,13 +147,7 @@ export const sendSOPOnboardingMail = async (mailInfo) => {
     emailSubject: `${developerName} Placed with ${partnerName}`,
     emailBody: eval(`\`${fs.readFileSync(successOnboardingTemplatePath).toString()}\``),
   });
-
-  try {
-    const mailResponse = await sendMail(mailOptions);
-    return mailResponse;
-  } catch (error) {
-    throw Error('Unable to send success ops onboaridng email');
-  }
+  await sendAndSaveMail(mailOptions);
 };
 
 /**
@@ -169,11 +176,5 @@ export const sendSOPOffboardingMail = async (mailInfo) => {
     emailSubject: `${developerName} Placed with ${partnerName}`,
     emailBody: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
   });
-
-  try {
-    const mailResponse = await sendMail(mailOptions);
-    return mailResponse;
-  } catch (error) {
-    throw new Error('Unable to send success ops offboarding email');
-  }
+  await sendAndSaveMail(mailOptions);
 };
