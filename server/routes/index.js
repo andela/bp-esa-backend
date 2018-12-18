@@ -1,6 +1,6 @@
 import client from '../helpers/redis';
-
 import daysBetween from '../helpers/daysBetween';
+import mockAndelAPI from '../mockAndelaApi';
 
 export default (app) => {
   app.get('/worker-status', (req, res) => client.mget('startTime', 'message', 'numberOfJobs', (err, response) => {
@@ -20,4 +20,6 @@ export default (app) => {
       startTime: startTime.toLocaleDateString(), // the time stamp the worker started,
     });
   }));
+
+  app.use('/mock-api/api/v1', mockAndelAPI);
 };
