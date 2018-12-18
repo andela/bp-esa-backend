@@ -1,13 +1,17 @@
 import sinon from 'sinon';
-import * as slack from '../../server/modules/slack/slackIntegration';
+import proxyquire from 'proxyquire';
 import client from '../../server/helpers/redis';
 import { rawAllocations, onboardingAllocations } from '../mocks/allocations';
 import slackMocks from '../mocks/slack';
-import models from '../../server/models';
 
-const fakeModels = {
-  SlackAutomation: sinon.spy(models.SlackAutomation, 'create'),
-};
+const createOrUpdateSlackAutomation = sinon.stub();
+const getSlackAutomation = sinon.stub();
+
+const slack = proxyquire('../../server/modules/slack/slackIntegration', {
+  '../../../db/operations/automations': {
+    createOrUpdateSlackAutomation, getSlackAutomation,
+  },
+});
 
 const fakeSlackClient = {
   get: sinon
@@ -27,13 +31,16 @@ const fakeSlackClient = {
     .callsFake(() => slackMocks.createGroups),
 };
 
+/* eslint-disable no-unused-expressions */
+
 describe('Slack Integration Test Suite', async () => {
   beforeEach(() => {
-    Object.keys(fakeModels).forEach(fake => fakeModels[fake].resetHistory());
     Object.keys(fakeSlackClient).forEach(fake => fakeSlackClient[fake].resetHistory());
+    createOrUpdateSlackAutomation.resetHistory();
+    getSlackAutomation.resetHistory();
   });
 
-  it('Should create internal slack channels for a new partner', async () => {
+  it('Should create internal slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
     const createResult = await slack.createPartnerChannel(partnerName, 'internal');
@@ -41,12 +48,12 @@ describe('Slack Integration Test Suite', async () => {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,
     };
-    expect(fakeModels.SlackAutomation.calledOnce);
-    expect(fakeSlackClient.create.calledOnce);
+    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
+    expect(fakeSlackClient.create.calledOnce).to.be.true;
     expect(createResult.id).to.equal(expectedResult.id);
     expect(createResult.name).to.equal(expectedResult.name);
   });
-  it('Should create general slack channels for a new partner', async () => {
+  it('Should create general slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
     const createResult = await slack.createPartnerChannel(partnerName, 'general');
@@ -54,23 +61,23 @@ describe('Slack Integration Test Suite', async () => {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,
     };
-    expect(models.SlackAutomation.create.calledOnce);
-    expect(fakeSlackClient.create.calledOnce);
+    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
+    expect(fakeSlackClient.create.calledOnce).to.be.true;
     expect(createResult.id).to.equal(expectedResult.id);
     expect(createResult.name).to.equal(expectedResult.name);
   });
-  it('Should add developers to respective channels', async () => {
+  it('Should add developers to respective channels and save the automation to DB', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GDL7RDC5V';
     await slack.accessChannel(email, channel, 'invite');
-    expect(fakeModels.SlackAutomation.calledOnce);
-    expect(fakeSlackClient.invite.calledOnce);
+    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
+    expect(fakeSlackClient.invite.calledOnce).to.be.true;
   });
-  it('Should remove developers from channels', async () => {
+  it('Should remove developers from channels and save the automation to DB', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GDL7RDC5V';
     await slack.accessChannel(email, channel, 'kick');
-    expect(fakeModels.SlackAutomation.calledOnce);
-    expect(fakeSlackClient.kick.calledOnce);
+    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
+    expect(fakeSlackClient.kick.calledOnce).to.be.true;
   });
 });

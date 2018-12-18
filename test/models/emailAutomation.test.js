@@ -27,6 +27,7 @@ describe('server/models/emailAutomation', () => {
       expect(EmailAutomation.belongsTo).to.have.been.calledWith(automation, {
         foreignKey: {
           name: 'automationId',
+          allowNull: false,
         },
       });
     });
