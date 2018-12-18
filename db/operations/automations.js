@@ -79,3 +79,46 @@ export const createOrUpdateEmaillAutomation = automationDetails => (
  * @return {Promise} Promise that resolves the created automation.
  */
 export const createAutomation = automationDetails => Automation.create(automationDetails);
+
+
+/**
+ * @func saveFreckleAutomation
+ * @desc save created freckId to database after automation operation.
+ *
+ * @param {string} partnerId partner id on allocation
+ * @param {string} freckleProjectId created freckle id
+ *
+ * @return {void}
+ */
+export const saveFreckleAutomation = async (partnerId, freckleProjectId) => {
+  await db.Partner.upsert({
+    partnerId,
+    freckleProjectId,
+  });
+};
+
+/**
+ * @func saveSlackAutomation
+ * @desc save details of created partner slack channels to database after automation operation.
+ *
+ * @param {string} partnerId partner id on allocation
+ * @param {string} partnerName partner name
+ * @param {object} partnerDetailInternal partner internal slack channel
+ * @param {object} partnerDetailGeneral partner general slack channel
+ *
+ * @return {void}
+ */
+export const saveSlackAutomation = async (partnerId,
+  partnerName,
+  partnerDetailInternal,
+  partnerDetailGeneral,
+) => {
+  await db.Partner.upsert({
+    partnerId,
+    name: partnerName,
+    slackChannels: JSON.stringify({
+      partnerDetailInternal: partnerDetailInternal.id,
+      partnerDetailGeneral: partnerDetailGeneral.id,
+    }),
+  });
+};
