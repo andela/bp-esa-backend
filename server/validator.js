@@ -11,6 +11,7 @@ const validateEnvironmentVars = () => {
     'ANDELA_ALLOCATIONS_API_TOKEN',
     'FRECKLE_ADMIN_TOKEN',
     'SLACK_AVAILABLE_DEVS_CHANNEL_ID',
+    'SLACK_RACK_CITY_CHANNEL_ID',
     'ANDELA_API_BASE_URL',
   ];
   const missingVariable = [];
