@@ -10,7 +10,7 @@ import { creatOrUpdatePartnerRecord } from '../../../db/operations/automations';
  * @returns {undefined}
  */
 export default async (placement) => {
-  const { fellow, id: partnerId, client_name: partnerName } = placement;
+  const { fellow, client_id: partnerId, client_name: partnerName } = placement;
   getOrCreateProject(placement.client_name).then((project) => {
     if (project.id) {
       assignProject(fellow.email, project.id);

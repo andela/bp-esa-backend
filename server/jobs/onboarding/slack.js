@@ -15,7 +15,7 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = process.
  */
 const slackOnBoarding = async (placement) => {
   const { fellow } = placement;
-  const { client_name: partnerName, id: partnerId } = placement;
+  const { client_name: partnerName, client_id: partnerId } = placement;
 
   accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'kick');
   accessChannel(fellow.email, SLACK_RACK_CITY_CHANNEL_ID, 'invite');
