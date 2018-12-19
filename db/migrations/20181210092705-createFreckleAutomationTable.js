@@ -31,6 +31,7 @@ module.exports = {
     },
     automationId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: 'automation',
         key: 'id',

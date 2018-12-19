@@ -27,6 +27,7 @@ describe('server/models/freckleAutomation', () => {
       expect(FlackAutomation.belongsTo).to.have.been.calledWith(automation, {
         foreignKey: {
           name: 'automationId',
+          allowNull: false,
         },
       });
     });

@@ -27,6 +27,7 @@ describe('server/models/slackAutomation', () => {
       expect(SlackAutomation.belongsTo).to.have.been.calledWith(automation, {
         foreignKey: {
           name: 'automationId',
+          allowNull: false,
         },
       });
     });

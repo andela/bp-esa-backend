@@ -2,7 +2,7 @@ import sequelize from 'sequelize';
 import db from '../../server/models';
 
 const { Op } = sequelize;
-const { SlackAutomation, Automation } = db;
+const { SlackAutomation, EmailAutomation, Automation } = db;
 
 /**
  * @func createOrUpdateSlackAutomation
@@ -15,26 +15,14 @@ const { SlackAutomation, Automation } = db;
  * @param {string} automationDetails.type Automation type: create || kick || invite
  * @param {string} automationDetails.status Automation status: success || failure
  * @param {string} automationDetails.statusMessage Status message
- * @param {string} [automationDetails.slackAutomationId] ID of existing slackAutomation.
+ * @param {string} [automationDetails.id] ID of existing slackAutomation.
  * For updating purpose alone.
  *
  * @return {Promise} Promise that resolves the created/updated slackAutomation.
  */
-export const createOrUpdateSlackAutomation = (automationDetails) => {
-  const { slackAutomationId } = automationDetails;
-  if (slackAutomationId) {
-    return SlackAutomation.find({ where: { id: slackAutomationId } }).then((result) => {
-      result.update({
-        channelId: automationDetails.channelId || result.channelId,
-        channelName: automationDetails.channelName || result.channelName,
-        slackUserId: automationDetails.slackUserId || result.slackUserId,
-        status: automationDetails.status || result.status,
-        statusMessage: automationDetails.statusMessage || result.statusMessage,
-      });
-    });
-  }
-  return SlackAutomation.create(automationDetails);
-};
+export const createOrUpdateSlackAutomation = automationDetails => (
+  SlackAutomation.upsertById(automationDetails)
+);
 
 /**
  * @func getSlackAutomation
@@ -55,6 +43,27 @@ export const getSlackAutomation = (automationDetails) => {
     },
   });
 };
+
+/**
+ * @func createOrUpdateEmaillAutomation
+ * @desc create or update an emailAutomation in the Database.
+ *
+ * @param {object} automationDetails Details about the email automation to be created
+ * @param {string} automationDetails.automationId ID of the connected automation
+ * @param {string} automationDetails.body Body of the email
+ * @param {string} automationDetails.recipient Recipient of the email
+ * @param {string} automationDetails.sender Sender of the email
+ * @param {string} automationDetails.subject Subject of the email
+ * @param {string} automationDetails.status Automation status: success || failure
+ * @param {string} automationDetails.statusMessage Status message
+ * @param {string} [automationDetails.id] ID of existing emailAutomation.
+ * For updating purpose alone.
+ *
+ * @return {Promise} Promise that resolves the created/updated emailAutomation.
+ */
+export const createOrUpdateEmaillAutomation = automationDetails => (
+  EmailAutomation.upsertById(automationDetails)
+);
 
 /**
  * @func createAutomation
