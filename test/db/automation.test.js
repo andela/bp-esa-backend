@@ -17,6 +17,9 @@ const mockModels = {
   Automation: {
     create: sinon.stub(),
   },
+  Partner: {
+    find: sinon.stub(),
+  },
 };
 
 const fakeModels = makeMockModels(mockModels);
@@ -64,5 +67,10 @@ describe('Automation Database Operations', () => {
     };
     await automations.createOrUpdateEmaillAutomation(automationDetails);
     expect(mockModels.EmailAutomation.upsertById.calledWith(automationDetails)).to.be.true;
+  });
+  it('should get a partner record from the DB', async () => {
+    const partnerId = '-UTF56K';
+    await automations.getPartnerRecord(partnerId);
+    expect(mockModels.Partner.find.calledWith({ where: { partnerId } })).to.be.true;
   });
 });

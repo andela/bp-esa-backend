@@ -2,7 +2,9 @@ import sequelize from 'sequelize';
 import db from '../../server/models';
 
 const { Op } = sequelize;
-const { SlackAutomation, EmailAutomation, Automation } = db;
+const {
+  SlackAutomation, EmailAutomation, Automation, Partner,
+} = db;
 
 /**
  * @func createOrUpdateSlackAutomation
@@ -102,3 +104,12 @@ export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
   }
   return db.Partner.create(partnerDetails);
 };
+
+/**
+ * @func getPartnerRecord
+ * @desc Get a partner record from the database
+ *
+ * @param {string} partnerId The id of the partner(from the placement data).
+ * @returns {Promise} Promise that resolves to the found partner record.
+ */
+export const getPartnerRecord = partnerId => Partner.find({ where: { partnerId } });
