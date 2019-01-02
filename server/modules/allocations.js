@@ -57,15 +57,6 @@ export async function findPartnerById(partnerId) {
 }
 
 /**
- *@desc Fetches placements from allocations, based on the status specified
- *
- * @param {string} status - The status of placements to fetch
- *
- * @returns {Promise} - Promise of the returned placements from allocations
- */
-const fetchPlacementsByStatus = status => axios.get(`api/v1/placements?status=${status}`);
-
-/**
  * @desc Fetches new placements based on status, from the past numberOfDays
  *
  * @param {string} status - The status of placements to fetch from allocations
@@ -74,9 +65,10 @@ const fetchPlacementsByStatus = status => axios.get(`api/v1/placements?status=${
  * @returns {Promise} - Promise which resolves to a list of placements
  * from the past numberOfDays provided, or throws an error if unsuccessful
  */
-export const fetchNewPlacements = (status, numberOfDays = 1) => fetchPlacementsByStatus(status).then((res) => {
-  const placements = res.data.values;
+export const fetchNewPlacements = async (status, numberOfDays = 1) => {
+  const response = await axios.get(`api/v1/placements?status=${status}`);
+  const placements = response.data.values;
   const currentDate = new Date(Date.now());
   const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);
   return placements.filter(data => Date.parse(data.created_at) >= fromDate);
-});
+};

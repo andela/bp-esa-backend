@@ -9,11 +9,9 @@ module.exports = {
       },
       freckleProjectId: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
       name: {
         type: DataTypes.STRING,
-        allowNull: false,
       },
       partnerId: {
         type: DataTypes.STRING,
@@ -21,7 +19,6 @@ module.exports = {
       },
       slackChannels: {
         type: DataTypes.JSON,
-        allowNull: false,
       },
       createdAt: {
         allowNull: false,

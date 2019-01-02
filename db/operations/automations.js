@@ -79,3 +79,26 @@ export const createOrUpdateEmaillAutomation = automationDetails => (
  * @return {Promise} Promise that resolves the created automation.
  */
 export const createAutomation = automationDetails => Automation.create(automationDetails);
+
+/**
+ * @func creatOrUpdatePartnerRecord
+ * @desc create or update a partner record in the database
+ *
+ * @param {object} partnerDetails The partner details
+ * @param {string} partnerDetails.name Name of partner
+ * @param {string} partnerDetails.partnerId Id of partner from allocaitons
+ * @param {string} partnerDetails.freckleProjectId The partner freckle project ID
+ * @param {string} partnerDetails.slackChannels The partner slack channels
+ * @param {string} partnerDetails.slackChannels.internal The partner internal slack channel
+ * @param {string} partnerDetails.slackChannels.general The partner general slack channel
+ *
+ * @returns {Promise} Promise that resolves to the created/updated partner record
+ */
+export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
+  const { partnerId } = partnerDetails;
+  const existingRecord = await db.Partner.find({ where: { partnerId } });
+  if (existingRecord) {
+    return db.Partner.update(partnerDetails, { where: { partnerId } });
+  }
+  return db.Partner.create(partnerDetails);
+};
