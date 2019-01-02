@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { getOrCreateProject, assignProject } from '../../modules/freckle/projects';
-import { saveFreckleAutomation } from '../../../db/operations/automations';
+import { creatOrUpdatePartnerRecord } from '../../../db/operations/automations';
 
 /**
  * @desc Automates freckle developer onboarding.
@@ -10,11 +10,15 @@ import { saveFreckleAutomation } from '../../../db/operations/automations';
  * @returns {undefined}
  */
 export default async (placement) => {
-  const { fellow, id: partnerId } = placement;
-  getOrCreateProject(placement.client_name).then(async (project) => {
+  const { fellow, id: partnerId, client_name: partnerName } = placement;
+  getOrCreateProject(placement.client_name).then((project) => {
     if (project.id) {
       assignProject(fellow.email, project.id);
-      saveFreckleAutomation(partnerId, project.id);
+      creatOrUpdatePartnerRecord({
+        partnerId,
+        name: partnerName,
+        freckleProjectId: project.id,
+      });
     }
   });
 };
