@@ -3,6 +3,7 @@ import {
 } from 'sequelize-test-helpers';
 import slackAutomation from '../../server/models/slackAutomation';
 import automation from '../../server/models/automation';
+import { automationRelationships } from '../../server/helpers/modelHelpers';
 
 describe('server/models/slackAutomation', () => {
   const SlackAutomation = slackAutomation(sequelize, dataTypes);
@@ -24,12 +25,7 @@ describe('server/models/slackAutomation', () => {
     });
 
     it('defines a belongsTo association with Automation', () => {
-      expect(SlackAutomation.belongsTo).to.have.been.calledWith(automation, {
-        foreignKey: {
-          name: 'automationId',
-          allowNull: false,
-        },
-      });
+      expect(SlackAutomation.belongsTo).to.have.been.calledWith(automation, automationRelationships);
     });
   });
 });

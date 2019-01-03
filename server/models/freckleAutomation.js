@@ -1,13 +1,10 @@
-import { automationStatus } from './emailAutomation';
+import { baseAutomationFields, automationRelationships } from '../helpers/modelHelpers';
 
 export default (sequelize, DataTypes) => {
-  const FreckleAutomation = sequelize.define('freckleAutomation', Object.assign(
-    automationStatus(DataTypes),
-    {
-      freckleUserId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
+  const FreckleAutomation = sequelize.define(
+    'freckleAutomation',
+    Object.assign(baseAutomationFields(DataTypes), {
+      freckleUserId: DataTypes.STRING,
       projectId: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -17,16 +14,11 @@ export default (sequelize, DataTypes) => {
         values: ['projectCreation', 'projectAssignment'],
         allowNull: false,
       },
-    },
-  ));
+    }),
+  );
 
   FreckleAutomation.associate = (models) => {
-    FreckleAutomation.belongsTo(models.Automation, {
-      foreignKey: {
-        name: 'automationId',
-        allowNull: false,
-      },
-    });
+    FreckleAutomation.belongsTo(models.Automation, automationRelationships);
   };
 
   return FreckleAutomation;
