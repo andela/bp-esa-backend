@@ -3,6 +3,7 @@ import {
 } from 'sequelize-test-helpers';
 import freckleAutomation from '../../server/models/freckleAutomation';
 import automation from '../../server/models/automation';
+import { automationRelationships } from '../../server/helpers/modelHelpers';
 
 describe('server/models/freckleAutomation', () => {
   const FlackAutomation = freckleAutomation(sequelize, dataTypes);
@@ -24,12 +25,7 @@ describe('server/models/freckleAutomation', () => {
     });
 
     it('defines a belongsTo association with Automation', () => {
-      expect(FlackAutomation.belongsTo).to.have.been.calledWith(automation, {
-        foreignKey: {
-          name: 'automationId',
-          allowNull: false,
-        },
-      });
+      expect(FlackAutomation.belongsTo).to.have.been.calledWith(automation, automationRelationships);
     });
   });
 });

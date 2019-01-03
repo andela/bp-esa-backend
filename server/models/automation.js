@@ -23,9 +23,18 @@ export default (sequelize, DataTypes) => {
     },
   });
   Automation.associate = (models) => {
-    Automation.hasMany(models.SlackAutomation);
-    Automation.hasMany(models.FreckleAutomation);
-    Automation.hasMany(models.EmailAutomation);
+    Automation.hasMany(models.SlackAutomation, {
+      foreignKey: 'automationId',
+      as: 'slackAutomations',
+    });
+    Automation.hasMany(models.FreckleAutomation, {
+      foreignKey: 'automationId',
+      as: 'freckleAutomations',
+    });
+    Automation.hasMany(models.EmailAutomation, {
+      foreignKey: 'automationId',
+      as: 'emailAutomations',
+    });
   };
   return Automation;
 };
