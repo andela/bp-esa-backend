@@ -3,7 +3,7 @@ import db from '../../server/models';
 
 const { Op } = sequelize;
 const {
-  SlackAutomation, EmailAutomation, Automation, Partner,
+  SlackAutomation, EmailAutomation, FreckleAutomation, Automation, Partner,
 } = db;
 
 /**
@@ -65,6 +65,26 @@ export const getSlackAutomation = (automationDetails) => {
  */
 export const createOrUpdateEmaillAutomation = automationDetails => (
   EmailAutomation.upsertById(automationDetails)
+);
+
+/**
+ * @func createOrUpdateFreckleAutomation
+ * @desc create or update a freckleAutomation in the Database.
+ *
+ * @param {object} automationDetails Details about the freckle automation to be created
+ * @param {string} automationDetails.automationId ID of the connected automation
+ * @param {string} automationDetails.freckleUserId ID of freckle user
+ * @param {string} automationDetails.projectId ID of project on freckle
+ * @param {string} automationDetails.type Automation type: projectCreation || projectAssignment
+ * @param {string} automationDetails.status Automation status: success || failure
+ * @param {string} automationDetails.statusMessage Status message
+ * @param {string} [automationDetails.id] ID of existing freckleAutomation.
+ * For updating purpose alone.
+ *
+ * @returns {Promise} Promise that resolves to the created/updated freckleAutomation.
+ */
+export const createOrUpdateFreckleAutomation = automationDetails => (
+  FreckleAutomation.upsertById(automationDetails)
 );
 
 /**
