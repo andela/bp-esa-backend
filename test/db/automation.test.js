@@ -14,6 +14,9 @@ const mockModels = {
   EmailAutomation: {
     upsertById: sinon.stub(),
   },
+  FreckleAutomation: {
+    upsertById: sinon.stub(),
+  },
   Automation: {
     create: sinon.stub(),
   },
@@ -67,6 +70,13 @@ describe('Automation Database Operations', () => {
     };
     await automations.createOrUpdateEmaillAutomation(automationDetails);
     expect(mockModels.EmailAutomation.upsertById.calledWith(automationDetails)).to.be.true;
+  });
+  it('should upsert a freckleAutomation record in the DB', async () => {
+    const automationDetails = {
+      projectId: '4444UFH',
+    };
+    await automations.createOrUpdateFreckleAutomation(automationDetails);
+    expect(mockModels.FreckleAutomation.upsertById.calledWith(automationDetails)).to.be.true;
   });
   it('should get a partner record from the DB', async () => {
     const partnerId = '-UTF56K';
