@@ -10,7 +10,7 @@ export default (sequelize, DataTypes) => {
       },
       projectId: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       type: {
         type: DataTypes.ENUM,
