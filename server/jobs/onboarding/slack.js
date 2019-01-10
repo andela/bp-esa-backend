@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { accessChannel, createPartnerChannel } from '../../modules/slack/slackIntegration';
-import { creatOrUpdatePartnerRecord } from '../../../db/operations/automations';
+import { creatOrUpdatePartnerRecord } from '../../modules/automations';
 
 dotenv.config();
 const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = process.env;

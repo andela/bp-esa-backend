@@ -1,7 +1,7 @@
 import { WebClient } from '@slack/client';
 import dotenv from 'dotenv';
 import makeChannelNames from '../../helpers/slackHelpers';
-import { createOrUpdateSlackAutomation, getSlackAutomation } from '../../../db/operations/automations';
+import { createOrUpdateSlackAutomation, getSlackAutomation } from '../automations';
 
 dotenv.config();
 const { SLACK_TOKEN } = process.env;

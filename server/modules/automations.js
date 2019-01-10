@@ -1,5 +1,5 @@
 import sequelize from 'sequelize';
-import db from '../../server/models';
+import db from '../models';
 
 const { Op } = sequelize;
 const {
@@ -22,9 +22,7 @@ const {
  *
  * @return {Promise} Promise that resolves the created/updated slackAutomation.
  */
-export const createOrUpdateSlackAutomation = automationDetails => (
-  SlackAutomation.upsertById(automationDetails)
-);
+export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
 
 /**
  * @func getSlackAutomation
@@ -63,9 +61,7 @@ export const getSlackAutomation = (automationDetails) => {
  *
  * @return {Promise} Promise that resolves the created/updated emailAutomation.
  */
-export const createOrUpdateEmaillAutomation = automationDetails => (
-  EmailAutomation.upsertById(automationDetails)
-);
+export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
 
 /**
  * @func createOrUpdateFreckleAutomation
