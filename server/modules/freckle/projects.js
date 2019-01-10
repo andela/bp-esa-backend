@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import response from '../../helpers/response';
 
 // eslint-disable-next-line max-len
-import { createOrUpdateFreckleAutomation } from '../../../db/operations/automations';
+import { createOrUpdateFreckleAutomation } from '../automations';
 
 dotenv.config();
 const freckleUrl = 'https://api.letsfreckle.com/v2';
@@ -49,7 +49,10 @@ export const getOrCreateProject = async (projectName) => {
       saveFreckleProject(projectDetails, `${projectName} freckle project already exist`);
       return projectDetails;
     }
-    ({ data: projectDetails } = await axios.post(`${freckleUrl}/projects?freckle_token=${freckleToken}`, name));
+    ({ data: projectDetails } = await axios.post(
+      `${freckleUrl}/projects?freckle_token=${freckleToken}`,
+      name,
+    ));
     saveFreckleProject(projectDetails, `${projectName} freckle project created`);
     return projectDetails;
   } catch (error) {

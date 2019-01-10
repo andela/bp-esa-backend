@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import emailTransport from './emailTransport';
-import { createOrUpdateEmaillAutomation } from '../../../db/operations/automations';
+import { createOrUpdateEmaillAutomation } from '../automations';
 
 dotenv.config();
 
@@ -67,7 +67,6 @@ const constructMailOptions = ({ emailBody, sendTo, emailSubject }) => ({
   generateTextFromHTML: true,
   html: emailBody,
 });
-
 
 /* eslint-disable no-eval */
 /* eslint-disable no-unused-vars */
@@ -138,8 +137,12 @@ export const sendITOffboardingMail = async (mailInfo) => {
  */
 export const sendSOPOnboardingMail = async (mailInfo) => {
   const {
-    developerName, developerEmail, developerLocation,
-    partnerName, partnerLocation, startDate,
+    developerName,
+    developerEmail,
+    developerLocation,
+    partnerName,
+    partnerLocation,
+    startDate,
   } = mailInfo;
 
   const mailOptions = constructMailOptions({
@@ -167,8 +170,12 @@ export const sendSOPOnboardingMail = async (mailInfo) => {
  */
 export const sendSOPOffboardingMail = async (mailInfo) => {
   const {
-    developerName, developerEmail, developerLocation,
-    partnerName, partnerLocation, rollOffDate,
+    developerName,
+    developerEmail,
+    developerLocation,
+    partnerName,
+    partnerLocation,
+    rollOffDate,
   } = mailInfo;
 
   const mailOptions = constructMailOptions({

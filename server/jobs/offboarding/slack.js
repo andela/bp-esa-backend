@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { accessChannel } from '../../modules/slack/slackIntegration';
-import { getPartnerRecord } from '../../../db/operations/automations';
+import { getPartnerRecord } from '../../modules/automations';
 /* eslint-disable no-param-reassign */
 
 dotenv.config();
