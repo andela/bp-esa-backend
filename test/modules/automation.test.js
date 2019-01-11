@@ -27,8 +27,8 @@ const mockModels = {
 
 const fakeModels = makeMockModels(mockModels);
 
-const automations = proxyquire('../../db/operations/automations', {
-  '../../server/models': fakeModels,
+const automations = proxyquire('../../server/modules/automations', {
+  '../models': fakeModels,
 });
 
 describe('Automation Database Operations', () => {
@@ -55,14 +55,16 @@ describe('Automation Database Operations', () => {
       // ...other properties...
     };
     await automations.getSlackAutomation(automationDetails);
-    expect(mockModels.SlackAutomation.find.calledWith({
-      where: {
-        [Op.or]: [
-          { id: automationDetails.slackAutomationId },
-          { channelName: automationDetails.channelName },
-        ],
-      },
-    })).to.be.true;
+    expect(
+      mockModels.SlackAutomation.find.calledWith({
+        where: {
+          [Op.or]: [
+            { id: automationDetails.slackAutomationId },
+            { channelName: automationDetails.channelName },
+          ],
+        },
+      }),
+    ).to.be.true;
   });
   it('should upsert an emailAutomation record in the DB', async () => {
     const automationDetails = {

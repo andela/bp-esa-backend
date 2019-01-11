@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { getOrCreateProject, assignProject } from '../../modules/freckle/projects';
-import { creatOrUpdatePartnerRecord } from '../../../db/operations/automations';
+import { creatOrUpdatePartnerRecord } from '../../modules/automations';
 
 /**
  * @desc Automates freckle developer onboarding.
