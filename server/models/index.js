@@ -14,21 +14,16 @@ if (env !== 'development') {
     },
   });
 } else {
-  sequelize = new Sequelize(
-    config.database,
-    config.dialect,
-    config.password, {
-      host: config.host,
-      port: config.port,
-      dialect: config.dialect,
-      logging: () => {},
-      define: {
-        freezeTableName: true,
-      },
+  sequelize = new Sequelize(config.database, config.username, config.password, {
+    host: config.host,
+    port: config.port,
+    dialect: config.dialect,
+    logging: () => {},
+    define: {
+      freezeTableName: true,
     },
-  );
+  });
 }
-
 
 const db = {
   Partner: sequelize.import('./partner'),
@@ -58,6 +53,4 @@ Object.keys(db).forEach((modelName) => {
 });
 
 db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
 export default db;

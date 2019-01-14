@@ -3,6 +3,7 @@ import {
 } from 'sequelize-test-helpers';
 import emailAutomation from '../../server/models/emailAutomation';
 import automation from '../../server/models/automation';
+import { automationRelationships } from '../../server/helpers/modelHelpers';
 
 describe('server/models/emailAutomation', () => {
   const EmailAutomation = emailAutomation(sequelize, dataTypes);
@@ -24,12 +25,7 @@ describe('server/models/emailAutomation', () => {
     });
 
     it('defines a belongsTo association with Automation', () => {
-      expect(EmailAutomation.belongsTo).to.have.been.calledWith(automation, {
-        foreignKey: {
-          name: 'automationId',
-          allowNull: false,
-        },
-      });
+      expect(EmailAutomation.belongsTo).to.have.been.calledWith(automation, automationRelationships);
     });
   });
 });
