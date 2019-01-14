@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { accessChannel } from '../../modules/slack/slackIntegration';
+import { getPartnerRecord } from '../../modules/automations';
 /* eslint-disable no-param-reassign */
 
 dotenv.config();
@@ -13,7 +14,8 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
  * @returns {undefined}
  */
 export default async function slackOffboarding(placement) {
-  const { fellow } = placement;
+  const { fellow, client_id: partnerId } = placement;
   accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'invite');
-  accessChannel(fellow.email, 'partnerChannelId', 'kick');
+  const { slackChannels: { general } } = await getPartnerRecord(partnerId);
+  accessChannel(fellow.email, general, 'kick');
 }

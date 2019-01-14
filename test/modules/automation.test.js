@@ -14,15 +14,21 @@ const mockModels = {
   EmailAutomation: {
     upsertById: sinon.stub(),
   },
+  FreckleAutomation: {
+    upsertById: sinon.stub(),
+  },
   Automation: {
     create: sinon.stub(),
+  },
+  Partner: {
+    find: sinon.stub(),
   },
 };
 
 const fakeModels = makeMockModels(mockModels);
 
-const automations = proxyquire('../../db/operations/automations', {
-  '../../server/models': fakeModels,
+const automations = proxyquire('../../server/modules/automations', {
+  '../models': fakeModels,
 });
 
 describe('Automation Database Operations', () => {
@@ -49,14 +55,16 @@ describe('Automation Database Operations', () => {
       // ...other properties...
     };
     await automations.getSlackAutomation(automationDetails);
-    expect(mockModels.SlackAutomation.find.calledWith({
-      where: {
-        [Op.or]: [
-          { id: automationDetails.slackAutomationId },
-          { channelName: automationDetails.channelName },
-        ],
-      },
-    })).to.be.true;
+    expect(
+      mockModels.SlackAutomation.find.calledWith({
+        where: {
+          [Op.or]: [
+            { id: automationDetails.slackAutomationId },
+            { channelName: automationDetails.channelName },
+          ],
+        },
+      }),
+    ).to.be.true;
   });
   it('should upsert an emailAutomation record in the DB', async () => {
     const automationDetails = {
@@ -64,5 +72,17 @@ describe('Automation Database Operations', () => {
     };
     await automations.createOrUpdateEmaillAutomation(automationDetails);
     expect(mockModels.EmailAutomation.upsertById.calledWith(automationDetails)).to.be.true;
+  });
+  it('should upsert a freckleAutomation record in the DB', async () => {
+    const automationDetails = {
+      projectId: '4444UFH',
+    };
+    await automations.createOrUpdateFreckleAutomation(automationDetails);
+    expect(mockModels.FreckleAutomation.upsertById.calledWith(automationDetails)).to.be.true;
+  });
+  it('should get a partner record from the DB', async () => {
+    const partnerId = '-UTF56K';
+    await automations.getPartnerRecord(partnerId);
+    expect(mockModels.Partner.find.calledWith({ where: { partnerId } })).to.be.true;
   });
 });

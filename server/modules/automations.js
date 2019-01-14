@@ -1,8 +1,10 @@
 import sequelize from 'sequelize';
-import db from '../../server/models';
+import db from '../models';
 
 const { Op } = sequelize;
-const { SlackAutomation, EmailAutomation, Automation } = db;
+const {
+  SlackAutomation, EmailAutomation, FreckleAutomation, Automation, Partner,
+} = db;
 
 /**
  * @func createOrUpdateSlackAutomation
@@ -20,9 +22,7 @@ const { SlackAutomation, EmailAutomation, Automation } = db;
  *
  * @return {Promise} Promise that resolves the created/updated slackAutomation.
  */
-export const createOrUpdateSlackAutomation = automationDetails => (
-  SlackAutomation.upsertById(automationDetails)
-);
+export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
 
 /**
  * @func getSlackAutomation
@@ -61,8 +61,26 @@ export const getSlackAutomation = (automationDetails) => {
  *
  * @return {Promise} Promise that resolves the created/updated emailAutomation.
  */
-export const createOrUpdateEmaillAutomation = automationDetails => (
-  EmailAutomation.upsertById(automationDetails)
+export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
+
+/**
+ * @func createOrUpdateFreckleAutomation
+ * @desc create or update a freckleAutomation in the Database.
+ *
+ * @param {object} automationDetails Details about the freckle automation to be created
+ * @param {string} automationDetails.automationId ID of the connected automation
+ * @param {string} automationDetails.freckleUserId ID of freckle user
+ * @param {string} automationDetails.projectId ID of project on freckle
+ * @param {string} automationDetails.type Automation type: projectCreation || projectAssignment
+ * @param {string} automationDetails.status Automation status: success || failure
+ * @param {string} automationDetails.statusMessage Status message
+ * @param {string} [automationDetails.id] ID of existing freckleAutomation.
+ * For updating purpose alone.
+ *
+ * @returns {Promise} Promise that resolves to the created/updated freckleAutomation.
+ */
+export const createOrUpdateFreckleAutomation = automationDetails => (
+  FreckleAutomation.upsertById(automationDetails)
 );
 
 /**
@@ -79,3 +97,35 @@ export const createOrUpdateEmaillAutomation = automationDetails => (
  * @return {Promise} Promise that resolves the created automation.
  */
 export const createAutomation = automationDetails => Automation.create(automationDetails);
+
+/**
+ * @func creatOrUpdatePartnerRecord
+ * @desc create or update a partner record in the database
+ *
+ * @param {object} partnerDetails The partner details
+ * @param {string} partnerDetails.name Name of partner
+ * @param {string} partnerDetails.partnerId Id of partner from allocaitons
+ * @param {string} partnerDetails.freckleProjectId The partner freckle project ID
+ * @param {string} partnerDetails.slackChannels The partner slack channels
+ * @param {string} partnerDetails.slackChannels.internal The partner internal slack channel
+ * @param {string} partnerDetails.slackChannels.general The partner general slack channel
+ *
+ * @returns {Promise} Promise that resolves to the created/updated partner record
+ */
+export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
+  const { partnerId } = partnerDetails;
+  const existingRecord = await db.Partner.find({ where: { partnerId } });
+  if (existingRecord) {
+    return db.Partner.update(partnerDetails, { where: { partnerId } });
+  }
+  return db.Partner.create(partnerDetails);
+};
+
+/**
+ * @func getPartnerRecord
+ * @desc Get a partner record from the database
+ *
+ * @param {string} partnerId The id of the partner(from the placement data).
+ * @returns {Promise} Promise that resolves to the found partner record.
+ */
+export const getPartnerRecord = partnerId => Partner.find({ where: { partnerId } });

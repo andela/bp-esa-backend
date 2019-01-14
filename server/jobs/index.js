@@ -7,7 +7,7 @@ import fs from 'fs';
 import ms from 'ms';
 
 import { fetchNewPlacements } from '../modules/allocations';
-import { createAutomation } from '../../db/operations/automations';
+import { createAutomation } from '../modules/automations';
 import client from '../helpers/redis';
 
 /**

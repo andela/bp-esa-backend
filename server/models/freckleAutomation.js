@@ -7,7 +7,7 @@ export default (sequelize, DataTypes) => {
       freckleUserId: DataTypes.STRING,
       projectId: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       type: {
         type: DataTypes.ENUM,

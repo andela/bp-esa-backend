@@ -8,27 +8,20 @@ const createOrUpdateSlackAutomation = sinon.stub();
 const getSlackAutomation = sinon.stub();
 
 const slack = proxyquire('../../server/modules/slack/slackIntegration', {
-  '../../../db/operations/automations': {
-    createOrUpdateSlackAutomation, getSlackAutomation,
+  '../automations': {
+    createOrUpdateSlackAutomation,
+    getSlackAutomation,
   },
 });
 
 const fakeSlackClient = {
-  get: sinon
-    .stub(client, 'get')
-    .callsFake((value, cb) => cb.apply(this, [null, rawAllocations])),
+  get: sinon.stub(client, 'get').callsFake((value, cb) => cb.apply(this, [null, rawAllocations])),
   lookupByEmail: sinon
     .stub(slack.slackClient.users, 'lookupByEmail')
     .callsFake(() => slackMocks.slackUser),
-  invite: sinon
-    .stub(slack.slackClient.groups, 'invite')
-    .callsFake(() => slackMocks.inviteUser),
-  kick: sinon
-    .stub(slack.slackClient.groups, 'kick')
-    .callsFake(() => slackMocks.removeUser),
-  create: sinon
-    .stub(slack.slackClient.groups, 'create')
-    .callsFake(() => slackMocks.createGroups),
+  invite: sinon.stub(slack.slackClient.groups, 'invite').callsFake(() => slackMocks.inviteUser),
+  kick: sinon.stub(slack.slackClient.groups, 'kick').callsFake(() => slackMocks.removeUser),
+  create: sinon.stub(slack.slackClient.groups, 'create').callsFake(() => slackMocks.createGroups),
 };
 
 /* eslint-disable no-unused-expressions */
