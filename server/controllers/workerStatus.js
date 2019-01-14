@@ -10,11 +10,10 @@ import daysBetween from '../helpers/daysBetween';
  */
 export default (req, res) => client.mget('startTime', 'message', 'numberOfJobs', (err, response) => {
   if (err) {
-    return res.status(400).send({
+    return res.status(500).send({
       message: 'Error with redis connection, kindly connect to redis',
     });
   }
-
   const [startTimeRaw, message, numberOfJobs] = response;
   const startTime = new Date(JSON.parse(startTimeRaw));
 
