@@ -1,21 +1,9 @@
-
-export const automationStatus = DataTypes => ({
-  status: {
-    type: DataTypes.ENUM,
-    values: ['success', 'failure'],
-    allowNull: false,
-  },
-  statusMessage: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    defaultValue: null,
-  },
-});
+import { baseAutomationFields, automationRelationships } from '../helpers/modelHelpers';
 
 export default (sequelize, DataTypes) => {
-  const EmailAutomation = sequelize.define('emailAutomation', Object.assign(
-    automationStatus(DataTypes),
-    {
+  const EmailAutomation = sequelize.define(
+    'emailAutomation',
+    Object.assign(baseAutomationFields(DataTypes), {
       body: {
         type: DataTypes.TEXT,
         allowNull: false,
@@ -32,16 +20,11 @@ export default (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-    },
-  ));
+    }),
+  );
 
   EmailAutomation.associate = (models) => {
-    EmailAutomation.belongsTo(models.Automation, {
-      foreignKey: {
-        name: 'automationId',
-        allowNull: false,
-      },
-    });
+    EmailAutomation.belongsTo(models.Automation, automationRelationships);
   };
   return EmailAutomation;
 };

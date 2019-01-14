@@ -1,36 +1,22 @@
-import { automationStatus } from './emailAutomation';
+import { baseAutomationFields, automationRelationships } from '../helpers/modelHelpers';
 
 export default (sequelize, DataTypes) => {
-  const SlackAutomation = sequelize.define('slackAutomation', Object.assign(
-    automationStatus(DataTypes),
-    {
-      channelId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      channelName: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      slackUserId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
+  const SlackAutomation = sequelize.define(
+    'slackAutomation',
+    Object.assign(baseAutomationFields(DataTypes), {
+      channelId: DataTypes.STRING,
+      channelName: DataTypes.STRING,
+      slackUserId: DataTypes.STRING,
       type: {
         type: DataTypes.ENUM,
         values: ['create', 'kick', 'invite'],
         allowNull: false,
       },
-    },
-  ));
+    }),
+  );
 
   SlackAutomation.associate = (models) => {
-    SlackAutomation.belongsTo(models.Automation, {
-      foreignKey: {
-        name: 'automationId',
-        allowNull: false,
-      },
-    });
+    SlackAutomation.belongsTo(models.Automation, automationRelationships);
   };
 
   return SlackAutomation;
