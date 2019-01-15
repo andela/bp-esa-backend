@@ -1,5 +1,5 @@
 #Define image to build from
-FROM node:alpine
+FROM node:10.15.0-alpine
 
 LABEL AUTHOR="Dominic Motuka <dominic.motuka@andela.com>"
 LABEL app="esa-backend"
