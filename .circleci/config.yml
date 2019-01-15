@@ -71,7 +71,7 @@ workflows:
       - deploy_staging:
           requires:
             - build
-          # filters:
-          #   branches:
-          #     only:
-          #       - develop
+          filters:
+            branches:
+              only:
+                - develop
