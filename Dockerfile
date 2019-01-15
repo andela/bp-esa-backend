@@ -1,5 +1,5 @@
 #Define image to build from
-FROM node:10.15.0-alpine
+FROM node:alpine
 
 LABEL AUTHOR="Dominic Motuka <dominic.motuka@andela.com>"
 LABEL app="esa-backend"
@@ -9,19 +9,22 @@ LABEL app="esa-backend"
 WORKDIR /usr/src/app
 
 #Install app dependencies using npm binary
-COPY package*.json ./
+COPY package*.json /usr/src/app/
+COPY docs /usr/src/app/docs/
+COPY server /usr/src/app/server/
+COPY .sequelizerc /usr/src/app/
+COPY .babelrc /usr/src/app/
 
-RUN npm install --production
-# When building  for production
-# RUN npm install --only=production
-
-#Bundle apps source code
-COPY build ./build
-COPY docs ./docs
+RUN npm install 
 
 # Uncomment this when using the application locally
 # COPY .env .
 
+#Bundle apps source code
+RUN npm run build
+
+ENV NODE_ENV=production
+ENV PORT=6050
 
 # app binds to port 6050 so you'll use the EXPOSE
 # instruction to have it mapped by the docker daemon:
