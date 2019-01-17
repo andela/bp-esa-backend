@@ -35,16 +35,16 @@ describe('Partner and Allocations Test Suite', async () => {
         resolve(samplePartner);
       }),
     );
-    // const fakeClientGet = sinon
-    //   .stub(client, 'get')
-    //   .callsFake((value, cb) => cb.apply(this, [null, stringifiedPartners]));
+    const fakeClientGet = sinon
+      .stub(client, 'get')
+      .callsFake((value, cb) => cb.apply(this, [null, stringifiedPartners]));
     const fakeClientSet = sinon.stub(client, 'set').callsFake(() => undefined);
 
     const partner = await resource.findPartnerById('ABCDEFZYXWVU');
     expect(partner.id).to.equal('ABCDEFZYXWVU');
 
     fakeAxiosGet.restore();
-    // fakeClientGet.restore();
+    fakeClientGet.restore();
     fakeClientSet.restore();
   });
 });
