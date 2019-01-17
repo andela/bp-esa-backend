@@ -1,13 +1,14 @@
 import sinon from 'sinon';
 import axios from 'axios';
+import client from '../../server/helpers/redis';
 import * as resource from '../../server/modules/allocations';
-import { onboardingAllocations } from '../mocks/allocations';
+import onboardingAllocations from '../mocks/allocations';
+import { stringifiedPartners, samplePartner } from '../mocks/partners';
 
 describe('Partner and Allocations Test Suite', async () => {
-  it(`Should fetch new placements based on the status specified,
-        from the numberOfDays provided`, async () => {
+  it('Should fetch new placements based on the status specified, and the numberOfDays provided', async () => {
     // Mock successful request
-    const fakeAxiosPut = sinon.stub(axios, 'get').callsFake(
+    const fakeAxiosGet = sinon.stub(axios, 'get').callsFake(
       () => new Promise((resolve) => {
         resolve(onboardingAllocations);
       }),
@@ -24,7 +25,26 @@ describe('Partner and Allocations Test Suite', async () => {
     expect(result.length).to.equal(6);
     // Total onboarding.data.values objects in mock response is 10
     expect(onboardingAllocations.data.values.length - result.length).to.equal(4);
-    fakeAxiosPut.restore();
+    fakeAxiosGet.restore();
     fakeCurrentDate.restore();
+  });
+  it('Should successfully fetch partner when partnerId is provided', async () => {
+    // Mock successful request
+    const fakeAxiosGet = sinon.stub(axios, 'get').callsFake(
+      () => new Promise((resolve) => {
+        resolve(samplePartner);
+      }),
+    );
+    // const fakeClientGet = sinon
+    //   .stub(client, 'get')
+    //   .callsFake((value, cb) => cb.apply(this, [null, stringifiedPartners]));
+    const fakeClientSet = sinon.stub(client, 'set').callsFake(() => undefined);
+
+    const partner = await resource.findPartnerById('ABCDEFZYXWVU');
+    expect(partner.id).to.equal('ABCDEFZYXWVU');
+
+    fakeAxiosGet.restore();
+    // fakeClientGet.restore();
+    fakeClientSet.restore();
   });
 });
