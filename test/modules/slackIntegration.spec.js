@@ -1,9 +1,7 @@
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
-// import client from '../../server/helpers/redis';
 import onboardingAllocations from '../mocks/allocations';
 import slackMocks from '../mocks/slack';
-// import { stringifiedPartners } from '../mocks/partners';
 
 const createOrUpdateSlackAutomation = sinon.stub();
 const getSlackAutomation = sinon.stub();
