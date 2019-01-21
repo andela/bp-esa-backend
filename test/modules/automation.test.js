@@ -22,6 +22,8 @@ const mockModels = {
   },
   Partner: {
     find: sinon.stub(),
+    update: sinon.stub(),
+    create: sinon.stub(),
   },
 };
 
@@ -84,5 +86,20 @@ describe('Automation Database Operations', () => {
     const partnerId = '-UTF56K';
     await automations.getPartnerRecord(partnerId);
     expect(mockModels.Partner.find.calledWith({ where: { partnerId } })).to.be.true;
+  });
+  it('should create or update a partner record in database', async () => {
+    const partner = {
+      name: 'Facebook Inc',
+      partnerId: 'JKb533jksdf_iu34',
+      freckleProjectId: '349icnioj3in_23',
+      slackChannels: {
+        internal: 'facebook-int',
+        general: 'facebook',
+      },
+    };
+    await automations.creatOrUpdatePartnerRecord(partner);
+    expect(mockModels.Partner.find.calledWith({ where: { partnerId: partner.partnerId } })).to.be
+      .true;
+    expect(mockModels.Partner.create.calledWith(partner)).to.be.true;
   });
 });
