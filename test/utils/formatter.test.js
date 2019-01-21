@@ -9,6 +9,7 @@ import {
 import { automationsMockData, expectedReponseMockData } from '../mocks/automations';
 
 describe('API Response Payload Formatter', () => {
+  /* eslint-disable no-unused-expressions */
   it('should return overall status of the slack automations', () => {
     expect(getOveralStatus(automationsMockData[0].slackAutomations)).to.be.false;
   });
