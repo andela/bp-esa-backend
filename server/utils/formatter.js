@@ -2,13 +2,16 @@
  * @description Determines the overal status from individual status
  * @param {Array} automations Array of automations
  *
- * @returns {Boolean} true/false
+ * @returns {String} success/failure
  */
 export function getOveralStatus(automations) {
   if (Array.isArray(automations) && automations.length) {
-    return automations.every(automation => automation.status === 'success');
+    if (automations.every(automation => automation.status === 'success')) {
+      return 'success';
+    }
+    return 'failure';
   }
-  return false;
+  return 'failure';
 }
 
 /**
@@ -20,7 +23,7 @@ export function getOveralStatus(automations) {
 export function formatSlackAutomations(slackAutomations) {
   const automations = {};
 
-  automations.status = getOveralStatus(slackAutomations) ? 'success' : 'failure';
+  automations.status = getOveralStatus(slackAutomations);
   automations.slackActivities = slackAutomations.map((sa) => {
     const {
       status, statusMessage, type, channelId, slackUserId,
@@ -43,7 +46,7 @@ export function formatSlackAutomations(slackAutomations) {
 export function formatFreckleAutomations(freckleAutomations) {
   const automations = {};
 
-  automations.status = getOveralStatus(freckleAutomations) ? 'success' : 'failure';
+  automations.status = getOveralStatus(freckleAutomations);
   automations.freckleActivities = freckleAutomations.map((fa) => {
     const {
       status, statusMessage, type, freckleUserId, projectId,
@@ -66,7 +69,7 @@ export function formatFreckleAutomations(freckleAutomations) {
  */
 export function formatEmailAutomations(emailAutomations) {
   const automations = {};
-  automations.status = getOveralStatus(emailAutomations) ? 'success' : 'failure';
+  automations.status = getOveralStatus(emailAutomations);
   automations.emailActivities = emailAutomations.map((ea) => {
     const {
       status, statusMessage, emailTo, subject,
