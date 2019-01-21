@@ -11,7 +11,6 @@ const opsEmail = process.env.OPS_EMAIL;
 const itEmail = process.env.IT_EMAIL;
 
 const getEmailTemplatePath = emailTemplate => path.join(__dirname, `emailTemplates/${emailTemplate}`);
-
 const developerOnboardingTemplatePath = getEmailTemplatePath('developer-onboarding-email.html');
 const successOnboardingTemplatePath = getEmailTemplatePath('success-onboarding-email.html');
 const itOffboardingPath = getEmailTemplatePath('it-offboarding-email.html');
@@ -67,7 +66,6 @@ const constructMailOptions = ({ emailBody, sendTo, emailSubject }) => ({
   generateTextFromHTML: true,
   html: emailBody,
 });
-
 /* eslint-disable no-eval */
 /* eslint-disable no-unused-vars */
 
@@ -185,3 +183,5 @@ export const sendSOPOffboardingMail = async (mailInfo) => {
   });
   await sendAndSaveMail(mailOptions);
 };
+
+export default constructMailOptions;
