@@ -5,13 +5,13 @@
  * @returns {String} success/failure
  */
 export function getOveralStatus(automations) {
-  if (Array.isArray(automations) && automations.length) {
-    if (automations.every(automation => automation.status === 'success')) {
-      return 'success';
-    }
-    return 'failure';
-  }
-  return 'failure';
+  return (
+    Array.isArray(automations)
+    && automations.length
+    && automations.every(
+      automation => automation.status === 'success',
+    )
+  ) ? 'success' : 'failure';
 }
 
 /**
@@ -26,10 +26,10 @@ export function formatSlackAutomations(slackAutomations) {
   automations.status = getOveralStatus(slackAutomations);
   automations.slackActivities = slackAutomations.map((sa) => {
     const {
-      status, statusMessage, type, channelId, slackUserId,
+      status, statusMessage, type, channelId, channelName, slackUserId,
     } = sa;
     const activity = {
-      channelId, type, status, slackUserId, statusMessage,
+      channelId, channelName, type, status, slackUserId, statusMessage,
     };
     return activity;
   });
