@@ -7,7 +7,20 @@ export const automationsMockData = [{
   type: 'onboarding',
   createdAt: '2019-01-14T19:16:35.453Z',
   updatedAt: '2019-01-14T19:16:35.453Z',
-  emailAutomations: [],
+  emailAutomations: [
+    {
+      id: 1,
+      emailTo: 'Who.User@example.com',
+      subject: 'Onboarding',
+      status: 'success',
+    },
+    {
+      id: 2,
+      emailTo: 'User.Unknown@example.com',
+      subject: 'Onboarding',
+      status: 'success',
+    }
+  ],
   slackAutomations:
     [{
       id: 10,

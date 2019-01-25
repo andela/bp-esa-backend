@@ -15,6 +15,23 @@ export function getOveralStatus(automations) {
 }
 
 /**
+ * @description Copy original object to another object with only provided parameters
+ * @param {Object} srcObj Source/Original Object
+ * @param {Array} props Array of parameters to be copied
+ *
+ * @returns {Object} Copy Object
+ */
+export function objectCopy(srcObj, props) {
+  const copy = {};
+  props.forEach((prop) => {
+    if (prop in srcObj) {
+      copy[prop] = srcObj[prop];
+    }
+  });
+  return copy;
+}
+
+/**
  * @description Formats slack automations data
  * @param {Array} slackAutomations Array of slack automations
  *
@@ -25,13 +42,8 @@ export function formatSlackAutomations(slackAutomations) {
 
   automations.status = getOveralStatus(slackAutomations);
   automations.slackActivities = slackAutomations.map((sa) => {
-    const {
-      status, statusMessage, type, channelId, channelName, slackUserId,
-    } = sa;
-    const activity = {
-      channelId, channelName, type, status, slackUserId, statusMessage,
-    };
-    return activity;
+    const props = ['status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'];
+    return objectCopy(sa, props);
   });
 
   return automations;
@@ -48,14 +60,8 @@ export function formatFreckleAutomations(freckleAutomations) {
 
   automations.status = getOveralStatus(freckleAutomations);
   automations.freckleActivities = freckleAutomations.map((fa) => {
-    const {
-      status, statusMessage, type, freckleUserId, projectId,
-    } = fa;
-
-    const activity = {
-      status, statusMessage, type, freckleUserId, projectId,
-    };
-    return activity;
+    const props = ['status', 'statusMessage', 'type', 'freckleUserId', 'projectId'];
+    return objectCopy(fa, props);
   });
 
   return automations;
@@ -71,14 +77,8 @@ export function formatEmailAutomations(emailAutomations) {
   const automations = {};
   automations.status = getOveralStatus(emailAutomations);
   automations.emailActivities = emailAutomations.map((ea) => {
-    const {
-      status, statusMessage, emailTo, subject,
-    } = ea;
-
-    const activity = {
-      status, statusMessage, emailTo, subject,
-    };
-    return activity;
+    const props = ['status', 'statusMessage', 'emailTo', 'subject'];
+    return objectCopy(ea, props);
   });
 
   return automations;
@@ -91,13 +91,8 @@ export function formatEmailAutomations(emailAutomations) {
  * @returns {Object} Formated automation to be returned by the API
  */
 export function formatAutomation(automation) {
-  const {
-    id, fellowId, fellowName, partnerId, partnerName, type, createdAt, updatedAt,
-  } = automation;
-
-  const formattedAutomation = {
-    id, fellowId, fellowName, partnerId, partnerName, type, createdAt, updatedAt,
-  };
+  const props = ['id', 'fellowId', 'fellowName', 'partnerId', 'partnerName', 'type', 'createdAt', 'updatedAt'];
+  const formattedAutomation = objectCopy(automation, props);
 
   formattedAutomation.slackAutomations = formatSlackAutomations(automation.slackAutomations);
   formattedAutomation.emailAutomations = formatEmailAutomations(automation.emailAutomations);

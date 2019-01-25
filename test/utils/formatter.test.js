@@ -1,4 +1,5 @@
 import {
+  objectCopy,
   getOveralStatus,
   formatSlackAutomations,
   formatFreckleAutomations,
@@ -11,6 +12,13 @@ import { automationsMockData, expectedReponseMockData } from '../mocks/automatio
 describe('API Response Payload Formatter', () => {
   it('should return overall status of the slack automations', () => {
     expect(getOveralStatus(automationsMockData[0].slackAutomations)).to.equal('failure');
+    expect(getOveralStatus(automationsMockData[0].emailAutomations)).to.equal('success');
+  });
+
+  it('should return a formatted copy object', () => {
+    const props = ['fellowId', 'fellowName', 'notProp'];
+    const copy = objectCopy(automationsMockData[0], props);
+    Object.is(copy, { fellowName: 'Kelvin Kariuki', fellowId: '-KXGy1MT1oimjQgFimAd' });
   });
 
   it('should format slack automations payload', () => {
