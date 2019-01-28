@@ -1,10 +1,8 @@
 import {
   objectCopy,
   getOveralStatus,
-  formatSlackAutomations,
-  formatFreckleAutomations,
-  formatEmailAutomations,
-  formatAutomation,
+  formatAutomations,
+  formatPayload,
   formatAutomationResponse,
 } from '../../server/utils/formatter';
 import { automationsMockData, expectedReponseMockData } from '../mocks/automations';
@@ -21,23 +19,17 @@ describe('API Response Payload Formatter', () => {
     Object.is(copy, { fellowName: 'Kelvin Kariuki', fellowId: '-KXGy1MT1oimjQgFimAd' });
   });
 
-  it('should format slack automations payload', () => {
-    const formatedResponse = formatSlackAutomations(automationsMockData[0].slackAutomations);
+  it('should format automations payload', () => {
+    const formatedResponse = formatAutomations(
+      automationsMockData[0].slackAutomations,
+      'slackActivities',
+      ['status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'],
+    );
     Object.is(formatedResponse, expectedReponseMockData[0].slackAutomations);
   });
 
-  it('should format freckle automations payload', () => {
-    const formatedResponse = formatFreckleAutomations(automationsMockData[0].freckleAutomations);
-    Object.is(formatedResponse, expectedReponseMockData[0].freckleAutomations);
-  });
-
-  it('should format email automations payload', () => {
-    const formatedResponse = formatEmailAutomations(automationsMockData[0].emailAutomations);
-    Object.is(formatedResponse, expectedReponseMockData[0].emailAutomations);
-  });
-
   it('should format single automation payload', () => {
-    const formatedResponse = formatAutomation(automationsMockData[0]);
+    const formatedResponse = formatPayload(automationsMockData[0]);
     Object.is(formatedResponse, expectedReponseMockData[0]);
   });
 

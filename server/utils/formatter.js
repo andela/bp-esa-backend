@@ -33,54 +33,16 @@ export function objectCopy(srcObj, props) {
 
 /**
  * @description Formats slack automations data
- * @param {Array} slackAutomations Array of slack automations
+ * @param {Array} automationArray Array of automations
+ * @param {String} activities Activities parameter key.
+ * @param {Array} props Array of parameters to be processed
  *
  * @returns {Object} Formatted slack automation
  */
-export function formatSlackAutomations(slackAutomations) {
+export function formatAutomations(automationArray, activities, props) {
   const automations = {};
-
-  automations.status = getOveralStatus(slackAutomations);
-  automations.slackActivities = slackAutomations.map((sa) => {
-    const props = ['status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'];
-    return objectCopy(sa, props);
-  });
-
-  return automations;
-}
-
-/**
- * @description Formats freckle automations data
- * @param {Array} freckleAutomations Array of freckle automations
- *
- * @returns {Object} Formatted freckle automation
- */
-export function formatFreckleAutomations(freckleAutomations) {
-  const automations = {};
-
-  automations.status = getOveralStatus(freckleAutomations);
-  automations.freckleActivities = freckleAutomations.map((fa) => {
-    const props = ['status', 'statusMessage', 'type', 'freckleUserId', 'projectId'];
-    return objectCopy(fa, props);
-  });
-
-  return automations;
-}
-
-/**
- * @description Formats email automations data
- * @param {Array} emailAutomations Array of email automations
- *
- * @returns {Object} Formatted email automation
- */
-export function formatEmailAutomations(emailAutomations) {
-  const automations = {};
-  automations.status = getOveralStatus(emailAutomations);
-  automations.emailActivities = emailAutomations.map((ea) => {
-    const props = ['status', 'statusMessage', 'emailTo', 'subject'];
-    return objectCopy(ea, props);
-  });
-
+  automations.status = getOveralStatus(automationArray);
+  automations[activities] = automationArray.map(sa => objectCopy(sa, props));
   return automations;
 }
 
@@ -90,13 +52,25 @@ export function formatEmailAutomations(emailAutomations) {
  *
  * @returns {Object} Formated automation to be returned by the API
  */
-export function formatAutomation(automation) {
+export function formatPayload(automation) {
   const props = ['id', 'fellowId', 'fellowName', 'partnerId', 'partnerName', 'type', 'createdAt', 'updatedAt'];
   const formattedAutomation = objectCopy(automation, props);
 
-  formattedAutomation.slackAutomations = formatSlackAutomations(automation.slackAutomations);
-  formattedAutomation.emailAutomations = formatEmailAutomations(automation.emailAutomations);
-  formattedAutomation.freckleAutomations = formatFreckleAutomations(automation.freckleAutomations);
+  formattedAutomation.slackAutomations = formatAutomations(
+    automation.slackAutomations,
+    'slackActivities',
+    ['status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'],
+  );
+  formattedAutomation.emailAutomations = formatAutomations(
+    automation.emailAutomations,
+    'emailActivities',
+    ['status', 'statusMessage', 'emailTo', 'subject'],
+  );
+  formattedAutomation.freckleAutomations = formatAutomations(
+    automation.freckleAutomations,
+    'freckleActivities',
+    ['status', 'statusMessage', 'type', 'freckleUserId', 'projectId'],
+  );
 
   return formattedAutomation;
 }
@@ -108,5 +82,5 @@ export function formatAutomation(automation) {
  * @returns {Array} Formated automation to be returned by the API
  */
 export function formatAutomationResponse(payload) {
-  return payload.map(automation => formatAutomation(automation));
+  return payload.map(automation => formatPayload(automation));
 }
