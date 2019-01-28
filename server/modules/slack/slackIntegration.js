@@ -108,11 +108,11 @@ export const accessChannel = async (email, channelId, context) => {
     const slackAction = slackClient.groups[context];
     const channelInfo = await slackClient.groups.info({ channel: channelId });
     const userId = await getSlackUserId(email);
-    await slackAction({ user: userId, channel });
+    await slackAction({ user: userId, channelId });
     await createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: userId,
-      channelId: channelId,
+      channelId,
       channelName: channelInfo.group.name,
       type: context,
       status: 'success',
@@ -123,7 +123,7 @@ export const accessChannel = async (email, channelId, context) => {
     await createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: null,
-      channelId: channelId,
+      channelId,
       channelName: channelInfo.group.name,
       type: context,
       status: 'failure',
