@@ -116,6 +116,46 @@ const slackMocks = {
   removeUser: {
     ok: true,
   },
+  groupInfo: {
+    ok: true,
+    group:
+      {
+        id: 'GBRR4B5E3',
+        name: 'rack-city',
+        is_group: true,
+        created: 1531645759,
+        creator: 'UBNE1D2BV',
+        is_archived: false,
+        name_normalized: 'rack-city',
+        is_mpim: false,
+        is_open: true,
+        last_read: '1547826649.000000',
+        latest:
+          {
+            user: 'UE4910GEQ',
+            type: 'message',
+            subtype: 'group_join',
+            ts: '1547483152.000200',
+            text: '<@UE4910GEQ> has joined the group',
+            inviter: 'UBNE1D2BV'
+          },
+        unread_count: 0,
+        unread_count_display: 0,
+        members: ['UBNE1D2BV', 'UBQ31C11N', 'UE4910GEQ'],
+        topic: { value: '', creator: '', last_set: 0 },
+        purpose: { value: '', creator: '', last_set: 0 }
+      },
+    scopes:
+      ['identify',
+        'bot',
+        'commands',
+        'groups:read',
+        'users:read',
+        'users:read.email',
+        'chat:write:bot',
+        'groups:write'],
+    acceptedScopes: ['groups:read']
+  }
 };
 
 export default slackMocks;

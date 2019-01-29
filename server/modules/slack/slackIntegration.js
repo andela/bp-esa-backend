@@ -104,9 +104,9 @@ export const getSlackUserId = async (email) => {
  */
 
 export const accessChannel = async (email, channelId, context) => {
+  const channelInfo = await slackClient.groups.info({ channel: channelId });
   try {
     const slackAction = slackClient.groups[context];
-    const channelInfo = await slackClient.groups.info({ channel: channelId });
     const userId = await getSlackUserId(email);
     await slackAction({ user: userId, channelId });
     await createOrUpdateSlackAutomation({
@@ -119,7 +119,6 @@ export const accessChannel = async (email, channelId, context) => {
       statusMessage: `${email} ${context === 'invite' ? 'invited to' : 'kicked from'} a channel`,
     });
   } catch (error) {
-    const channelInfo = await slackClient.groups.info({ channel: channelId });
     await createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: null,
