@@ -5,17 +5,12 @@
 
 import fs from 'fs';
 import ms from 'ms';
-
-
-import sendPlacementFetchEmail from './helpers';
+import object from './helpers';
 import { fetchNewPlacements } from '../modules/allocations';
 import { createAutomation } from '../modules/automations';
 
 import client from '../helpers/redis';
 
-const receiverEmail = process.env.SUPPORT_EMAIL;
-
-let number = 1;
 /**
  * @function getJobs
  * @param {string} folderName The folder containing the jobs.
@@ -46,29 +41,6 @@ const jobs = {
   },
 };
 
-
-/**
- * @function increaseFailCount
- * @desc Increases fail count when fetching allocations data fails
- * @returns {Promise} Promise to fetch new placements and execute automations
- */
-const increaseFailCount = () => {
-  // eslint-disable-next-line radix
-  number += 1;
-};
-
-/**
- * @function checkFailureCount
- * @desc Checks failure count then calls the failure email
- * @returns {Promise} Promise to fetch new placements and execute automations
- */
-const checkFailureCount = () => {
-  // eslint-disable-next-line radix
-  if (number >= parseInt(process.env.RESTART_TIME)) {
-    sendPlacementFetchEmail(receiverEmail);
-  }
-};
-
 /**
  * @desc Executes jobs to automate developer offboarding/onboarding tasks
  *
@@ -77,13 +49,14 @@ const checkFailureCount = () => {
  * @returns {Promise} Promise to fetch new placements and execute automations
  */
 export default function executeJobs(type) {
-  checkFailureCount();
+  object.checkFailureCount();
   const { jobList, placementStatus, automationResult } = jobs[type];
   let fetchPlacementError;
   return fetchNewPlacements(placementStatus, 1)
     .catch(() => {
       fetchPlacementError = 'error';
       setTimeout(() => executeJobs(type), ms('5m'));
+      object.increaseFailCount();
     }).then(async (newPlacements) => {
       if (!fetchPlacementError) {
         for (const placement of newPlacements) {
@@ -98,8 +71,6 @@ export default function executeJobs(type) {
           await Promise.all(jobList.map(job => job(placement, automationResult)));
           client.incr('numberOfJobs');
         }
-      } else {
-        increaseFailCount();
       }
     });
 }

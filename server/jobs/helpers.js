@@ -8,7 +8,8 @@ import constructMailOptions from '../modules/email/emailModule';
 
 const getEmailTemplate = emailTemplate => path.join(__dirname, `../modules/email/emailTemplates/${emailTemplate}`);
 const placementFilTemplate = getEmailTemplate('placement-fail-email.html');
-
+const receiverEmail = process.env.SUPPORT_EMAIL;
+let number = 1;
 
 /**
  * @desc Retrieves necessary info. to be sent via email for any given placement
@@ -37,15 +38,21 @@ export const getMailInfo = async (placement) => {
   };
 };
 
+
+const increaseFailCount = () => {
+  // eslint-disable-next-line radix
+  number += 1;
+};
+
 /**
  * @function sendPlacementFetchEmail
  * @desc Send email to ESA if fetching placements fails constantly
  * @param {string} receiver Info about the mail to be sent
  *
- * @returns {Object} Promise to fetch new placements and execute automations
+ * @returns {Object} Fail status if the operation fails
  */
 
-const sendPlacementFetchEmail = async (receiver) => {
+const sendPlacementFetchEmail = (receiver) => {
   try {
     const mailOptions = constructMailOptions({
       sendTo: receiver,
@@ -53,10 +60,17 @@ const sendPlacementFetchEmail = async (receiver) => {
       // eslint-disable-next-line no-eval
       emailBody: eval(`\`${fs.readFileSync(placementFilTemplate).toString()}\``),
     });
-    await emailTransport.sendMail(mailOptions);
+    emailTransport.sendMail(mailOptions);
   } catch (error) {
     return { status: 'fail', message: error };
   }
 };
 
-export default sendPlacementFetchEmail;
+const checkFailureCount = () => {
+  // eslint-disable-next-line radix
+  if (number >= parseInt(process.env.RESTART_TIME)) {
+    sendPlacementFetchEmail(receiverEmail);
+  }
+};
+
+export default { checkFailureCount, increaseFailCount };
