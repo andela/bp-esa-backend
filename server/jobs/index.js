@@ -5,8 +5,6 @@
 
 import fs from 'fs';
 import ms from 'ms';
-
-
 import sendPlacementFetchEmail from './helpers';
 import { fetchNewPlacements } from '../modules/allocations';
 import { createAutomation } from '../modules/automations';

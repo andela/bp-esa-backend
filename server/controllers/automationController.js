@@ -1,4 +1,5 @@
 import models from '../models';
+import { formatAutomationResponse } from '../utils/formatter';
 
 const automation = models.Automation;
 const include = [
@@ -14,12 +15,11 @@ export default class AutomationController {
    * @param {object} res REST Response object
    * @returns {object} Response containing status message and automation data
    */
-
   static getAutomations(req, res) {
     return automation.findAll({ include }).then(data => res.status(200).json({
       status: 'success',
       message: 'Successfully fetched automations',
-      data,
+      data: formatAutomationResponse(data),
     }));
   }
 }
