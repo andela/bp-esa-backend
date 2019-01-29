@@ -9,13 +9,13 @@ import { getMailInfo } from '../helpers';
  * @param {object} automationResult Result of automation job
  * @returns {void}
  */
-const emailOnboarding = async (placement, automationResult) => {
+const emailOnboarding = async (placement) => {
   try {
     const mailInfo = await getMailInfo(placement);
     await Promise.all([sendDevOnboardingMail(mailInfo), sendSOPOnboardingMail(mailInfo)]);
-    automationResult.emailAutomation = 'success';
+    // write automation success to database
   } catch (error) {
-    automationResult.emailAutomation = error.message || 'failure';
+    // write automation failure to database
   }
 };
 

@@ -9,12 +9,12 @@ import { getMailInfo } from '../helpers';
  * @param {object} automationResult Result of automation job
  * @returns {void}
  */
-export default async function emailOffboarding(placement, automationResult) {
+export default async function emailOffboarding(placement) {
   try {
     const mailInfo = await getMailInfo(placement);
     await Promise.all([sendSOPOffboardingMail(mailInfo), sendITOffboardingMail(mailInfo)]);
-    automationResult.emailAutomation = 'success';
+    // write automation success to database
   } catch (error) {
-    automationResult.emailAutomation = error.message || 'failure';
+    // write automation failure to database
   }
 }
