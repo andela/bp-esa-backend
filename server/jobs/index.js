@@ -33,6 +33,29 @@ const jobs = {
     placementStatus: 'Placed - Awaiting Onboarding',
   },
 };
+/**
+ * @desc Generates data for creating automation from placement
+ *
+ * @param {Object} placement Placement instance from allocations
+ * @param {String} type Onboarding or Offboarding
+ * @returns {Object} Useful data for creating automation
+ */
+export const automationData = (placement, type) => {
+  const {
+    id: placementId,
+    fellow: { id: fellowId, name: fellowName },
+    client_name: partnerName,
+    client_id: partnerId,
+  } = placement;
+  return {
+    fellowId,
+    fellowName,
+    partnerName,
+    partnerId,
+    type,
+    placementId,
+  };
+};
 
 /**
  * @desc Executes jobs to automate developer offboarding/onboarding tasks
@@ -52,21 +75,10 @@ export default function executeJobs(type) {
     .then(async (newPlacements) => {
       if (!fetchPlacementError) {
         for (const placement of newPlacements) {
-          const {
-            id: placementId,
-            fellow: { id: fellowId, name: fellowName },
-            client_name: partnerName,
-            client_id: partnerId,
-          } = placement;
+          const { placementId, ...defaults } = automationData(placement, type);
           const [{ id: automationId }, created] = await db.Automation.findOrCreate({
             where: { placementId },
-            defaults: {
-              fellowId,
-              fellowName,
-              partnerName,
-              partnerId,
-              type,
-            },
+            defaults,
           });
           if (created) {
             process.env.AUTOMATION_ID = automationId;
