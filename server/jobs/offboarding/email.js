@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { sendITOffboardingMail, sendSOPOffboardingMail } from '../../modules/email/emailModule';
-import { getMailInfo } from '../helpers';
+import { executeEmailAutomation } from '../helpers';
 
 /**
  * @desc Automates developer offboarding via email
@@ -9,12 +9,6 @@ import { getMailInfo } from '../helpers';
  * @param {object} automationResult Result of automation job
  * @returns {void}
  */
-export default async function emailOffboarding(placement) {
-  try {
-    const mailInfo = await getMailInfo(placement);
-    await Promise.all([sendSOPOffboardingMail(mailInfo), sendITOffboardingMail(mailInfo)]);
-    // write automation success to database
-  } catch (error) {
-    // write automation failure to database
-  }
+export default function emailOffboarding(placement) {
+  executeEmailAutomation([sendSOPOffboardingMail, sendITOffboardingMail], placement);
 }

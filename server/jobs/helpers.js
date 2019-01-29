@@ -27,3 +27,21 @@ export const getMailInfo = async (placement) => {
     startDate: dateStart === '' ? 'not specified' : dateStart,
   };
 };
+
+/**
+ * @desc Executes email functions for an email automation
+ *
+ * @param {Array} emailFunctions List of functions to execute for the automation
+ * @param {Object} placement Placement data with which to execute automation
+ *
+ * @returns {void}
+ */
+export async function executeEmailAutomation(emailFunctions, placement) {
+  try {
+    const mailInfo = await getMailInfo(placement);
+    await Promise.all(emailFunctions.map(func => func(mailInfo)));
+    // write automation success to database
+  } catch (error) {
+    // write automation failure to database
+  }
+}
