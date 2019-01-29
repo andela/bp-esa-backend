@@ -79,24 +79,7 @@ export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomati
  *
  * @returns {Promise} Promise that resolves to the created/updated freckleAutomation.
  */
-export const createOrUpdateFreckleAutomation = automationDetails => (
-  FreckleAutomation.upsertById(automationDetails)
-);
-
-/**
- * @func createAutomation
- * @desc create an automation in the database.
- *
- * @param {object} automationDetails Details about the automation to be created
- * @param {string} automationDetails.fellowName Name of fellow
- * @param {string} automationDetails.fellowId Id of fellow
- * @param {string} automationDetails.partnerName Name of partner
- * @param {string} automationDetails.partnerId Id of partner
- * @param {string} automationDetails.type Automation type: onboarding || offboarding
- *
- * @return {Promise} Promise that resolves the created automation.
- */
-export const createAutomation = automationDetails => Automation.create(automationDetails);
+export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutomation.upsertById(automationDetails);
 
 /**
  * @func creatOrUpdatePartnerRecord
@@ -106,7 +89,7 @@ export const createAutomation = automationDetails => Automation.create(automatio
  * @param {string} partnerDetails.name Name of partner
  * @param {string} partnerDetails.partnerId Id of partner from allocaitons
  * @param {string} partnerDetails.freckleProjectId The partner freckle project ID
- * @param {string} partnerDetails.slackChannels The partner slack channels
+ * @param {object} partnerDetails.slackChannels The partner slack channels
  * @param {string} partnerDetails.slackChannels.internal The partner internal slack channel
  * @param {string} partnerDetails.slackChannels.general The partner general slack channel
  *

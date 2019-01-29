@@ -22,6 +22,8 @@ const mockModels = {
   },
   Partner: {
     find: sinon.stub(),
+    update: sinon.stub(),
+    create: sinon.stub(),
   },
 };
 
@@ -32,14 +34,6 @@ const automations = proxyquire('../../server/modules/automations', {
 });
 
 describe('Automation Database Operations', () => {
-  it('should create an automation record in the DB', async () => {
-    const automationDetails = {
-      partnerId: '-UTF56K',
-      // ...other properties...
-    };
-    await automations.createAutomation(automationDetails);
-    expect(mockModels.Automation.create.calledWith(automationDetails)).to.be.true;
-  });
   it('should upsert a slackAutomation record in the DB', async () => {
     const automationDetails = {
       channelId: '555',
@@ -84,5 +78,20 @@ describe('Automation Database Operations', () => {
     const partnerId = '-UTF56K';
     await automations.getPartnerRecord(partnerId);
     expect(mockModels.Partner.find.calledWith({ where: { partnerId } })).to.be.true;
+  });
+  it('should create or update a partner record in database', async () => {
+    const partner = {
+      name: 'Facebook Inc',
+      partnerId: 'JKb533jksdf_iu34',
+      freckleProjectId: '349icnioj3in_23',
+      slackChannels: {
+        internal: 'facebook-int',
+        general: 'facebook',
+      },
+    };
+    await automations.creatOrUpdatePartnerRecord(partner);
+    expect(mockModels.Partner.find.calledWith({ where: { partnerId: partner.partnerId } })).to.be
+      .true;
+    expect(mockModels.Partner.create.calledWith(partner)).to.be.true;
   });
 });

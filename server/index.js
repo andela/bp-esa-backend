@@ -1,6 +1,7 @@
 import express from 'express';
 import logger from 'morgan';
 import dotenv from 'dotenv';
+import '@babel/polyfill';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import ms from 'ms';
