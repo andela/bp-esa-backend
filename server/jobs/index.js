@@ -5,11 +5,10 @@
 
 import fs from 'fs';
 import ms from 'ms';
-import object from './helpers';
+import * as Helper from './helpers';
 import { fetchNewPlacements } from '../modules/allocations';
-import { createAutomation } from '../modules/automations';
-
 import client from '../helpers/redis';
+import db from '../models';
 
 /**
  * @function getJobs
@@ -28,17 +27,34 @@ const jobs = {
   offboarding: {
     jobList: getJobs('offboarding'),
     placementStatus: 'External Engagements - Rolling Off',
-    automationResult: {
-      type: 'Offboarding',
-    },
   },
   onboarding: {
     jobList: getJobs('onboarding'),
     placementStatus: 'Placed - Awaiting Onboarding',
-    automationResult: {
-      type: 'Onboarding',
-    },
   },
+};
+/**
+ * @desc Generates data for creating automation from placement
+ *
+ * @param {Object} placement Placement instance from allocations
+ * @param {String} type Onboarding or Offboarding
+ * @returns {Object} Useful data for creating automation
+ */
+export const automationData = (placement, type) => {
+  const {
+    id: placementId,
+    fellow: { id: fellowId, name: fellowName },
+    client_name: partnerName,
+    client_id: partnerId,
+  } = placement;
+  return {
+    fellowId,
+    fellowName,
+    partnerName,
+    partnerId,
+    type,
+    placementId,
+  };
 };
 
 /**
@@ -49,27 +65,27 @@ const jobs = {
  * @returns {Promise} Promise to fetch new placements and execute automations
  */
 export default function executeJobs(type) {
-  object.checkFailureCount();
-  const { jobList, placementStatus, automationResult } = jobs[type];
+  Helper.checkFailureCount();
+  const { jobList, placementStatus } = jobs[type];
   let fetchPlacementError;
   return fetchNewPlacements(placementStatus, 1)
     .catch(() => {
       fetchPlacementError = 'error';
       setTimeout(() => executeJobs(type), ms('5m'));
-      object.increaseFailCount();
+      Helper.increaseFailCount();
     }).then(async (newPlacements) => {
       if (!fetchPlacementError) {
         for (const placement of newPlacements) {
-          const {
-            fellow: { id: fellowId, name: fellowName },
-            client_name: partnerName, client_id: partnerId,
-          } = placement;
-          const { id: automationId } = await createAutomation({
-            fellowId, fellowName, partnerName, partnerId, type,
+          const { placementId, ...defaults } = automationData(placement, type);
+          const [{ id: automationId }, created] = await db.Automation.findOrCreate({
+            where: { placementId },
+            defaults,
           });
-          process.env.AUTOMATION_ID = automationId;
-          await Promise.all(jobList.map(job => job(placement, automationResult)));
-          client.incr('numberOfJobs');
+          if (created) {
+            process.env.AUTOMATION_ID = automationId;
+            await Promise.all(jobList.map(job => job(placement)));
+            client.incr('numberOfJobs');
+          }
         }
       }
     });

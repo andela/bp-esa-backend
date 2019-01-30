@@ -1,7 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-/* eslint-disable import/prefer-default-export */
-
 import { findPartnerById } from '../modules/allocations';
 import emailTransport from '../modules/email/emailTransport';
 import constructMailOptions from '../modules/email/emailModule';
@@ -13,9 +11,7 @@ let number = 1;
 
 /**
  * @desc Retrieves necessary info. to be sent via email for any given placement
- *
  * @param {oject} placement A placement instance from allocation
- *
  * @returns {object} Mail info to be sent
  */
 export const getMailInfo = async (placement) => {
@@ -38,9 +34,12 @@ export const getMailInfo = async (placement) => {
   };
 };
 
-
-const increaseFailCount = () => {
-  // eslint-disable-next-line radix
+/**
+ * @desc increases fail count by one
+ * @returns {void}
+ */
+/* istanbul ignore next */
+export const increaseFailCount = () => {
   number += 1;
 };
 
@@ -51,7 +50,6 @@ const increaseFailCount = () => {
  *
  * @returns {Object} Fail status if the operation fails
  */
-
 const sendPlacementFetchEmail = (receiver) => {
   try {
     const mailOptions = constructMailOptions({
@@ -65,12 +63,32 @@ const sendPlacementFetchEmail = (receiver) => {
     return { status: 'fail', message: error };
   }
 };
-
-const checkFailureCount = () => {
+/**
+ * @desc Checks fail count then calls method to send failure email
+ * @returns {void}
+ */
+/* istanbul ignore next */
+export const checkFailureCount = () => {
   // eslint-disable-next-line radix
   if (number >= parseInt(process.env.RESTART_TIME)) {
     sendPlacementFetchEmail(receiverEmail);
   }
 };
 
-export default { checkFailureCount, increaseFailCount };
+/**
+ * @desc Executes email functions for an email automation
+ *
+ * @param {Array} emailFunctions List of functions to execute for the automation
+ * @param {Object} placement Placement data with which to execute automation
+ *
+ * @returns {void}
+ */
+export async function executeEmailAutomation(emailFunctions, placement) {
+  try {
+    const mailInfo = await getMailInfo(placement);
+    await Promise.all(emailFunctions.map(func => func(mailInfo)));
+    // write automation success to database
+  } catch (error) {
+    // write automation failure to database
+  }
+}

@@ -82,21 +82,6 @@ export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomati
 export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutomation.upsertById(automationDetails);
 
 /**
- * @func createAutomation
- * @desc create an automation in the database.
- *
- * @param {object} automationDetails Details about the automation to be created
- * @param {string} automationDetails.fellowName Name of fellow
- * @param {string} automationDetails.fellowId Id of fellow
- * @param {string} automationDetails.partnerName Name of partner
- * @param {string} automationDetails.partnerId Id of partner
- * @param {string} automationDetails.type Automation type: onboarding || offboarding
- *
- * @return {Promise} Promise that resolves the created automation.
- */
-export const createAutomation = automationDetails => Automation.create(automationDetails);
-
-/**
  * @func creatOrUpdatePartnerRecord
  * @desc create or update a partner record in the database
  *
