@@ -1,5 +1,10 @@
 export default (sequelize, DataTypes) => {
   const Automation = sequelize.define('automation', {
+    placementId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
     fellowName: {
       type: DataTypes.STRING,
       allowNull: false,

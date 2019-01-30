@@ -1,21 +1,15 @@
 import fs from 'fs';
 import path from 'path';
-/* eslint-disable import/prefer-default-export */
-
 import { findPartnerById } from '../modules/allocations';
 import emailTransport from '../modules/email/emailTransport';
 import constructMailOptions from '../modules/email/emailModule';
 
 const getEmailTemplate = emailTemplate => path.join(__dirname, `../modules/email/emailTemplates/${emailTemplate}`);
-const placementFilTemplate = getEmailTemplate('placement-fail-email.html');
-const receiverEmail = process.env.SUPPORT_EMAIL;
 let number = 1;
 
 /**
  * @desc Retrieves necessary info. to be sent via email for any given placement
- *
  * @param {oject} placement A placement instance from allocation
- *
  * @returns {object} Mail info to be sent
  */
 export const getMailInfo = async (placement) => {
@@ -38,10 +32,15 @@ export const getMailInfo = async (placement) => {
   };
 };
 
-
-const increaseFailCount = () => {
-  // eslint-disable-next-line radix
+/**
+ * @desc increases fail count by one
+ * @returns {Number} fail number count
+ */
+/* istanbul ignore next */
+export const increaseFailCount = () => {
   number += 1;
+  process.env.FAIL_COUNT = number;
+  return number;
 };
 
 /**
@@ -51,26 +50,46 @@ const increaseFailCount = () => {
  *
  * @returns {Object} Fail status if the operation fails
  */
-
-const sendPlacementFetchEmail = (receiver) => {
+const sendPlacementFetchAlertEmail = (receiver) => {
   try {
     const mailOptions = constructMailOptions({
       sendTo: receiver,
       emailSubject: 'Allocations placement data error',
       // eslint-disable-next-line no-eval
-      emailBody: eval(`\`${fs.readFileSync(placementFilTemplate).toString()}\``),
+      emailBody: eval(`\`${fs.readFileSync(getEmailTemplate('placement-fail-email.html')).toString()}\``),
     });
     emailTransport.sendMail(mailOptions);
   } catch (error) {
     return { status: 'fail', message: error };
   }
 };
-
-const checkFailureCount = () => {
+/**
+ * @desc Checks fail count then calls method to send failure email
+ * @param {string} failCount Info about the number of times fetching placements has failed
+ * @returns {Object} message about email being sent
+ */
+export const checkFailureCount = (failCount) => {
   // eslint-disable-next-line radix
-  if (number >= parseInt(process.env.RESTART_TIME)) {
-    sendPlacementFetchEmail(receiverEmail);
+  if (failCount >= parseInt(process.env.RESTART_TIME)) {
+    sendPlacementFetchAlertEmail(process.env.SUPPORT_EMAIL);
+    return { message: 'Email sent successfully' };
   }
 };
 
-export default { checkFailureCount, increaseFailCount };
+/**
+ * @desc Executes email functions for an email automation
+ *
+ * @param {Array} emailFunctions List of functions to execute for the automation
+ * @param {Object} placement Placement data with which to execute automation
+ *
+ * @returns {void}
+ */
+export async function executeEmailAutomation(emailFunctions, placement) {
+  try {
+    const mailInfo = await getMailInfo(placement);
+    await Promise.all(emailFunctions.map(func => func(mailInfo)));
+    // write automation success to database
+  } catch (error) {
+    // write automation failure to database
+  }
+}

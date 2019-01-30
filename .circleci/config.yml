@@ -30,6 +30,16 @@ jobs:
       - run:
             name: Install dependencies
             command: yarn install
+      - run: 
+          name: "Setup custom environment variables"
+          command: |
+            echo 'export FAIL_COUNT = 1' >> $BASH_ENV # Redirect MY_ENV_VAR into $BASH_ENV
+      # Run a step to print what branch our code base is on.
+      - run: 
+          name: "Setup custom environment variables"
+          command: |
+            echo 'export RESTART_TIME=10' >> $BASH_ENV # Redirect MY_ENV_VAR into $BASH_ENV
+      # Run a step to print what branch our code base is on.
       - save_cache:
           paths:
             - node_modules
