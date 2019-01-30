@@ -9,12 +9,14 @@ dotenv.config();
 const user = process.env.EMAIL_USER;
 const opsEmail = process.env.OPS_EMAIL;
 const itEmail = process.env.IT_EMAIL;
+const supportEmail = process.env.SUPPORT_EMAIL;
 
 const getEmailTemplatePath = emailTemplate => path.join(__dirname, `emailTemplates/${emailTemplate}`);
 const developerOnboardingTemplatePath = getEmailTemplatePath('developer-onboarding-email.html');
 const successOnboardingTemplatePath = getEmailTemplatePath('success-onboarding-email.html');
 const itOffboardingPath = getEmailTemplatePath('it-offboarding-email.html');
 const successOffboardingTemplatePath = getEmailTemplatePath('success-offboarding-email.html');
+const placementFailedTemplatePath = getEmailTemplatePath('placement-fail-email.html');
 
 /**
  * @func sendAndSaveMail
@@ -182,6 +184,25 @@ export const sendSOPOffboardingMail = async (mailInfo) => {
     emailBody: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
   });
   await sendAndSaveMail(mailOptions);
+};
+
+/**
+ * @function sendPlacementFetchAlertEmail
+ * @desc Send email to ESA if fetching placements fails constantly
+ * @returns {Object} Fail status if the operation fails
+ */
+export const sendPlacementFetchAlertEmail = async () => {
+  try {
+    const mailOptions = constructMailOptions({
+      sendTo: supportEmail,
+      emailSubject: 'Allocations placement data error',
+      emailBody: eval(`\`${fs.readFileSync(placementFailedTemplatePath).toString()}\``),
+    });
+    await emailTransport.sendMail(mailOptions);
+    return { status: 'success', message: `Successfully sent email to ${supportEmail} ` };
+  } catch (error) {
+    return { status: 'fail', message: error };
+  }
 };
 
 export default constructMailOptions;

@@ -97,22 +97,23 @@ export const getSlackUserId = async (email) => {
  * @desc Add or remove a fellow from a channel after being placed or rolled-off
  *
  * @param {string} email User's email
- * @param {string} channel The channel id
+ * @param {string} channelId The channel id
  * @param {string} context The action to perform: invite || kick
  *
  * @returns {Object} The result of the operation performed
  */
 
-export const accessChannel = async (email, channel, context) => {
+export const accessChannel = async (email, channelId, context) => {
+  const channelInfo = await slackClient.groups.info({ channel: channelId });
   try {
     const slackAction = slackClient.groups[context];
     const userId = await getSlackUserId(email);
-    await slackAction({ user: userId, channel });
-
+    await slackAction({ user: userId, channelId });
     await createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: userId,
-      channelId: channel,
+      channelId,
+      channelName: channelInfo.group.name,
       type: context,
       status: 'success',
       statusMessage: `${email} ${context === 'invite' ? 'invited to' : 'kicked from'} a channel`,
@@ -121,7 +122,8 @@ export const accessChannel = async (email, channel, context) => {
     await createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: null,
-      channelId: channel,
+      channelId,
+      channelName: channelInfo.group.name,
       type: context,
       status: 'failure',
       statusMessage: `${error.message}`,

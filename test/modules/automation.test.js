@@ -34,14 +34,6 @@ const automations = proxyquire('../../server/modules/automations', {
 });
 
 describe('Automation Database Operations', () => {
-  it('should create an automation record in the DB', async () => {
-    const automationDetails = {
-      partnerId: '-UTF56K',
-      // ...other properties...
-    };
-    await automations.createAutomation(automationDetails);
-    expect(mockModels.Automation.create.calledWith(automationDetails)).to.be.true;
-  });
   it('should upsert a slackAutomation record in the DB', async () => {
     const automationDetails = {
       channelId: '555',
