@@ -108,7 +108,7 @@ export const accessChannel = async (email, channelId, context) => {
   try {
     const slackAction = slackClient.groups[context];
     const userId = await getSlackUserId(email);
-    await slackAction({ user: userId, channelId });
+    await slackAction({ user: userId, channel: channelId });
     await createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: userId,

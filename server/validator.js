@@ -11,7 +11,8 @@ export const requiredEnvVariables = [
   'FRECKLE_ADMIN_TOKEN',
   'SLACK_AVAILABLE_DEVS_CHANNEL_ID',
   'SLACK_RACK_CITY_CHANNEL_ID',
-  'ANDELA_API_BASE_URL',
+  'ANDELA_PARTNERS',
+  'ALLOCATION_PLACEMENTS',
 ];
 
 const validateEnvironmentVars = () => {

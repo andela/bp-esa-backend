@@ -36,6 +36,7 @@
     "chai-http": "^4.2.1",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
+    "faker": "^4.1.0",
     "googleapis": "^33.0.0",
     "http-proxy": "^1.17.0",
     "morgan": "^1.9.1",

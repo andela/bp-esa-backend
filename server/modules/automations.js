@@ -3,7 +3,7 @@ import db from '../models';
 
 const { Op } = sequelize;
 const {
-  SlackAutomation, EmailAutomation, FreckleAutomation, Automation, Partner,
+  SlackAutomation, EmailAutomation, FreckleAutomation, Partner,
 } = db;
 
 /**

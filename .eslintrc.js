@@ -1,23 +1,26 @@
 module.exports = {
-  extends: 'airbnb-base',
+  extends: "airbnb-base",
   env: {
     mocha: true,
-    node: true,
+    node: true
   },
   globals: {
-    expect: true,
+    expect: true
   },
   rules: {
-    "require-jsdoc": ["error",
+    "require-jsdoc": [
+      "error",
       {
-        "require": {
-          "FunctionDeclaration": true,
-          "MethodDefinition": false,
-          "ArrowFunctionExpression": false,
-          "FunctionExpression": false
+        require: {
+          FunctionDeclaration: true,
+          MethodDefinition: false,
+          ArrowFunctionExpression: false,
+          FunctionExpression: false
         }
       }
     ],
-    "valid-jsdoc": "error"
+    "valid-jsdoc": "error",
+    "no-plusplus": "off",
+    "no-await-in-loop": "off"
   }
 };

@@ -1,18 +1,18 @@
 import axios from 'axios';
 import redis from 'redis';
 import dotenv from 'dotenv';
-
+import ms from 'ms';
 import client from '../helpers/redis';
 
 dotenv.config();
 
-// axios base URL and Authorization header setup
-axios.defaults.baseURL = process.env.ANDELA_API_BASE_URL;
+// Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 // Updates the local redis store with latest Partner List
-export const updatePartnerStore = () => axios.get('api/v1/partners').then((response) => {
+export const updatePartnerStore = () => axios.get(process.env.ANDELA_PARTNERS).then((response) => {
   client.set('partners', JSON.stringify(response.data), redis.print);
+  return response.data;
 });
 
 const resolvePartner = (partnerId, result, resolve) => {
@@ -49,26 +49,22 @@ const retrievePartner = partnerId => new Promise((resolve, reject) => {
 export async function findPartnerById(partnerId) {
   let partner = await retrievePartner(partnerId);
   if (!partner) {
-    await updatePartnerStore();
-    partner = await retrievePartner(partnerId);
+    const { values } = await updatePartnerStore();
+    [partner] = values.filter(data => data.id === partnerId);
     if (!partner) throw new Error('Partner record was not found');
   }
   return partner;
 }
 
 /**
- * @desc Fetches new placements based on status, from the past numberOfDays
+ * @desc Fetches new placements by status, from the last TIME_INTERVAL
  *
- * @param {string} status - The status of placements to fetch from allocations
- * @param {number} numberOfDays - The range of days from which to get new placements
+ * @param {string} status The status of placements to fetch from allocations
  *
- * @returns {Promise} - Promise which resolves to a list of placements
- * from the past numberOfDays provided, or throws an error if unsuccessful
+ * @returns {Array} List of placements from the last TIME_INTERVAL
  */
-export const fetchNewPlacements = async (status, numberOfDays = 1) => {
-  const response = await axios.get(`api/v1/placements?status=${status}`);
-  const placements = response.data.values;
-  const currentDate = new Date(Date.now());
-  const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);
-  return placements.filter(data => Date.parse(data.created_at) >= fromDate);
+export const fetchNewPlacements = async (status) => {
+  const { data } = await axios.get(`${process.env.ALLOCATION_PLACEMENTS}?status=${status}`);
+  const fromDate = new Date(Date.now() - ms(process.env.TIMER_INTERVAL));
+  return data.values.filter(placement => Date.parse(placement.created_at) > fromDate);
 };
