@@ -23,7 +23,7 @@ RUN npm install
 #Bundle apps source code
 RUN npm run build
 
-ENV NODE_ENV=production
+ENV NODE_ENV=staging
 ENV PORT=6050
 
 # app binds to port 6050 so you'll use the EXPOSE
