@@ -20,6 +20,7 @@ const fakeSlackClient = {
   invite: sinon.stub(slack.slackClient.groups, 'invite').callsFake(() => slackMocks.inviteUser),
   kick: sinon.stub(slack.slackClient.groups, 'kick').callsFake(() => slackMocks.removeUser),
   create: sinon.stub(slack.slackClient.groups, 'create').callsFake(() => slackMocks.createGroups),
+  groupInfo: sinon.stub(slack.slackClient.groups, 'info').callsFake(() => slackMocks.groupInfo),
 };
 
 /* eslint-disable no-unused-expressions */
@@ -59,16 +60,18 @@ describe('Slack Integration Test Suite', async () => {
   });
   it('Should add developers to respective channels and save the automation to DB', async () => {
     const email = 'johndoe@mail.com';
-    const channel = 'GDL7RDC5V';
+    const channel = 'GBRR4B5E3';
     await slack.accessChannel(email, channel, 'invite');
     expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
     expect(fakeSlackClient.invite.calledOnce).to.be.true;
+    expect(fakeSlackClient.groupInfo.calledOnce).to.be.true;
   });
   it('Should remove developers from channels and save the automation to DB', async () => {
     const email = 'johndoe@mail.com';
-    const channel = 'GDL7RDC5V';
+    const channel = 'GBRR4B5E3';
     await slack.accessChannel(email, channel, 'kick');
     expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
     expect(fakeSlackClient.kick.calledOnce).to.be.true;
+    expect(fakeSlackClient.groupInfo.calledOnce).to.be.true;
   });
 });

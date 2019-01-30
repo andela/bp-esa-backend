@@ -66,7 +66,7 @@ export async function findPartnerById(partnerId) {
  * from the past numberOfDays provided, or throws an error if unsuccessful
  */
 export const fetchNewPlacements = async (status, numberOfDays = 1) => {
-  const response = await axios.get(`api/v1/placements?status=${status}`);
+  const response = await axios.get(`api/v1/placement?status=${status}`);
   const placements = response.data.values;
   const currentDate = new Date(Date.now());
   const fromDate = currentDate.setDate(currentDate.getDate() - numberOfDays);

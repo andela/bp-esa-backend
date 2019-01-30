@@ -19,7 +19,7 @@ export const automationsMockData = [{
       emailTo: 'User.Unknown@example.com',
       subject: 'Onboarding',
       status: 'success',
-    }
+    },
   ],
   slackAutomations:
     [{

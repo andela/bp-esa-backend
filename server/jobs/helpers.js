@@ -38,7 +38,11 @@ export const getMailInfo = async (placement) => {
   };
 };
 
-
+/**
+ * @desc increases fail count by one
+ * @returns {void}
+ */
+/* istanbul ignore next */
 const increaseFailCount = () => {
   // eslint-disable-next-line radix
   number += 1;
@@ -51,7 +55,7 @@ const increaseFailCount = () => {
  *
  * @returns {Object} Fail status if the operation fails
  */
-
+/* istanbul ignore next */
 const sendPlacementFetchEmail = (receiver) => {
   try {
     const mailOptions = constructMailOptions({
@@ -65,12 +69,34 @@ const sendPlacementFetchEmail = (receiver) => {
     return { status: 'fail', message: error };
   }
 };
-
+/**
+ * @desc Checks fail count then calls method to send failure email
+ * @returns {void}
+ */
+/* istanbul ignore next */
 const checkFailureCount = () => {
   // eslint-disable-next-line radix
   if (number >= parseInt(process.env.RESTART_TIME)) {
     sendPlacementFetchEmail(receiverEmail);
   }
 };
+
+/**
+ * @desc Executes email functions for an email automation
+ *
+ * @param {Array} emailFunctions List of functions to execute for the automation
+ * @param {Object} placement Placement data with which to execute automation
+ *
+ * @returns {void}
+ */
+export async function executeEmailAutomation(emailFunctions, placement) {
+  try {
+    const mailInfo = await getMailInfo(placement);
+    await Promise.all(emailFunctions.map(func => func(mailInfo)));
+    // write automation success to database
+  } catch (error) {
+    // write automation failure to database
+  }
+}
 
 export default { checkFailureCount, increaseFailCount };
