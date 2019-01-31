@@ -19,6 +19,8 @@ defaults: &defaults
 jobs:
   build:
     <<: *defaults
+    environment:
+        TIMER_INTERVAL: 15s
     steps:
       - checkout
       # Download and cache dependencies

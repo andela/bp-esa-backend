@@ -62,10 +62,20 @@ describe('Automation Database Operations', () => {
   });
   it('should upsert an emailAutomation record in the DB', async () => {
     const automationDetails = {
-      body: 'An email to be sent to anybody',
+      automationId: '3',
+      body:
+        '<p><b>Developer Placement Notification</b></p>\n\n<p>\n  This is to notify you that mr smith, mr.smith@andela.com, Lagos,\n  has been placed with payoff,  .\n</p>\n\nTheir expected start date is not specified\n~~\nPlease do provide them with any support they need to ensure smooth transition to their Partner Engagement.\n\n\nRegards,\n\nSuccess',
+      recipient: 'esarecipient@gmail.com',
+      sender: 'esa@andela.com',
+      subject: 'smith mr Placed with payoff',
+      status: 'success',
+      statusMessage: 'Email sent succesfully',
     };
     await automations.createOrUpdateEmaillAutomation(automationDetails);
     expect(mockModels.EmailAutomation.upsertById.calledWith(automationDetails)).to.be.true;
+    expect(mockModels.EmailAutomation.upsertById.firstCall.args[0].statusMessage).to.equal(
+      'Email sent succesfully',
+    );
   });
   it('should upsert a freckleAutomation record in the DB', async () => {
     const automationDetails = {

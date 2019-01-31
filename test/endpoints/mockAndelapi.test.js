@@ -20,12 +20,17 @@ describe('Tests for mockAndelaApi endpoint\n', () => {
         const fakeUserList = sinon.stub(slackClient.users, 'list').callsFake(() => slackMocks.userList);
         const { values } = res.body;
         expect(res).to.have.status(200);
-        // expect(res.body)
-        //   .to.have.property('values')
-        //   .to.be.an('array');
-        // expect(values.length > 0).to.equal(true);
-        // expect(values.length < 6).to.equal(true);
-        // expect(userEmails.includes(values[0].fellow.email)).to.equal(true);
+        expect(res.body)
+          .to.have.property('values')
+          .to.be.an('array');
+        expect(values.length > 0).to.equal(true);
+        expect(values.length < 6).to.equal(true);
+        console.log('=============USEREMAILS=======================');
+        console.log(userEmails);
+        console.log('====================================');
+        console.log('==========VALUEs==========================');
+        console.log(values);
+        console.log('====================================');
         fakeUserList.restore();
         done();
       });
