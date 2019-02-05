@@ -65,11 +65,7 @@ export const automationData = (placement, type) => {
  * @returns {Promise} Promise to fetch new placements and execute automations
  */
 export default function executeJobs(type) {
-<<<<<<< HEAD
-  object.checkFailureCount();
-=======
   Helper.checkFailureCount();
->>>>>>> 5d7ce548a3dd8348e708b4c3c8e38d0357e45ee9
   const { jobList, placementStatus } = jobs[type];
   let fetchPlacementError;
   return fetchNewPlacements(placementStatus, 1)
