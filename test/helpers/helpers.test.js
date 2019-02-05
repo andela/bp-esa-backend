@@ -35,6 +35,7 @@ describe('Test that helper functions work as expected', () => {
     expect(data.partnerName).to.equal(placement.client_name);
     expect(data.placementId).to.equal(placement.id);
   });
+
   it('should return email sent message', async () => {
     const allocationsFetchFailCount = process.env.FETCH_FAIL_AUTOMATION_COUNT + 20;
     const sendResponse = await checkFailureCount(allocationsFetchFailCount);
