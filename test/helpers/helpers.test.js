@@ -1,6 +1,10 @@
 import sinon from 'sinon';
 import response from '../../server/helpers/response';
+<<<<<<< HEAD
 import { getMailInfo, checkFailureCount } from '../../server/jobs/helpers';
+=======
+import { getMailInfo, increaseFailCount, checkFailureCount } from '../../server/jobs/helpers';
+>>>>>>> fb601e41ede4d290334be3e6e007822bd83153c7
 import { automationData } from '../../server/jobs';
 
 import * as allocation from '../../server/modules/allocations';
@@ -35,6 +39,7 @@ describe('Test that helper functions work as expected', () => {
     expect(data.partnerName).to.equal(placement.client_name);
     expect(data.placementId).to.equal(placement.id);
   });
+<<<<<<< HEAD
   it('should return email sent message', async () => {
     const allocationsFetchFailCount = process.env.FETCH_FAIL_AUTOMATION_COUNT + 20;
     const sendResponse = await checkFailureCount(allocationsFetchFailCount);
@@ -44,5 +49,14 @@ describe('Test that helper functions work as expected', () => {
     const allocationsFetchFailCount = process.env.FETCH_FAIL_AUTOMATION_COUNT - 5;
     const sendResponse = await checkFailureCount(allocationsFetchFailCount);
     expect(sendResponse.message).to.equal('Max failures not reached yet');
+=======
+  it('Should return number 1 when increasing count', () => {
+    const number = increaseFailCount();
+    expect(number).to.equal(2);
+  });
+  it('should return email sent message', () => {
+    const sendResponse = checkFailureCount(20);
+    expect(sendResponse.message).to.equal('Email sent successfully');
+>>>>>>> fb601e41ede4d290334be3e6e007822bd83153c7
   });
 });
