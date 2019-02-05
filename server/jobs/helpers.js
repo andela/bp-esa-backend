@@ -1,7 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-/* eslint-disable import/prefer-default-export */
-
 import { findPartnerById } from '../modules/allocations';
 import emailTransport from '../modules/email/emailTransport';
 import constructMailOptions from '../modules/email/emailModule';
@@ -13,9 +11,7 @@ let number = 1;
 
 /**
  * @desc Retrieves necessary info. to be sent via email for any given placement
- *
  * @param {oject} placement A placement instance from allocation
- *
  * @returns {object} Mail info to be sent
  */
 export const getMailInfo = async (placement) => {
@@ -43,8 +39,7 @@ export const getMailInfo = async (placement) => {
  * @returns {void}
  */
 /* istanbul ignore next */
-const increaseFailCount = () => {
-  // eslint-disable-next-line radix
+export const increaseFailCount = () => {
   number += 1;
 };
 
@@ -55,7 +50,6 @@ const increaseFailCount = () => {
  *
  * @returns {Object} Fail status if the operation fails
  */
-/* istanbul ignore next */
 const sendPlacementFetchEmail = (receiver) => {
   try {
     const mailOptions = constructMailOptions({
@@ -74,7 +68,7 @@ const sendPlacementFetchEmail = (receiver) => {
  * @returns {void}
  */
 /* istanbul ignore next */
-const checkFailureCount = () => {
+export const checkFailureCount = () => {
   // eslint-disable-next-line radix
   if (number >= parseInt(process.env.RESTART_TIME)) {
     sendPlacementFetchEmail(receiverEmail);
@@ -98,5 +92,3 @@ export async function executeEmailAutomation(emailFunctions, placement) {
     // write automation failure to database
   }
 }
-
-export default { checkFailureCount, increaseFailCount };
