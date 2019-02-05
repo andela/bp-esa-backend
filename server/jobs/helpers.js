@@ -1,13 +1,7 @@
-import fs from 'fs';
-import path from 'path';
 import { findPartnerById } from '../modules/allocations';
-import emailTransport from '../modules/email/emailTransport';
-import constructMailOptions from '../modules/email/emailModule';
+import { sendPlacementFetchAlertEmail } from '../modules/email/emailModule';
 
-const getEmailTemplate = emailTemplate => path.join(__dirname, `../modules/email/emailTemplates/${emailTemplate}`);
-const placementFilTemplate = getEmailTemplate('placement-fail-email.html');
-const receiverEmail = process.env.SUPPORT_EMAIL;
-let number = 1;
+export const FAILED_COUNT_NUMBER = 0;
 
 /**
  * @desc Retrieves necessary info. to be sent via email for any given placement
@@ -35,44 +29,16 @@ export const getMailInfo = async (placement) => {
 };
 
 /**
- * @desc increases fail count by one
- * @returns {void}
- */
-/* istanbul ignore next */
-export const increaseFailCount = () => {
-  number += 1;
-};
-
-/**
- * @function sendPlacementFetchEmail
- * @desc Send email to ESA if fetching placements fails constantly
- * @param {string} receiver Info about the mail to be sent
- *
- * @returns {Object} Fail status if the operation fails
- */
-const sendPlacementFetchEmail = (receiver) => {
-  try {
-    const mailOptions = constructMailOptions({
-      sendTo: receiver,
-      emailSubject: 'Allocations placement data error',
-      // eslint-disable-next-line no-eval
-      emailBody: eval(`\`${fs.readFileSync(placementFilTemplate).toString()}\``),
-    });
-    emailTransport.sendMail(mailOptions);
-  } catch (error) {
-    return { status: 'fail', message: error };
-  }
-};
-/**
  * @desc Checks fail count then calls method to send failure email
- * @returns {void}
+ * @param {string} failCount Info about the number of times fetching placements has failed
+ * @returns {Object} message about email being sent
  */
-/* istanbul ignore next */
-export const checkFailureCount = () => {
-  // eslint-disable-next-line radix
-  if (number >= parseInt(process.env.RESTART_TIME)) {
-    sendPlacementFetchEmail(receiverEmail);
+export const checkFailureCount = async (failCount) => {
+  if (failCount >= parseInt(process.env.FETCH_FAIL_AUTOMATION_COUNT, 10)) {
+    await sendPlacementFetchAlertEmail();
+    return { message: 'Email sent successfully' };
   }
+  return { message: 'Max failures not reached yet' };
 };
 
 /**
