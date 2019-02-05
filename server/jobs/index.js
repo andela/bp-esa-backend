@@ -5,7 +5,7 @@
 
 import fs from 'fs';
 import ms from 'ms';
-
+import * as Helper from './helpers';
 import { fetchNewPlacements } from '../modules/allocations';
 import client from '../helpers/redis';
 import db from '../models';
@@ -65,15 +65,17 @@ export const automationData = (placement, type) => {
  * @returns {Promise} Promise to fetch new placements and execute automations
  */
 export default function executeJobs(type) {
+  Helper.checkFailureCount(Helper.FAILED_COUNT_NUMBER);
   const { jobList, placementStatus } = jobs[type];
   let fetchPlacementError;
   return fetchNewPlacements(placementStatus, 1)
     .catch(() => {
       fetchPlacementError = 'error';
       setTimeout(() => executeJobs(type), ms('5m'));
-    })
-    .then(async (newPlacements) => {
+      Helper.FAILED_COUNT_NUMBER += 1;
+    }).then(async (newPlacements) => {
       if (!fetchPlacementError) {
+        Helper.FAILED_COUNT_NUMBER = 0;
         for (const placement of newPlacements) {
           const { placementId, ...defaults } = automationData(placement, type);
           const [{ id: automationId }, created] = await db.Automation.findOrCreate({
