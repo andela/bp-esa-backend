@@ -34,10 +34,16 @@ The following should be installed in your machine
     - brew services stop redis
     - brew services stop postgres
 ### Setup
-* Clone the application and change to it's directory
-* Create a `.env` file and use `.env.example` as a guide on the environment variables required
-* Run `docker-compose up --build`
-* Access the application on your machine `http://localhost:8000`
+ On the terminal run the following  commands:
+1. Change to the application root directory
+2. Uncomment  [this line](https://github.com/andela/bp-esa-backend/blob/1828ebf586cf5a04cae00b5b92fda845f3825932/Dockerfile#L23) for  local development. Change  the  following Environment Variables:
+>REDIS_HOST=redis
+
+3. Build a docker image with the following command
+` docker build -t esa-backend  .`
+4. Use docker  compose to install services required by the application i.e *postgres* and *redis*
+5. Then run `docker-compose up`
+
 
 ## API Documentation
 *  API documentation is a concise reference manual containing all the information required to work with the API, with details about the functions, classes, return types, arguments and more, supported by tutorials and examples. We take API Documentation Seriously.
