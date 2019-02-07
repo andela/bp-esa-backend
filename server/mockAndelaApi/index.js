@@ -1,86 +1,36 @@
 import express from 'express';
-import httpProxy from 'http-proxy';
-import samplePlacement from './samplePlacement';
-import * as helpers from './helpers';
+import faker from 'faker';
+import mockPlacement from './mockPlacement';
+import { slackClient } from '../modules/slack/slackIntegration';
 
 const router = express.Router();
-const proxy = httpProxy.createProxyServer({});
 
-const placementDatabase = {
-  offboarding: [],
-  onboarding: [],
-};
+const { list } = slackClient.users;
 
-const possiblePlacementStatus = [
-  'Placed - Awaiting Onboarding',
-  'External Engagements - Rolling Off',
-];
-
-const storePlacement = (placement, type) => {
-  placementDatabase[type].push(placement);
-};
-
-const validatePlacementData = (req, res, next) => { // eslint-disable-line consistent-return
-  const { placement } = req.body;
-  if (!placement) {
-    return helpers.badResponse(res, { error: 'Placement data not found' });
+/**
+ * Generates random number of placements
+ *
+ * @param {String} status The status of the placement to generate
+ *
+ * @returns {Array} The list of placements generated
+ */
+async function generatePlacements(status) {
+  const placements = [];
+  const { members } = await list();
+  const emails = members.reduce(
+    (result, { profile: { email } }) => (email ? [...result, email] : result),
+    [],
+  );
+  // max: 5, min: 1
+  for (let index = 0; index < Math.floor(Math.random() * 5) + 1; index++) {
+    placements.push(mockPlacement(status, emails[faker.random.number(emails.length - 1)]));
   }
+  return placements;
+}
 
-  // Validating the placement object fields
-  const requiredFields = Object.keys(samplePlacement);
-  const givenFields = Object.keys(placement);
-  const missingFields = [];
-  requiredFields.forEach(filed => !givenFields.includes(filed) && missingFields.push(filed));
-  if (missingFields.length) {
-    return helpers.badResponse(res, { error: 'The placement object is missing some required fields', missingFields });
-  }
-
-  // Check if the placement don't already exist.
-  let placementAlreadyExist = false;
-  if (req.path === '/placement/onboarding') {
-    placementAlreadyExist = helpers.checkPlacementExist(placementDatabase, placement, 'onboarding');
-  }
-  if (req.path === '/placement/offboarding') {
-    placementAlreadyExist = helpers.checkPlacementExist(placementDatabase, placement, 'offboarding');
-  }
-  if (placementAlreadyExist) {
-    return helpers.badResponse(res, { error: 'This placement already exist. Validated with the ID' });
-  }
-  next();
-};
-
-router.post('/placement/onboarding', validatePlacementData, (req, res) => {
-  storePlacement(req.body.placement, 'onboarding');
-  return helpers.successResponse(res, { message: 'Onboarding placement created', values: req.body.placement }, 201);
-});
-
-router.post('/placement/offboarding', validatePlacementData, (req, res) => {
-  storePlacement(req.body.placement, 'offboarding');
-  return helpers.successResponse(res, { message: 'Offboarding placement created', values: req.body.placement }, 201);
-});
-
-
-router.get('/placements', (req, res) => { // eslint-disable-line consistent-return
-  const { query: { status } } = req;
-  if (!status || !possiblePlacementStatus.includes(status)) {
-    return helpers.badResponse(res, { error: 'status query is invalid' });
-  }
-  if (status === 'Placed - Awaiting Onboarding') {
-    return helpers.successResponse(res, { values: placementDatabase.onboarding });
-  }
-  if (status === 'External Engagements - Rolling Off') {
-    return helpers.successResponse(res, { values: placementDatabase.offboarding });
-  }
-});
-
-router.post('/reset', (req, res) => {
-  placementDatabase.offboarding = [];
-  placementDatabase.onboarding = [];
-  return helpers.successResponse(res, { message: 'Placement database successfully reset' });
-});
-
-router.all('*', (req, res) => {
-  proxy.web(req, res, { target: 'https://api-prod.andela.com/api/v1', changeOrigin: true });
+router.get('/placements', async (req, res) => {
+  const { status } = req.query;
+  return res.status(200).json({ values: await generatePlacements(status) });
 });
 
 export default router;

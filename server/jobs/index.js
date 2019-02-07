@@ -68,7 +68,7 @@ export default function executeJobs(type) {
   Helper.checkFailureCount(Helper.FAILED_COUNT_NUMBER);
   const { jobList, placementStatus } = jobs[type];
   let fetchPlacementError;
-  return fetchNewPlacements(placementStatus, 1)
+  return fetchNewPlacements(placementStatus)
     .catch(() => {
       fetchPlacementError = 'error';
       setTimeout(() => executeJobs(type), ms('5m'));
