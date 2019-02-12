@@ -56,5 +56,6 @@ export async function executeEmailAutomation(emailFunctions, placement) {
     // write automation success to database
   } catch (error) {
     // write automation failure to database
+    console.log(error.message);
   }
 }

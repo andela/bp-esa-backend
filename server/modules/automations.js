@@ -111,4 +111,4 @@ export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
  * @param {string} partnerId The id of the partner(from the placement data).
  * @returns {Promise} Promise that resolves to the found partner record.
  */
-export const getPartnerRecord = partnerId => Partner.find({ where: { partnerId } });
+export const getPartnerRecord = partnerId => Partner.findOne({ where: { partnerId } });

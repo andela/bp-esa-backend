@@ -14,8 +14,12 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
  * @returns {undefined}
  */
 export default async function slackOffboarding(placement) {
-  const { fellow, client_id: partnerId } = placement;
-  accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'invite');
-  const { slackChannels: { general } } = await getPartnerRecord(partnerId);
-  accessChannel(fellow.email, general, 'kick');
+  try {
+    const { fellow, client_id: partnerId } = placement;
+    accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'invite');
+    const { slackChannels: { general } } = await getPartnerRecord(partnerId);
+    accessChannel(fellow.email, general, 'kick');
+  } catch (error) {
+    console.log(error.message);
+  }
 }
