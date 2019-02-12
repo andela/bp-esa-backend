@@ -20,6 +20,6 @@ export default async function slackOffboarding(placement) {
     const { slackChannels: { general } } = await getPartnerRecord(partnerId);
     accessChannel(fellow.email, general, 'kick');
   } catch (error) {
-    console.log(error.message);
+    throw new Error(error.message);
   }
 }
