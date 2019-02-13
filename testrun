@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set +e
+
+export M_USERNAME=esa_user;
+export M_PASSWORD=esa_user
+export M_DATABASE=esa_test
+
+docker  run -it --name testdb1  \
+    -e POSTGRES_DB=${M_DATABASE} \
+    -e POSTGRES_USER=${M_USERNAME} \
+    -e POSTGRES_PASSWORD=${M_PASSWORD} \
+    -d postgres:latest;
+
+docker  run -it --name redistestdb  \
+    -d redis:latest;
+
+export DB_TEST_URL=postgres://${M_USERNAME}:${M_PASSWORD}@testdb1:5432/${M_DATABASE}
+failcounter=0
+timeout_in_sec=120
+until docker exec testdb1 pg_isready --username=${M_USERNAME} --host="127.0.0.1" --quiet &> /dev/null ; do
+    let "failcounter += 1"
+    echo "Waiting for database connection..."
+     if [[ $failcounter -gt timeout_in_sec ]]; then
+      echo "Timeout ($timeout_in_sec seconds) reached; failed to connect to database"
+      exit 1
+    fi
+    sleep 2
+done
+docker run -it  --rm \
+    --link testdb1 \
+    --link redistestdb \
+    --env-file ./.env \
+    -e DB_HOST=testdb1 \
+    -e REDIS_HOST=redistestdb \
+    -e DB_DEV_NAME=${M_DATABASE} \
+    -e DB_USER_NAME=${M_USERNAME} \
+    -e DB_PASSWORD=${M_PASSWORD} \
+    -e DB_TEST_URL=${DB_TEST_URL} \
+    --volume $(pwd)/test:/usr/src/app/test \
+    esa-backend:latest sh -c " ls -la && npm run test";
+
+docker stop testdb1 redistestdb && docker rm testdb1 redistestdb;
