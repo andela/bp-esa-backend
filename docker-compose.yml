@@ -11,6 +11,9 @@ services:
       - "5432:5432"
   backend:
     image: esa-backend:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "6050:6050"
     depends_on:
