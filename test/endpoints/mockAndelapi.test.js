@@ -9,23 +9,26 @@ chai.use(chaiHttp);
 describe('Tests for mockAndelaApi endpoint\n', () => {
   it('Should return list of mock placements with a 200 status code', (done) => {
     const status = 'External Engagements - Rolling Off';
+    // const fakeUserList = sinon.stub(slackClient.users, 'list').resolves(slackMocks.userList);
+    const fakeUserList = sinon.stub(slackClient.users, 'list').callsFake(() => new Promise((r)=>r(slackMocks.userList)));
     const userEmails = slackMocks.userList.members.reduce(
       (result, { profile: { email } }) => (email ? [...result, email] : result),
       [],
     );
     chai
       .request(app)
-      .get(`/mock-api/placements/?status=${status}`)
+      .get(`/mock-api/placements?status=${status}`)
       .end((err, res) => {
-        const fakeUserList = sinon.stub(slackClient.users, 'list').callsFake(() => slackMocks.userList);
-        const { values } = res.body;
         expect(res).to.have.status(200);
-        // expect(res.body)
-        //   .to.have.property('values')
-        //   .to.be.an('array');
-        // expect(values.length > 0).to.equal(true);
-        // expect(values.length < 6).to.equal(true);
+        expect(res.body)
+        .to.have.property('values')
+        .to.be.an('array');
+        const { values } = res.body;
+        expect(values.length > 0).to.equal(true);
+        expect(values.length < 6).to.equal(true);
         // expect(userEmails.includes(values[0].fellow.email)).to.equal(true);
+        // expect(fakeUserList.called).to.equal(true);
+        // sinon.assert.called(fakeUserList.users.list);
         fakeUserList.restore();
         done();
       });
