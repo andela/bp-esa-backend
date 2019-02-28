@@ -5,7 +5,7 @@ set +e
 export M_USERNAME=esa_user;
 export M_PASSWORD=esa_user
 export M_DATABASE=esa_test
-
+docker build -t esa-backend:latest .;
 docker  run -it --name testdb1  \
     -e POSTGRES_DB=${M_DATABASE} \
     -e POSTGRES_USER=${M_USERNAME} \

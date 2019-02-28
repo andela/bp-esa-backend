@@ -21,8 +21,6 @@ app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerConfig));
-
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -31,6 +29,8 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerConfig));
 
 routes(app);
 
