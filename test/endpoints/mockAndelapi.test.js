@@ -21,6 +21,7 @@ describe('Tests for mockAndelaApi endpoint\n', () => {
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
+
         .to.have.property('values')
         .to.be.an('array');
         const { values } = res.body;
