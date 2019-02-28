@@ -2,7 +2,16 @@ build
 node_modules/
 test.js
 .env
-package-lock.json
+
 .vscode/
 coverage
 .nyc_output
+
+# Webstorm
+.idea/
+
+# Yarn
+yarn.lock
+
+# Redis server dump
+dump.rdb
