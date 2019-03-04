@@ -25,7 +25,9 @@ describe('server/models/freckleAutomation', () => {
     });
 
     it('defines a belongsTo association with Automation', () => {
-      expect(FlackAutomation.belongsTo).to.have.been.calledWith(automation, automationRelationships);
+      expect(FlackAutomation.belongsTo).to.have.been.calledWith(
+        automation, automationRelationships,
+      );
     });
   });
 });

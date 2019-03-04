@@ -82,18 +82,18 @@ const automationProcess = async (newPlacements, type, jobList) => {
  * @returns {Promise} Promise to fetch new placements and execute automations
  */
 export default function executeJobs(type) {
-  Helper.checkFailureCount(Helper.FAILED_COUNT_NUMBER);
+  Helper.checkFailureCount(Helper.count.FAILED_COUNT_NUMBER);
   const { jobList, placementStatus } = jobs[type];
   let fetchPlacementError;
   return fetchNewPlacements(placementStatus)
     .catch(() => {
       fetchPlacementError = 'error';
       setTimeout(() => executeJobs(type), ms('5m'));
-      Helper.FAILED_COUNT_NUMBER += 1;
+      Helper.count.FAILED_COUNT_NUMBER += 1;
     })
     .then(async (newPlacements) => {
       if (!fetchPlacementError) {
-        Helper.FAILED_COUNT_NUMBER = 0;
+        Helper.count.FAILED_COUNT_NUMBER = 0;
         return automationProcess(newPlacements, type, jobList);
       }
     });
