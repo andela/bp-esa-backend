@@ -9,7 +9,7 @@ import { creatOrUpdatePartnerRecord } from '../../modules/automations';
  * @param {object} automationResult Result of automation job
  * @returns {undefined}
  */
-export default async (placement) => {
+const freckleOnboarding = async (placement) => {
   const { fellow, client_id: partnerId, client_name: partnerName } = placement;
   getOrCreateProject(placement.client_name).then((project) => {
     if (project.id) {
@@ -22,3 +22,5 @@ export default async (placement) => {
     }
   });
 };
+
+export default freckleOnboarding;

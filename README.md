@@ -47,14 +47,12 @@ The following should be installed in your machine
 
 ## API Documentation
 *  API documentation is a concise reference manual containing all the information required to work with the API, with details about the functions, classes, return types, arguments and more, supported by tutorials and examples. We take API Documentation Seriously.
-* Engagement Support Automation(ESA) API is documented using [swagger](https://swagger.io/) and abides to the [**OpenAPI Specification**](https://swagger.io/specification/)
-### How to Access the API Documentation
-* Local development setup; After a complete and successful setup of the application, you can access the API Documentation at:
-> http:<host_url>:<host_port>/api-docs
-### How to Access and contribute ESA API Documentation
-* You can access the API documentation on `~<project_root_folder>/docs/swagger/{here}`
-* Each file represents and endpoint and it's configuration.
-* Swagger uses `YAML` syntax. You can write documentation to a particular endpoint and add it to the already existing endpoints here `~<project_root_folder>/docs/swagger/{here}`
+
+### How to Access the API Documentation 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/067850387022b9c2766c#?env%5BREST%20API%20for%20Engagement%20Support%20Automation%5D=W3siZW5hYmxlZCI6dHJ1ZSwia2V5IjoidXJsIiwidmFsdWUiOiJodHRwczovLzk2MGFjMjg1LWNmNTMtNDI1NS04NGE2LWM4ZmYyZTM1MDZjMS5tb2NrLnBzdG1uLmlvIiwidHlwZSI6InRleHQifV0=)
+
+The documentation can be __viewed__ on this [link](https://documenter.getpostman.com/view/3235336/S11HteM1).
+  
 
 ## How To Contribute
 
