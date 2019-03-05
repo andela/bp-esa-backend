@@ -7,6 +7,15 @@ dotenv.config();
 const { SLACK_TOKEN } = process.env;
 export const slackClient = new WebClient(SLACK_TOKEN);
 
+const channelData = channelName => ({
+  automationId: process.env.AUTOMATION_ID,
+  slackUserId: null,
+  channelName,
+  type: 'create',
+  status: 'success',
+  statusMessage: `${channelName} slack channel created`,
+});
+
 /**
  * @func createChannel
  * @desc Create a slack channel(and store it in the database)
@@ -15,17 +24,17 @@ export const slackClient = new WebClient(SLACK_TOKEN);
  * @returns {object} The details of the slack channel created.
  */
 const createChannel = async (channelName) => {
-  const result = await slackClient.groups.create({ name: channelName });
-  await createOrUpdateSlackAutomation({
-    automationId: process.env.AUTOMATION_ID,
-    slackUserId: null,
-    channelName,
-    channelId: result.group.id,
-    type: 'create',
-    status: 'success',
-    statusMessage: `${channelName} slack channel created`,
-  });
-  return result;
+  const data = channelData(channelName);
+  try {
+    const result = await slackClient.groups.create({ name: channelName });
+    data.channelId = result.group.id;
+    await createOrUpdateSlackAutomation(data);
+    return result;
+  } catch (error) {
+    data.status = 'failure';
+    data.statusMessage = `${channelName} slack channel not created`;
+    createOrUpdateSlackAutomation(data);
+  }
 };
 
 /**
@@ -47,6 +56,11 @@ const getExistingChannel = async (channelName) => {
   return { channelExists, channelId };
 };
 
+const automationData = (partnerName, channelType) => {
+  const channelName = makeChannelNames(partnerName, channelType);
+  return channelData(channelName);
+};
+
 /**
  * @function createPartnerChannel
  * @desc Create slack channels for a partner engagement
@@ -57,26 +71,22 @@ const getExistingChannel = async (channelName) => {
  * @returns {Object} An object containing details of the created channels
  */
 export const createPartnerChannel = async (partnerName, channelType) => {
-  const channelName = makeChannelNames(partnerName, channelType);
+  const data = automationData(partnerName, channelType);
   try {
-    const { group } = await createChannel(channelName);
+    const { group } = await createChannel(data.channelName);
+    data.channelId = group.id;
     return { id: group.id, name: group.name };
   } catch (error) {
     let channelId;
     let channelExists = false;
     if (error.data && error.data.error === 'name_taken') {
-      ({ channelExists, channelId } = await getExistingChannel(channelName));
+      ({ channelExists, channelId = null } = await getExistingChannel(data.channelName));
     }
-    await createOrUpdateSlackAutomation({
-      automationId: process.env.AUTOMATION_ID,
-      slackUserId: null,
-      channelName,
-      channelId: channelId || null,
-      type: 'create',
-      status: channelExists ? 'success' : 'failure',
-      statusMessage: channelExists ? 'channel already exist' : `${error.message}`,
-    });
-    return { id: channelId, name: channelName };
+    data.channelId = channelId;
+    data.status = 'failure';
+    data.statusMessage = channelExists ? 'channel already exist' : `${error.message}`;
+    await createOrUpdateSlackAutomation(data);
+    return { id: channelId, name: data.channelName };
   }
 };
 

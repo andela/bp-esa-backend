@@ -1,5 +1,6 @@
 import sequelize from 'sequelize';
 import db from '../models';
+import { io } from '..';
 
 const { Op } = sequelize;
 const {
@@ -22,7 +23,10 @@ const {
  *
  * @return {Promise} Promise that resolves the created/updated slackAutomation.
  */
-export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
+export const createOrUpdateSlackAutomation = (automationDetails) => {
+  io.emit('slackAutomation', automationDetails);
+  return SlackAutomation.upsertById(automationDetails);
+};
 
 /**
  * @func getSlackAutomation
@@ -61,7 +65,10 @@ export const getSlackAutomation = (automationDetails) => {
  *
  * @return {Promise} Promise that resolves the created/updated emailAutomation.
  */
-export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
+export const createOrUpdateEmaillAutomation = (automationDetails) => {
+  io.emit('emailAutomation', automationDetails);
+  return EmailAutomation.upsertById(automationDetails);
+};
 
 /**
  * @func createOrUpdateFreckleAutomation
@@ -79,7 +86,10 @@ export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomati
  *
  * @returns {Promise} Promise that resolves to the created/updated freckleAutomation.
  */
-export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutomation.upsertById(automationDetails);
+export const createOrUpdateFreckleAutomation = (automationDetails) => {
+  io.emit('freckleAutomation', automationDetails);
+  return FreckleAutomation.upsertById(automationDetails);
+};
 
 /**
  * @func creatOrUpdatePartnerRecord
@@ -96,6 +106,7 @@ export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutom
  * @returns {Promise} Promise that resolves to the created/updated partner record
  */
 export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
+  io.emit('PartnerDetails', partnerDetails);
   const { partnerId } = partnerDetails;
   const existingRecord = await db.Partner.find({ where: { partnerId } });
   if (existingRecord) {

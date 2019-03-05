@@ -7,6 +7,7 @@ import fs from 'fs';
 import ms from 'ms';
 import * as Helper from './helpers';
 import { fetchNewPlacements } from '../modules/allocations';
+import { io } from '..';
 import client from '../helpers/redis';
 import db from '../models';
 
@@ -57,6 +58,21 @@ export const automationData = (placement, type) => {
   };
 };
 
+const automationProcess = async (newPlacements, type, jobList) => {
+  for (const placement of newPlacements) {
+    const { placementId, ...defaults } = automationData(placement, type);
+    io.emit('newAutomation', defaults);
+    const [{ id: automationId }, created] = await db.Automation.findOrCreate({
+      where: { placementId },
+      defaults,
+    });
+    if (created) {
+      process.env.AUTOMATION_ID = automationId;
+      await Promise.all(jobList.map(job => job(placement)));
+    }
+  }
+};
+
 /**
  * @desc Executes jobs to automate developer offboarding/onboarding tasks
  *
@@ -73,21 +89,11 @@ export default function executeJobs(type) {
       fetchPlacementError = 'error';
       setTimeout(() => executeJobs(type), ms('5m'));
       Helper.FAILED_COUNT_NUMBER += 1;
-    }).then(async (newPlacements) => {
+    })
+    .then(async (newPlacements) => {
       if (!fetchPlacementError) {
         Helper.FAILED_COUNT_NUMBER = 0;
-        for (const placement of newPlacements) {
-          const { placementId, ...defaults } = automationData(placement, type);
-          const [{ id: automationId }, created] = await db.Automation.findOrCreate({
-            where: { placementId },
-            defaults,
-          });
-          if (created) {
-            process.env.AUTOMATION_ID = automationId;
-            await Promise.all(jobList.map(job => job(placement)));
-            client.incr('numberOfJobs');
-          }
-        }
+        automationProcess(newPlacements, type, jobList);
       }
     });
 }
