@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 
 #Install app dependencies using npm binary
 COPY package*.json /usr/src/app/
-COPY docs /usr/src/app/docs/
+#COPY docs /usr/src/app/docs/
 COPY db /usr/src/app/db/
 COPY server /usr/src/app/server/
 COPY .sequelizerc /usr/src/app/
