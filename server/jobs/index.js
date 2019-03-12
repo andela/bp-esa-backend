@@ -68,7 +68,7 @@ const automationProcess = async (newPlacements, type, jobList) => {
     if (created) {
       process.env.AUTOMATION_ID = automationId;
       await Promise.all(jobList.map(job => job(placement)));
-      const newAutomation = await db.Automation.findById(automationId, { include });
+      const newAutomation = await db.Automation.findByPk(automationId, { include });
       io.emit('newAutomation', formatPayload(newAutomation));
     }
   }
@@ -94,7 +94,7 @@ export default function executeJobs(type) {
     .then(async (newPlacements) => {
       if (!fetchPlacementError) {
         Helper.FAILED_COUNT_NUMBER = 0;
-        automationProcess(newPlacements, type, jobList);
+        return automationProcess(newPlacements, type, jobList);
       }
     });
 }
