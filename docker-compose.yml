@@ -9,13 +9,21 @@ services:
     image: postgres:latest
     ports:
       - "5432:5432"
+    environment: 
+      - "POSTGRES_USER=${DB_USER_NAME}"
+      - "POSTGRES_DB=${DB_DEV_NAME}"
+      - "POSTGRES_PASSWORD=${DB_PASSWORD}"
   backend:
     image: esa-backend:latest
+    env_file: .env
     build: 
       context: .
       dockerfile: Dockerfile
     ports:
       - "6050:6050"
+    environment: 
+      - "REDIS_HOST=redis"
+      - "DB_HOST=database"
     depends_on:
       - redis
       - database
