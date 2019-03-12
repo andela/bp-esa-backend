@@ -64,7 +64,7 @@ export const createPartnerChannel = async (partnerName, channelType) => {
   } catch (error) {
     let channelId;
     let channelExists = false;
-    if (error.data && (error.data.error === 'name_taken')) {
+    if (error.data && error.data.error === 'name_taken') {
       ({ channelExists, channelId } = await getExistingChannel(channelName));
     }
     await createOrUpdateSlackAutomation({
@@ -109,7 +109,7 @@ export const accessChannel = async (email, channelId, context) => {
     const slackAction = slackClient.groups[context];
     const userId = await getSlackUserId(email);
     await slackAction({ user: userId, channel: channelId });
-    await createOrUpdateSlackAutomation({
+    createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: userId,
       channelId,
@@ -119,7 +119,7 @@ export const accessChannel = async (email, channelId, context) => {
       statusMessage: `${email} ${context === 'invite' ? 'invited to' : 'kicked from'} a channel`,
     });
   } catch (error) {
-    await createOrUpdateSlackAutomation({
+    createOrUpdateSlackAutomation({
       automationId: process.env.AUTOMATION_ID,
       slackUserId: null,
       channelId,
