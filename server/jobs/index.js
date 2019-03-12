@@ -1,14 +1,14 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 /* eslint-disable  no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
 
 import fs from 'fs';
 import ms from 'ms';
 import * as Helper from './helpers';
 import { fetchNewPlacements } from '../modules/allocations';
 import { io } from '..';
-import client from '../helpers/redis';
+import { formatPayload } from '../utils/formatter';
+import { include } from '../controllers/automationController';
 import db from '../models';
 
 /**
@@ -61,7 +61,6 @@ export const automationData = (placement, type) => {
 const automationProcess = async (newPlacements, type, jobList) => {
   for (const placement of newPlacements) {
     const { placementId, ...defaults } = automationData(placement, type);
-    io.emit('newAutomation', defaults);
     const [{ id: automationId }, created] = await db.Automation.findOrCreate({
       where: { placementId },
       defaults,
@@ -69,6 +68,8 @@ const automationProcess = async (newPlacements, type, jobList) => {
     if (created) {
       process.env.AUTOMATION_ID = automationId;
       await Promise.all(jobList.map(job => job(placement)));
+      const newAutomation = await db.Automation.findById(automationId, { include });
+      io.emit('newAutomation', formatPayload(newAutomation));
     }
   }
 };

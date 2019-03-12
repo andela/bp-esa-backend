@@ -1,6 +1,6 @@
 import express from 'express';
 import HTTP from 'http';
-import IO from 'socket.io';
+import socket from 'socket.io';
 import logger from 'morgan';
 import dotenv from 'dotenv';
 import '@babel/polyfill';
@@ -15,11 +15,7 @@ dotenv.config();
 // Set up the express app
 const app = express();
 const http = HTTP.Server(app);
-export const io = IO(http);
-
-io.on('connection', () => {
-  console.log('A user connected');
-});
+export const io = socket(http);
 
 // Log requests to the console.
 app.use(logger('dev'));
@@ -29,10 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept',
-  );
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 

@@ -29,7 +29,6 @@ const resolvePartner = (partnerId, result, resolve) => {
  *
  * @returns {Promise} Promise of the partner data to be fetched
  */
-
 const retrievePartner = partnerId => new Promise((resolve, reject) => {
   client.get('partners', (error, result) => {
     if (error) {
@@ -61,7 +60,7 @@ export async function findPartnerById(partnerId) {
  *
  * @param {string} status The status of placements to fetch from allocations
  *
- * @returns {Array} List of placements from the last TIME_INTERVAL
+ * @returns {Promise} Promise to return list of placements
  */
 export const fetchNewPlacements = async (status) => {
   const { data } = await axios.get(`${process.env.ALLOCATION_PLACEMENTS}?status=${status}`);
