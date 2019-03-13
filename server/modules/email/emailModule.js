@@ -26,27 +26,22 @@ const placementFailedTemplatePath = getEmailTemplatePath('placement-fail-email.h
  * @returns {undefined}
  */
 const sendAndSaveMail = async (mailOptions) => {
+  const data = {
+    automationId: process.env.AUTOMATION_ID,
+    body: mailOptions.html,
+    recipient: mailOptions.to,
+    sender: mailOptions.from,
+    subject: mailOptions.subject,
+    status: 'success',
+    statusMessage: 'Email sent succesfully',
+  };
   try {
     await emailTransport.sendMail(mailOptions);
-    await createOrUpdateEmaillAutomation({
-      automationId: process.env.AUTOMATION_ID,
-      body: mailOptions.html,
-      recipient: mailOptions.to,
-      sender: mailOptions.from,
-      subject: mailOptions.subject,
-      status: 'success',
-      statusMessage: 'Email sent succesfully',
-    });
+    await createOrUpdateEmaillAutomation(data);
   } catch (error) {
-    await createOrUpdateEmaillAutomation({
-      automationId: process.env.AUTOMATION_ID,
-      body: mailOptions.html,
-      recipient: mailOptions.to,
-      sender: mailOptions.from,
-      subject: mailOptions.subject,
-      status: 'failure',
-      statusMessage: error.message,
-    });
+    data.status = 'failure';
+    data.statusMessage = error.message;
+    await createOrUpdateEmaillAutomation(data);
   }
 };
 

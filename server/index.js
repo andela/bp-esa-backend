@@ -1,4 +1,6 @@
 import express from 'express';
+import HTTP from 'http';
+import socket from 'socket.io';
 import logger from 'morgan';
 import dotenv from 'dotenv';
 import '@babel/polyfill';
@@ -12,6 +14,8 @@ dotenv.config();
 
 // Set up the express app
 const app = express();
+const http = HTTP.Server(app);
+export const io = socket(http);
 
 // Log requests to the console.
 app.use(logger('dev'));
@@ -21,10 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept',
-  );
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 
@@ -42,7 +43,7 @@ app.set('port', port);
 // Start worker
 worker.init();
 
-app.listen(port, () => {
+http.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
   console.log(`Timer Interval is set to ${process.env.TIMER_INTERVAL}`);
   setInterval(() => worker.exec(), ms(process.env.TIMER_INTERVAL || '1d'));
