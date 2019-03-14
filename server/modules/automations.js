@@ -22,6 +22,7 @@ const {
  *
  * @return {Promise} Promise that resolves the created/updated slackAutomation.
  */
+// eslint-disable-next-line max-len
 export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
 
 /**
@@ -61,6 +62,7 @@ export const getSlackAutomation = (automationDetails) => {
  *
  * @return {Promise} Promise that resolves the created/updated emailAutomation.
  */
+// eslint-disable-next-line max-len
 export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
 
 /**
@@ -79,6 +81,7 @@ export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomati
  *
  * @returns {Promise} Promise that resolves to the created/updated freckleAutomation.
  */
+// eslint-disable-next-line max-len
 export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutomation.upsertById(automationDetails);
 
 /**
@@ -87,7 +90,7 @@ export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutom
  *
  * @param {object} partnerDetails The partner details
  * @param {string} partnerDetails.name Name of partner
- * @param {string} partnerDetails.partnerId Id of partner from allocaitons
+ * @param {string} partnerDetails.partnerId Id of partner from allocations
  * @param {string} partnerDetails.freckleProjectId The partner freckle project ID
  * @param {object} partnerDetails.slackChannels The partner slack channels
  * @param {string} partnerDetails.slackChannels.internal The partner internal slack channel
