@@ -6,7 +6,7 @@ import { formatAutomationResponse } from '../utils/formatter';
 const automation = models.Automation;
 export const include = [
   { model: models.EmailAutomation, as: 'emailAutomations' },
-  { model: models.SlackAutomation, as: 'slackAutomations' },
+  { model: models.SlackAutomation, as: 'slackAutomations', where: { status: 'failure' } },
   { model: models.FreckleAutomation, as: 'freckleAutomations' },
 ];
 
