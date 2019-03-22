@@ -1,18 +1,35 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 /* eslint-disable no-console */
+import { Op } from 'sequelize';
 import models from '../models';
 import { formatAutomationResponse } from '../utils/formatter';
 
 const automation = models.Automation;
 export const include = [
-  { model: models.EmailAutomation, as: 'emailAutomations' },
-  { model: models.SlackAutomation, as: 'slackAutomations', where: { status: 'failure' } },
-  { model: models.FreckleAutomation, as: 'freckleAutomations' },
+  {
+    model: models.EmailAutomation,
+    as: 'emailAutomations',
+    required: false,
+  },
+  {
+    model: models.SlackAutomation,
+    as: 'slackAutomations',
+    required: false,
+  },
+  {
+    model: models.FreckleAutomation,
+    as: 'freckleAutomations',
+    required: false,
+  },
 ];
 
 const order = [
-  ['createdAt', 'DESC'],
+  ['id', 'DESC'],
 ];
+
+// holds values needed for the status column
+const statusValues = ['success', 'failure'];
 
 /**
  * Returns all data
@@ -54,6 +71,46 @@ const paginationResponse = (res, allData, page, numberOfPages, data, nextPage, p
   },
 });
 
+const filterObjectInJSON = (req) => {
+  try {
+    // duplicate include object
+    const includeWithWhereQuery = [...include];
+    // fetch automation key values from JSON
+    const { slackAutomation, emailAutomation, freckleAutomation } = req.body;
+
+    // check if slackAutomation has either success or failure strings
+    if (slackAutomation) {
+      includeWithWhereQuery.forEach((queryModel) => {
+        if (queryModel.as === 'slackAutomations' && statusValues.includes(slackAutomation)) {
+          queryModel.where = { status: `${slackAutomation}` };
+        }
+      });
+    }
+
+    // check if emailAutomation has either success or failure strings
+    if (emailAutomation) {
+      includeWithWhereQuery.forEach((queryModel) => {
+        if (queryModel.as === 'emailAutomations' && statusValues.includes(emailAutomation)) {
+          queryModel.where = { status: `${emailAutomation}` };
+        }
+      });
+    }
+
+    // check if freckleAutomation has either success or failure strings
+    if (freckleAutomation) {
+      includeWithWhereQuery.forEach((queryModel) => {
+        if (queryModel.as === 'freckleAutomations' && statusValues.includes(freckleAutomation)) {
+          queryModel.where = { status: `${freckleAutomation}` };
+        }
+      });
+    }
+
+    return includeWithWhereQuery;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 /**
  * Returns pagination in JSON format
@@ -63,12 +120,54 @@ const paginationResponse = (res, allData, page, numberOfPages, data, nextPage, p
  * @returns {object} JSON object
  */
 const paginationData = (req, res) => {
-  const limit = parseInt(req.query.limit, 10) || 10;
+  let createdAt;
   let offset = 0;
   let prevPage;
   let nextPage;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const { date } = req.body;
 
-  return automation.findAndCountAll()
+  // check if date object exists in the req body
+  if (date) {
+    // if date.from is greater than date.to or today, return an error
+    if ((new Date(date.from) > new Date(date.to)) || (new Date(date.from) > new Date())) {
+      return res.status(400).json({ error: 'date.from cannot be greater than date.now or today' });
+    }
+    // check if both date from and to are provided
+    if (date.from && date.to) {
+      createdAt = {
+        [Op.between]: [date.from, date.to],
+      };
+    }
+
+    // if only the date from is provided then return data up to now
+    if (date.from && !date.to) {
+      createdAt = {
+        [Op.between]: [date.from, new Date()],
+      };
+    }
+
+    // if only the date.to has been provided, return all data up to date.to
+    if (!date.from && date.to) {
+      createdAt = {
+        [Op.lte]: date.to,
+      };
+    }
+  } else {
+    // if date object is not provided return all data up to today
+    (
+      createdAt = {
+        [Op.lte]: new Date(),
+      }
+    );
+  }
+
+
+  return automation.findAndCountAll({
+    where: {
+      createdAt,
+    },
+  })
     .then((data) => {
       const page = parseInt(req.query.page, 10) || 1; // current page number
       const numberOfPages = Math.ceil(data.count / limit); // all pages count
@@ -85,10 +184,11 @@ const paginationData = (req, res) => {
 
 
       return automation.findAll({
-        include,
+        include: filterObjectInJSON(req),
         limit,
         offset,
         order,
+        logging: console.log,
       })
         .then(allData => paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage));
     });
