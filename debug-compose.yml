@@ -10,36 +10,24 @@ services:
     ports:
       - "5432:5432"
     environment: 
+      - "POSTGRES_PASSWORD=${DB_PASSWORD}"
       - "POSTGRES_USER=${DB_USER_NAME}"
       - "POSTGRES_DB=${DB_DEV_NAME}"
-      - "POSTGRES_PASSWORD=${DB_PASSWORD}"
   backend:
     image: esa-backend:latest
     env_file: .env
     build: 
       context: .
-      dockerfile: Dockerfile.dev
     ports:
       - "6050:${PORT}"
+      - "9229:9229"
+    volumes:
+      - "${PWD}:/usr/src/app/"
+      - /usr/src/app/node_modules
     environment: 
-      - "REDIS_HOST=redis"
       - "DB_HOST=database"
+      - "REDIS_HOST=redis"
     depends_on:
       - redis
       - database
-  adminer:
-    image: adminer
-    # restart: always
-    environment:
-      - "ADMINER_DEFAULT_SERVER=database"
-    ports:
-      - 8080:8080
-  migration:
-    image: esa-backend:latest
-    command: ["wait-for-it", "database:5432", "--", "npm", "run", "migrations"]
-    env_file: .env
-    environment: 
-      - "DB_HOST=database"
-    depends_on:
-      - database
-
+    command: "npm run start:dev"
