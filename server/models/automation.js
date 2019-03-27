@@ -44,6 +44,11 @@ export default (sequelize, DataTypes) => {
       foreignKey: 'automationId',
       as: 'emailAutomations',
     });
+    Automation.belongsTo(models.Partner, {
+      foreignKey: 'partnerId',
+      as: 'partner',
+      onDelete: 'SET NULL',
+    });
   };
   return Automation;
 };

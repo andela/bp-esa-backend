@@ -100,9 +100,9 @@ export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutom
  */
 export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
   const { partnerId } = partnerDetails;
-  const existingRecord = await db.Partner.find({ where: { partnerId } });
+  const existingRecord = await db.Partner.find({ where: { id: partnerId } });
   if (existingRecord) {
-    return db.Partner.update(partnerDetails, { where: { partnerId } });
+    return db.Partner.update(partnerDetails, { where: { id: partnerId } });
   }
   return db.Partner.create(partnerDetails);
 };
@@ -114,4 +114,4 @@ export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
  * @param {string} partnerId The id of the partner(from the placement data).
  * @returns {Promise} Promise that resolves to the found partner record.
  */
-export const getPartnerRecord = partnerId => Partner.find({ where: { partnerId } });
+export const getPartnerRecord = partnerId => Partner.find({ where: { id: partnerId } });

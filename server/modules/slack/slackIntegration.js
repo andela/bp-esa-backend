@@ -15,6 +15,13 @@ const channelData = channelName => ({
   statusMessage: `${channelName} slack channel created`,
 });
 
+const skippedStatus = {
+  'An API error occurred: not_in_group': 'skipped',
+  'An API error occurred: name_taken': 'skipped',
+  'An API error occurred: cant_kick_self': 'skipped',
+  'An API error occurred: cant_invite_self': 'skipped',
+};
+
 /**
  * @func getExistingChannel
  * @desc Get an existing slack channel(from the database)
@@ -48,7 +55,7 @@ const createChannel = async (channelName) => {
     data.channelId = result.group.id;
     return data;
   } catch (error) {
-    data.status = 'failure';
+    data.status = skippedStatus[error.message] || 'failure';
     data.statusMessage = error.message;
     let channelId;
     if (error.data && error.data.error === 'name_taken') {
@@ -100,7 +107,6 @@ export const getSlackUserId = async (email) => {
  *
  * @returns {Object} The result of the operation performed
  */
-
 export const accessChannel = async (email, channelId, context) => {
   let channelInfo;
   try {
@@ -122,8 +128,8 @@ export const accessChannel = async (email, channelId, context) => {
       channelId,
       channelName: channelInfo && channelInfo.group.name,
       type: context,
-      status: 'failure',
-      statusMessage: `${error.message}`,
+      status: skippedStatus[error.message] || 'failure',
+      statusMessage: error.message,
     };
   }
 };

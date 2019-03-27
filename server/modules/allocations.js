@@ -1,43 +1,32 @@
 import axios from 'axios';
-import redis from 'redis';
 import dotenv from 'dotenv';
 import ms from 'ms';
-import client from '../helpers/redis';
+import models from '../models';
 
 dotenv.config();
 
 // Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
+const validStatus = [
+  'Active Partner',
+  'Inactive Partner',
+  'Onboarding Partner',
+  'Onboarding and Active Partner',
+];
+
 // Updates the local redis store with latest Partner List
-export const updatePartnerStore = () => axios.get(process.env.ANDELA_PARTNERS).then((response) => {
-  client.set('partners', JSON.stringify(response.data), redis.print);
-  return response.data;
-});
-
-const resolvePartner = (partnerId, result, resolve) => {
-  if (result) {
-    return resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
+export const updatePartnerStore = (partnerId) => {
+  if (partnerId) {
+    return axios
+      .get(`${process.env.ANDELA_PARTNERS}/${partnerId}`)
+      .then(async response => models.Partner.create(response.data));
   }
-  return resolve(null);
-};
-
-/**
- * @desc Fetch partner data from external api
- *
- * @param {string} partnerId ID of the partner
- *
- * @returns {Promise} Promise of the partner data to be fetched
- */
-const retrievePartner = partnerId => new Promise((resolve, reject) => {
-  client.get('partners', (error, result) => {
-    if (error) {
-      reject(error);
-    }
-    return resolvePartner(partnerId, result, resolve);
+  return axios.get(`${process.env.ANDELA_PARTNERS}?status=${validStatus}`).then(async (response) => {
+    await models.Partner.destroy({ where: {} });
+    return models.Partner.bulkCreate(response.data.values);
   });
-});
-
+};
 /**
  * @desc Get partner details from radis db or fetch new partner data
  *
@@ -46,10 +35,9 @@ const retrievePartner = partnerId => new Promise((resolve, reject) => {
  * @returns {object} Data of the partner
  */
 export async function findPartnerById(partnerId) {
-  let partner = await retrievePartner(partnerId);
+  let partner = await models.Partner.findByPk(partnerId);
   if (!partner) {
-    const { values } = await updatePartnerStore();
-    [partner] = values.filter(data => data.id === partnerId);
+    partner = await updatePartnerStore(partnerId);
     if (!partner) throw new Error('Partner record was not found');
   }
   return partner;
@@ -63,7 +51,9 @@ export async function findPartnerById(partnerId) {
  * @returns {Promise} Promise to return list of placements
  */
 export const fetchNewPlacements = async (status) => {
-  const { data } = await axios.get(`${process.env.ALLOCATION_PLACEMENTS}?status=${status}`);
   const fromDate = new Date(Date.now() - ms(process.env.TIMER_INTERVAL));
-  return data.values.filter(placement => Date.parse(placement.created_at) > fromDate);
+  const { data } = await axios.get(
+    `${process.env.ALLOCATION_PLACEMENTS}?status=${status}&created_at=${fromDate}`,
+  );
+  return data.values;
 };

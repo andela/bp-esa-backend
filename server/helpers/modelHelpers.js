@@ -3,7 +3,7 @@ export function baseAutomationFields(DataTypes) {
   return {
     status: {
       type: DataTypes.ENUM,
-      values: ['success', 'failure'],
+      values: ['success', 'failure', 'skipped'],
       allowNull: false,
     },
     statusMessage: {

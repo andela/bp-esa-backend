@@ -10,9 +10,7 @@ export const include = [
   { model: models.FreckleAutomation, as: 'freckleAutomations' },
 ];
 
-const order = [
-  ['createdAt', 'DESC'],
-];
+const order = [['createdAt', 'DESC']];
 
 /**
  * Returns all data
@@ -20,14 +18,11 @@ const order = [
  * @param {object} res REST Response object
  * @returns {object} Response containing all data
  */
-const checkQueryObject = res => (
-  automation.findAll({ include, order }).then(data => res.status(200).json({
-    status: 'success',
-    message: 'Successfully fetched automations',
-    data: formatAutomationResponse(data),
-  }))
-);
-
+const checkQueryObject = res => automation.findAll({ include, order }).then(data => res.status(200).json({
+  status: 'success',
+  message: 'Successfully fetched automations',
+  data: formatAutomationResponse(data),
+}));
 
 /**
  * Returns a response JSON object
@@ -54,7 +49,6 @@ const paginationResponse = (res, allData, page, numberOfPages, data, nextPage, p
   },
 });
 
-
 /**
  * Returns pagination in JSON format
  *
@@ -68,30 +62,28 @@ const paginationData = (req, res) => {
   let prevPage;
   let nextPage;
 
-  return automation.findAndCountAll()
-    .then((data) => {
-      const page = parseInt(req.query.page, 10) || 1; // current page number
-      const numberOfPages = Math.ceil(data.count / limit); // all pages count
-      offset = limit * (page - 1);
+  return automation.findAndCountAll().then((data) => {
+    const page = parseInt(req.query.page, 10) || 1; // current page number
+    const numberOfPages = Math.ceil(data.count / limit); // all pages count
+    offset = limit * (page - 1);
 
-      // check if number of pages is less than the current page number to show next page number
-      if (page < numberOfPages) {
-        nextPage = page + 1;
-      }
-      // show previous page number if page is greater than 1
-      if (page > 1) {
-        prevPage = page - 1;
-      }
-
-
-      return automation.findAll({
+    // check if number of pages is less than the current page number to show next page number
+    if (page < numberOfPages) {
+      nextPage = page + 1;
+    }
+    // show previous page number if page is greater than 1
+    if (page > 1) {
+      prevPage = page - 1;
+    }
+    return automation
+      .findAll({
         include,
         limit,
         offset,
         order,
       })
-        .then(allData => paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage));
-    });
+      .then(allData => paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage));
+  });
 };
 
 export default class AutomationController {
@@ -108,7 +100,20 @@ export default class AutomationController {
     if (Object.entries(req.query).length === 0 && req.query.constructor === Object) {
       return checkQueryObject(res);
     }
-
     return paginationData(req, res);
+  }
+
+  // 1. filter failed emailAutomations, slackAutomations and freckleAutomations into three arrays respv
+  // 2. create object with automation types  and their respective functions as key: value
+  // 3. for each automation in failedFreckleAutomation:
+  //    freckleAutomationObj[automation.type](automationDetails)
+  // 4. Run step 3 for other failedAutomation arrays asynchronously using promise.All()
+  // 5. Get that automation by id and return to user
+
+  static async retryAutomation(req, res) {
+    const automationDetails = await automation.findOne({
+      include,
+    });
+    return res.status(200).json(automationDetails);
   }
 }

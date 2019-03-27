@@ -9,6 +9,7 @@ import ms from 'ms';
 import validateEnvironmentVars from './validator';
 import routes from './routes';
 import worker from './jobs/worker';
+import { updatePartnerStore } from './modules/allocations';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ http.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
   console.log(`Timer Interval is set to ${process.env.TIMER_INTERVAL}`);
   setInterval(() => worker.exec(), ms(process.env.TIMER_INTERVAL || '1d'));
+  setInterval(() => updatePartnerStore(), ms(process.env.UPDATE_PARTNER_INTERVAL || '1d'));
 });
 
 export default app;

@@ -27,9 +27,7 @@ const slackOnBoarding = async (placement, automationId) => {
   ]);
   createOrUpdateSlackAutomation({ ...internalSlackChannel, automationId });
   createOrUpdateSlackAutomation({ ...generalSlackChannel, automationId });
-  accessChannel(fellow.email, generalSlackChannel.channelId, 'invite').then(
-    result => createOrUpdateSlackAutomation({ ...result, automationId }),
-  );
+  accessChannel(fellow.email, generalSlackChannel.channelId, 'invite').then(result => createOrUpdateSlackAutomation({ ...result, automationId }));
   creatOrUpdatePartnerRecord({
     partnerId,
     name: partnerName,

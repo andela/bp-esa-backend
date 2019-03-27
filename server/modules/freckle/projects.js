@@ -47,7 +47,7 @@ export const getOrCreateProject = async (projectName) => {
     ));
     return saveFreckleProject(projectDetails, `${projectName} freckle project created`);
   } catch (error) {
-    return saveFreckleProject({}, `${error.message}`, 'failure');
+    return saveFreckleProject({}, error.message, 'failure');
   }
 };
 /**
