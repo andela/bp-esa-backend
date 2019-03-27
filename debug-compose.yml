@@ -18,6 +18,7 @@ services:
     env_file: .env
     build: 
       context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "6050:${PORT}"
       - "9229:9229"
@@ -30,4 +31,19 @@ services:
     depends_on:
       - redis
       - database
-    command: "npm run start:dev"
+    command: "npm run start:debug"
+  adminer:
+    image: adminer
+    # restart: always
+    environment:
+      - "ADMINER_DEFAULT_SERVER=database"
+    ports:
+      - 8080:8080
+  migration:
+    image: esa-backend:latest
+    command: ["wait-for-it", "database:5432", "--", "npm", "run", "migrations"]
+    env_file: .env
+    environment: 
+      - "DB_HOST=database"
+    depends_on:
+      - database

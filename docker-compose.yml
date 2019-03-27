@@ -16,6 +16,9 @@ services:
   backend:
     image: esa-backend:latest
     env_file: .env
+    volumes: 
+      - ${PWD}:/usr/src/app/"
+      - /usr/src/app/node_modules
     build: 
       context: .
       dockerfile: Dockerfile.dev
