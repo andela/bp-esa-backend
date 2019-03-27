@@ -53,7 +53,7 @@ export function formatAutomations(automationArray, activities, props) {
  * @returns {Object} Formated automation to be returned by the API
  */
 export function formatPayload(automation) {
-  const props = ['id', 'fellowId', 'fellowName', 'partnerId', 'partnerName', 'type', 'createdAt', 'updatedAt'];
+  const props = ['id', 'fellowId', 'fellowName', 'email', 'partnerId', 'partnerName', 'type', 'createdAt', 'updatedAt'];
   const formattedAutomation = objectCopy(automation, props);
 
   formattedAutomation.slackAutomations = formatAutomations(
