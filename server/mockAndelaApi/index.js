@@ -18,7 +18,9 @@ async function generatePlacements(status) {
   const placements = [];
   const { members } = await list();
   const emails = members.reduce(
-    (result, { profile: { email } }) => (email ? [...result, email] : result),
+    (result, { deleted, profile: { email } }) => {
+      return ((email && !deleted) ? [...result, email] : result);
+    },
     [],
   );
   // max: 5, min: 1
