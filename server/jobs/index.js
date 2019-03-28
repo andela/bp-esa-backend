@@ -44,7 +44,7 @@ const jobs = {
 export const automationData = (placement, type) => {
   const {
     id: placementId,
-    fellow: { id: fellowId, name: fellowName },
+    fellow: { id: fellowId, name: fellowName, email },
     client_name: partnerName,
     client_id: partnerId,
   } = placement;
@@ -54,6 +54,7 @@ export const automationData = (placement, type) => {
     partnerName,
     partnerId,
     type,
+    email,
     placementId,
   };
 };
