@@ -1,4 +1,5 @@
 import { findPartnerById } from '../modules/allocations';
+import { createOrUpdateEmaillAutomation } from '../modules/automations';
 import { sendPlacementFetchAlertEmail } from '../modules/email/emailModule';
 
 export const FAILED_COUNT_NUMBER = 0;
@@ -46,15 +47,12 @@ export const checkFailureCount = async (failCount) => {
  *
  * @param {Array} emailFunctions List of functions to execute for the automation
  * @param {Object} placement Placement data with which to execute automation
+ * @param {String} automationId Id of the automation being carried out
  *
  * @returns {void}
  */
-export async function executeEmailAutomation(emailFunctions, placement) {
-  try {
-    const mailInfo = await getMailInfo(placement);
-    await Promise.all(emailFunctions.map(func => func(mailInfo)));
-    // write automation success to database
-  } catch (error) {
-    // write automation failure to database
-  }
+export async function executeEmailAutomation(emailFunctions, placement, automationId) {
+  const mailInfo = await getMailInfo(placement);
+  const emailAutomations = await Promise.all(emailFunctions.map(func => func(mailInfo)));
+  emailAutomations.map(automationData => createOrUpdateEmaillAutomation({ ...automationData, automationId }));
 }

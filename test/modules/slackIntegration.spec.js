@@ -40,10 +40,9 @@ describe('Slack Integration Test Suite', async () => {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,
     };
-    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
     expect(fakeSlackClient.create.calledOnce).to.be.true;
-    expect(createResult.id).to.equal(expectedResult.id);
-    expect(createResult.name).to.equal(expectedResult.name);
+    expect(createResult.channelId).to.equal(expectedResult.id);
+    expect(createResult.channelName).to.equal(`${expectedResult.name}-int`);
   });
   it('Should create general slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
@@ -53,16 +52,14 @@ describe('Slack Integration Test Suite', async () => {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,
     };
-    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
     expect(fakeSlackClient.create.calledOnce).to.be.true;
-    expect(createResult.id).to.equal(expectedResult.id);
-    expect(createResult.name).to.equal(expectedResult.name);
+    expect(createResult.channelId).to.equal(expectedResult.id);
+    expect(createResult.channelName).to.equal(expectedResult.name);
   });
   it('Should add developers to respective channels and save the automation to DB', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GBRR4B5E3';
     await slack.accessChannel(email, channel, 'invite');
-    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
     expect(fakeSlackClient.invite.calledOnce).to.be.true;
     expect(fakeSlackClient.groupInfo.calledOnce).to.be.true;
   });
@@ -70,7 +67,6 @@ describe('Slack Integration Test Suite', async () => {
     const email = 'johndoe@mail.com';
     const channel = 'GBRR4B5E3';
     await slack.accessChannel(email, channel, 'kick');
-    expect(createOrUpdateSlackAutomation.calledOnce).to.be.true;
     expect(fakeSlackClient.kick.calledOnce).to.be.true;
     expect(fakeSlackClient.groupInfo.calledOnce).to.be.true;
   });

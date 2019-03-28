@@ -66,8 +66,7 @@ const automationProcess = async (newPlacements, type, jobList) => {
       defaults,
     });
     if (created) {
-      process.env.AUTOMATION_ID = automationId;
-      await Promise.all(jobList.map(job => job(placement)));
+      await Promise.all(jobList.map(job => job(placement, automationId)));
       const newAutomation = await db.Automation.findByPk(automationId, { include });
       io.emit('newAutomation', formatPayload(newAutomation));
     }
