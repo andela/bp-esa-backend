@@ -125,7 +125,8 @@ const paginationData = (req, res) => {
   let prevPage;
   let nextPage;
   const limit = parseInt(req.query.limit, 10) || 10;
-  const { date } = req.body;
+  const { date } = req.query;
+  let dateQuery = '';
 
   // check if date object exists in the req body
   if (date) {
@@ -135,6 +136,7 @@ const paginationData = (req, res) => {
     }
     // check if both date from and to are provided
     if (date.from && date.to) {
+      dateQuery = `BETWEEN '${date.from}' AND '${date.to}' `;
       createdAt = {
         [Op.between]: [date.from, date.to],
       };
@@ -142,6 +144,7 @@ const paginationData = (req, res) => {
 
     // if only the date from is provided then return data up to now
     if (date.from && !date.to) {
+      dateQuery = `BETWEEN '${date.from}' AND '${new Date()}' `;
       createdAt = {
         [Op.between]: [date.from, new Date()],
       };
@@ -149,12 +152,14 @@ const paginationData = (req, res) => {
 
     // if only the date.to has been provided, return all data up to date.to
     if (!date.from && date.to) {
+      dateQuery = `<= '${date.to}'`;
       createdAt = {
         [Op.lte]: date.to,
       };
     }
   } else {
     // if date object is not provided return all data up to today
+    dateQuery = `<= '${new Date()}'`;
     (
       createdAt = {
         [Op.lte]: new Date(),
@@ -250,6 +255,9 @@ const paginationData = (req, res) => {
       const orderBy = order.map((item) => {
         return item.join(' ');
       }).join();
+      // if (dateQuery.length > 0) {
+      //   sql += `AND "a"."createdAt" ${dateQuery}`;
+      // }
       sql += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
       const automationIds = await models.sequelize.query(
         sql,
@@ -268,7 +276,7 @@ const paginationData = (req, res) => {
         include,
         // limit,
         // offset,
-        // order,
+        order,
         where: {
           id: {
             $in: automationIds.map(($da) => {
