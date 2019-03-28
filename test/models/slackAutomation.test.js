@@ -25,7 +25,9 @@ describe('server/models/slackAutomation', () => {
     });
 
     it('defines a belongsTo association with Automation', () => {
-      expect(SlackAutomation.belongsTo).to.have.been.calledWith(automation, automationRelationships);
+      expect(SlackAutomation.belongsTo).to.have.been.calledWith(
+        automation, automationRelationships,
+      );
     });
   });
 });
