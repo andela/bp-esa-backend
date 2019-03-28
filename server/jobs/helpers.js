@@ -1,11 +1,11 @@
 import { findPartnerById } from '../modules/allocations';
 import { sendPlacementFetchAlertEmail } from '../modules/email/emailModule';
 
-export const FAILED_COUNT_NUMBER = 0;
+export const count = { FAILED_COUNT_NUMBER: 0 };
 
 /**
  * @desc Retrieves necessary info. to be sent via email for any given placement
- * @param {oject} placement A placement instance from allocation
+ * @param {object} placement A placement instance from allocation
  * @returns {object} Mail info to be sent
  */
 export const getMailInfo = async (placement) => {

@@ -25,7 +25,9 @@ describe('server/models/emailAutomation', () => {
     });
 
     it('defines a belongsTo association with Automation', () => {
-      expect(EmailAutomation.belongsTo).to.have.been.calledWith(automation, automationRelationships);
+      expect(EmailAutomation.belongsTo).to.have.been.calledWith(
+        automation, automationRelationships,
+      );
     });
   });
 });
