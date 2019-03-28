@@ -168,7 +168,7 @@ const paginationData = (req, res) => {
       createdAt,
     },
   })
-    .then((data) => {
+    .then(async (data) => {
       const page = parseInt(req.query.page, 10) || 1; // current page number
       const numberOfPages = Math.ceil(data.count / limit); // all pages count
       offset = limit * (page - 1);
@@ -181,13 +181,101 @@ const paginationData = (req, res) => {
       if (page > 1) {
         prevPage = page - 1;
       }
-
+      const { slackAutomation, emailAutomation, freckleAutomation } = req.query;
+      let sql = 'SELECT a.id FROM automation as a '
+      + `
+        left join 
+        (SELECT 
+        "automationId", 
+        SUM(
+            (
+                CASE 
+                    WHEN status=? THEN 0
+                    ELSE 1
+                END
+            )
+        )
+        as status
+        
+        from "slackAutomation"
+        group by "automationId"
+        ) as s
+        on "s"."automationId"="a"."id"
+        
+        left join 
+        (SELECT 
+        "automationId", 
+        SUM(
+            (
+                CASE 
+                    WHEN status=? THEN 0
+                    ELSE 1
+                END
+            )
+        )
+        as status
+        
+        from "emailAutomation"
+        group by "automationId"
+        ) as e
+        on "e"."automationId"="a"."id"
+        left join 
+        (SELECT 
+        "automationId", 
+        SUM(
+            (
+                CASE 
+                    WHEN status=? THEN 0
+                    ELSE 1
+                END
+            )
+        )
+        as status
+        
+        from "freckleAutomation"
+        group by "automationId"
+        ) as f
+        on "f"."automationId"="a"."id"
+        where 1=1
+      `;
+      if (slackAutomation) {
+        sql += 'AND "s"."status" = 0 ';
+      }
+      if (emailAutomation) {
+        sql += 'AND "e"."status" = 0 ';
+      }
+      if (freckleAutomation) {
+        sql += 'AND "f"."status" = 0 ';
+      }
+      const orderBy = order.map((item) => {
+        return item.join(' ');
+      }).join();
+      sql += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
+      const automationIds = await models.sequelize.query(
+        sql,
+        {
+          replacements: [
+            slackAutomation || 'success',
+            emailAutomation || 'success',
+            freckleAutomation || 'success',
+          ],
+          type: models.sequelize.QueryTypes.SELECT,
+        },
+      );
 
       return automation.findAll({
-        include: filterObjectInJSON(req),
-        limit,
-        offset,
-        order,
+        // include: filterObjectInJSON(req),
+        include,
+        // limit,
+        // offset,
+        // order,
+        where: {
+          id: {
+            $in: automationIds.map(($da) => {
+              return $da.id;
+            }),
+          },
+        },
         logging: console.log,
       })
         .then(allData => paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage));
