@@ -3,7 +3,7 @@ const slackMocks = {
     ok: true,
     group: {
       id: 'GDL7RDC5V',
-      name: 'p-sample-partner',
+      name: 'p-virtualsummits',
       is_group: true,
       created: 1540194427,
       creator: 'UDECYD0LQ',

@@ -23,8 +23,8 @@ async function generatePlacements(status) {
     },
     [],
   );
-  // max: 5, min: 1
-  for (let index = 0; index < Math.floor(Math.random() * 5) + 1; index++) {
+  // max: 3, min: 1
+  for (let index = 0; index < Math.floor(Math.random() * 3) + 1; index++) {
     placements.push(mockPlacement(status, emails[faker.random.number(emails.length - 1)]));
   }
   return placements;

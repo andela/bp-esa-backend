@@ -1,10 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 
-import response from '../../helpers/response';
-
 // eslint-disable-next-line max-len
-import { createOrUpdateFreckleAutomation } from '../automations';
 
 dotenv.config();
 const freckleUrl = 'https://api.letsfreckle.com/v2';
@@ -20,16 +17,12 @@ const freckleToken = process.env.FRECKLE_ADMIN_TOKEN;
  *
  * @returns {void}
  */
-const saveFreckleProject = async (projectDetails, message, status = 'success') => {
-  const automationId = process.env.AUTOMATION_ID;
-  await createOrUpdateFreckleAutomation({
-    automationId,
-    projectId: projectDetails.id,
-    type: 'projectCreation',
-    status,
-    statusMessage: message,
-  });
-};
+const saveFreckleProject = async (projectDetails, message, status = 'success') => ({
+  projectId: projectDetails.id,
+  type: 'projectCreation',
+  status,
+  statusMessage: message,
+});
 
 /**
  * @desc Get existing project on freckle or create new if not exists(save it to the database)
@@ -46,18 +39,15 @@ export const getOrCreateProject = async (projectName) => {
       `${freckleUrl}/projects?freckle_token=${freckleToken}&name=${projectName}`,
     );
     if (projectDetails.length) {
-      saveFreckleProject(projectDetails, `${projectName} freckle project already exist`);
-      return projectDetails;
+      return saveFreckleProject(projectDetails, `${projectName} freckle project already exist`);
     }
     ({ data: projectDetails } = await axios.post(
       `${freckleUrl}/projects?freckle_token=${freckleToken}`,
       name,
     ));
-    saveFreckleProject(projectDetails, `${projectName} freckle project created`);
-    return projectDetails;
+    return saveFreckleProject(projectDetails, `${projectName} freckle project created`);
   } catch (error) {
-    saveFreckleProject({}, `${error.message}`, 'failure');
-    return error;
+    return saveFreckleProject({}, `${error.message}`, 'failure');
   }
 };
 /**
@@ -83,27 +73,22 @@ export const getUserIdByEmail = async (email) => {
  * @returns {object} If unsuccessful, return error response
  */
 export const assignProject = async (email, projectId) => {
-  const automationId = process.env.AUTOMATION_ID;
   try {
     const userId = await getUserIdByEmail(email);
     const url = `${freckleUrl}/users/${userId}/give_access_to_projects?freckle_token=${freckleToken}`;
     await axios.put(url, { project_ids: [projectId] });
-    await createOrUpdateFreckleAutomation({
-      automationId,
+    return {
       freckleUserId: userId,
       type: 'projectAssignment',
       status: 'success',
       statusMessage: `Assigned a freckle project to ${email}`,
-    });
-    return response(false, 'Successfully added developer to the project');
+    };
   } catch (error) {
-    await createOrUpdateFreckleAutomation({
-      automationId,
+    return {
       freckleUserId: null,
       type: 'projectAssignment',
       status: 'failure',
       statusMessage: `${error.message}`,
-    });
-    return error;
+    };
   }
 };

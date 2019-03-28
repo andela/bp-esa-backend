@@ -1,8 +1,9 @@
+/* eslint-disable no-eval */
+/* eslint-disable no-unused-vars */
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import emailTransport from './emailTransport';
-import { createOrUpdateEmaillAutomation } from '../automations';
 
 dotenv.config();
 
@@ -25,9 +26,8 @@ const placementFailedTemplatePath = getEmailTemplatePath('placement-fail-email.h
  * @param {object} mailOptions The mail options.
  * @returns {undefined}
  */
-const sendAndSaveMail = async (mailOptions) => {
+const sendEmail = async (mailOptions) => {
   const data = {
-    automationId: process.env.AUTOMATION_ID,
     body: mailOptions.html,
     recipient: mailOptions.to,
     sender: mailOptions.from,
@@ -37,11 +37,11 @@ const sendAndSaveMail = async (mailOptions) => {
   };
   try {
     await emailTransport.sendMail(mailOptions);
-    await createOrUpdateEmaillAutomation(data);
+    return data;
   } catch (error) {
     data.status = 'failure';
     data.statusMessage = error.message;
-    await createOrUpdateEmaillAutomation(data);
+    return data;
   }
 };
 
@@ -63,15 +63,42 @@ const constructMailOptions = ({ emailBody, sendTo, emailSubject }) => ({
   generateTextFromHTML: true,
   html: emailBody,
 });
-/* eslint-disable no-eval */
-/* eslint-disable no-unused-vars */
+
+/**
+ * @desc A function to help send automation email using designed template
+ *
+ * @param {object} mailInfo Info about the mail to be sent
+ * @param {string} recipient Email of the recipient
+ * @param {string} subject Subject of the email to be sent
+ * @param {string} template Template to be used to send email
+ *
+ * @returns {object} The result of sending the mail.
+ * @throws Will throw an error if sending email fails.
+ */
+const sendMailWithTemplate = async (mailInfo, recipient, subject, template) => {
+  const {
+    developerName,
+    developerEmail,
+    developerLocation,
+    partnerName,
+    partnerLocation,
+    startDate,
+    rollOffDate,
+  } = mailInfo;
+
+  const mailOptions = constructMailOptions({
+    sendTo: recipient,
+    emailSubject: subject,
+    emailBody: eval(`\`${fs.readFileSync(template).toString()}\``),
+  });
+  return sendEmail(mailOptions);
+};
 
 /**
  * @function sendDevOnboardingMail
  * @desc A function to help send email to a developer about an onboarding placement.
  *
  * @param {object} mailInfo Info about the mail to be sent
- * @param {string} mailInfo.developerName Name of the developer onboarded
  * @param {string} mailInfo.developerEmail Email of the developer onboarded
  * @param {string} mailInfo.partnerName Name of the partner
  *
@@ -79,14 +106,9 @@ const constructMailOptions = ({ emailBody, sendTo, emailSubject }) => ({
  * @throws Will throw an error if sending email fails.
  */
 export const sendDevOnboardingMail = async (mailInfo) => {
-  const { developerEmail, developerName, partnerName } = mailInfo;
-
-  const mailOptions = constructMailOptions({
-    sendTo: developerEmail,
-    emailSubject: `${partnerName} Engagement Support`,
-    emailBody: eval(`\`${fs.readFileSync(developerOnboardingTemplatePath).toString()}\``),
-  });
-  await sendAndSaveMail(mailOptions);
+  const subject = `${mailInfo.partnerName} Engagement Support`;
+  const template = developerOnboardingTemplatePath;
+  return sendMailWithTemplate(mailInfo, mailInfo.developerEmail, subject, template);
 };
 
 /**
@@ -95,24 +117,14 @@ export const sendDevOnboardingMail = async (mailInfo) => {
  *
  * @param {object} mailInfo Info about the mail to be sent
  * @param {string} mailInfo.developerName Name of the developer offboarded
- * @param {string} mailInfo.developerEmail Email of the developer offboarded
  * @param {string} mailInfo.developerLocation Location of developer offboarded
- * @param {string} mailInfo.rollOffDate The roll off date
  *
  * @returns {object} The result of sending the mail.
  * @throws Will throw an error if sending email fails.
  */
 export const sendITOffboardingMail = async (mailInfo) => {
-  const {
-    developerName, developerEmail, developerLocation, rollOffDate,
-  } = mailInfo;
-
-  const mailOptions = constructMailOptions({
-    sendTo: itEmail,
-    emailSubject: `${developerName} Engagement Roll Off (${developerLocation})`,
-    emailBody: eval(`\`${fs.readFileSync(itOffboardingPath).toString()}\``),
-  });
-  await sendAndSaveMail(mailOptions);
+  const subject = `${mailInfo.developerName} Engagement Roll Off (${mailInfo.developerLocation})`;
+  return sendMailWithTemplate(mailInfo, itEmail, subject, itOffboardingPath);
 };
 
 /**
@@ -120,66 +132,38 @@ export const sendITOffboardingMail = async (mailInfo) => {
  * @desc A function to help send email to success-ops about an onboarding placement.
  *
  * @param {object} mailInfo Info about the mail to be sent
- * @param {string} mailInfo.developerName Name of the developer onboarded
- * @param {string} mailInfo.developerEmail Email of the developer onboarded
- * @param {string} mailInfo.developerLocation Location of developer onboarded
- * @param {string} mailInfo.partnerName Name of the partner
- * @param {stirng} mailInfo.parnerLocation Location of partner
- * @param {string} mailInfo.startDate The placement start date
+ * @param {string} template The template to use in sending mail
  *
  * @returns {object} The result of sending the mail.
  * @throws Will throw an error if sending email fails.
  */
-export const sendSOPOnboardingMail = async (mailInfo) => {
-  const {
-    developerName,
-    developerEmail,
-    developerLocation,
-    partnerName,
-    partnerLocation,
-    startDate,
-  } = mailInfo;
-
-  const mailOptions = constructMailOptions({
-    sendTo: opsEmail,
-    emailSubject: `${developerName} Placed with ${partnerName}`,
-    emailBody: eval(`\`${fs.readFileSync(successOnboardingTemplatePath).toString()}\``),
-  });
-  await sendAndSaveMail(mailOptions);
+const sendSOPEMail = async (mailInfo, template) => {
+  const { developerName, partnerName } = mailInfo;
+  const subject = `${developerName} Placed with ${partnerName}`;
+  return sendMailWithTemplate(mailInfo, opsEmail, subject, template);
 };
+
+/**
+ * @function sendSOPOnboardingMail
+ * @desc A function to help send email to success-ops about an onboarding placement.
+ *
+ * @param {object} mailInfo Info about the mail to be sent
+ *
+ * @returns {object} The result of sending the mail.
+ * @throws Will throw an error if sending email fails.
+ */
+export const sendSOPOnboardingMail = mailInfo => sendSOPEMail(mailInfo, successOnboardingTemplatePath);
 
 /**
  * @function sendSOPOnboardingMail
  * @desc A function to help send email to success-ops about an offboarding placement.
  *
  * @param {object} mailInfo Info about the mail to be sent
- * @param {string} mailInfo.developerName Name of the developer offboarding
- * @param {string} mailInfo.developerEmail Email of the developer offboarding
- * @param {string} mailInfo.developerLocation Location of developer offboarding
- * @param {string} mailInfo.partnerName Name of the partner
- * @param {stirng} mailInfo.parnerLocation Location of partner
- * @param {string} mailInfo.rollOffDate The roll off date
  *
  * @returns {object} The result of sending the mail.
  * @throws Will throw an error if sending email fails.
  */
-export const sendSOPOffboardingMail = async (mailInfo) => {
-  const {
-    developerName,
-    developerEmail,
-    developerLocation,
-    partnerName,
-    partnerLocation,
-    rollOffDate,
-  } = mailInfo;
-
-  const mailOptions = constructMailOptions({
-    sendTo: opsEmail,
-    emailSubject: `${developerName} Placed with ${partnerName}`,
-    emailBody: eval(`\`${fs.readFileSync(successOffboardingTemplatePath).toString()}\``),
-  });
-  await sendAndSaveMail(mailOptions);
-};
+export const sendSOPOffboardingMail = mailInfo => sendSOPEMail(mailInfo, successOffboardingTemplatePath);
 
 /**
  * @function sendPlacementFetchAlertEmail
@@ -195,8 +179,8 @@ export const sendPlacementFetchAlertEmail = async () => {
     });
     await emailTransport.sendMail(mailOptions);
     return { status: 'success', message: `Successfully sent email to ${supportEmail} ` };
-  } catch (error) {
-    return { status: 'fail', message: error };
+  } catch ({ message }) {
+    return { status: 'failure', message };
   }
 };
 
