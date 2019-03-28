@@ -2,8 +2,10 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 import { Op } from 'sequelize';
+import moment from 'moment';
 import models from '../models';
-import { formatAutomationResponse } from '../utils/formatter';
+import { formatAutomationResponse, paginationResponse } from '../utils/formatter';
+import sqlAutomationRawQuery from '../utils/rawSQLQueries';
 
 const automation = models.Automation;
 export const include = [
@@ -28,8 +30,6 @@ const order = [
   ['id', 'DESC'],
 ];
 
-// holds values needed for the status column
-const statusValues = ['success', 'failure'];
 
 /**
  * Returns all data
@@ -47,72 +47,6 @@ const checkQueryObject = res => (
 
 
 /**
- * Returns a response JSON object
- *
- * @param {object} res Response object
- * @param {object} allData data object returned from the database
- * @param {integer} page page number
- * @param {integer} numberOfPages total number of pages
- * @param {object} data data object
- * @param {integer} nextPage next page number
- * @param {integer} prevPage previous page number
- * @returns {object} Response containing paginated object
- */
-const paginationResponse = (res, allData, page, numberOfPages, data, nextPage, prevPage) => res.status(200).json({
-  status: 'success',
-  message: 'Successfully fetched automations',
-  data: formatAutomationResponse(allData),
-  pagination: {
-    currentPage: page,
-    numberOfPages,
-    dataCount: data.count,
-    nextPage,
-    prevPage,
-  },
-});
-
-const filterObjectInJSON = (req) => {
-  try {
-    // duplicate include object
-    const includeWithWhereQuery = [...include];
-    // fetch automation key values from JSON
-    const { slackAutomation, emailAutomation, freckleAutomation } = req.body;
-
-    // check if slackAutomation has either success or failure strings
-    if (slackAutomation) {
-      includeWithWhereQuery.forEach((queryModel) => {
-        if (queryModel.as === 'slackAutomations' && statusValues.includes(slackAutomation)) {
-          queryModel.where = { status: `${slackAutomation}` };
-        }
-      });
-    }
-
-    // check if emailAutomation has either success or failure strings
-    if (emailAutomation) {
-      includeWithWhereQuery.forEach((queryModel) => {
-        if (queryModel.as === 'emailAutomations' && statusValues.includes(emailAutomation)) {
-          queryModel.where = { status: `${emailAutomation}` };
-        }
-      });
-    }
-
-    // check if freckleAutomation has either success or failure strings
-    if (freckleAutomation) {
-      includeWithWhereQuery.forEach((queryModel) => {
-        if (queryModel.as === 'freckleAutomations' && statusValues.includes(freckleAutomation)) {
-          queryModel.where = { status: `${freckleAutomation}` };
-        }
-      });
-    }
-
-    return includeWithWhereQuery;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-
-/**
  * Returns pagination in JSON format
  *
  * @param {Object} req request object
@@ -124,44 +58,54 @@ const paginationData = (req, res) => {
   let offset = 0;
   let prevPage;
   let nextPage;
+  let dateQuery = '';
   const limit = parseInt(req.query.limit, 10) || 10;
-  const { date } = req.body;
+  const { date } = req.query;
+  const todaysDate = moment().format('YYYY-MM-DD');
+
 
   // check if date object exists in the req body
   if (date) {
-    // if date.from is greater than date.to or today, return an error
-    if ((new Date(date.from) > new Date(date.to)) || (new Date(date.from) > new Date())) {
+    const dateTo = moment(date.to).format('YYYY-MM-DD');
+    const dateFrom = moment(date.from).format('YYYY-MM-DD');
+
+    // check if date.from is greater than date.to or today, return an error
+    if ((dateFrom > dateTo) || (dateFrom > todaysDate)) {
       return res.status(400).json({ error: 'date.from cannot be greater than date.now or today' });
     }
+
     // check if both date from and to are provided
-    if (date.from && date.to) {
+    if (dateFrom && dateTo) {
+      dateQuery = `BETWEEN '${dateFrom}' AND '${dateTo}' `;
       createdAt = {
-        [Op.between]: [date.from, date.to],
+        [Op.between]: [dateFrom, dateTo],
       };
     }
 
     // if only the date from is provided then return data up to now
-    if (date.from && !date.to) {
+    if (dateFrom && !dateTo) {
+      dateQuery = `BETWEEN '${dateFrom}' AND '${todaysDate}' `;
       createdAt = {
-        [Op.between]: [date.from, new Date()],
+        [Op.between]: [dateFrom, todaysDate],
       };
     }
 
     // if only the date.to has been provided, return all data up to date.to
-    if (!date.from && date.to) {
+    if (!dateFrom && dateTo) {
+      dateQuery = `<= '${dateTo}'`;
       createdAt = {
-        [Op.lte]: date.to,
+        [Op.lte]: dateTo,
       };
     }
   } else {
     // if date object is not provided return all data up to today
+    dateQuery = `<= '${todaysDate}'`;
     (
       createdAt = {
-        [Op.lte]: new Date(),
+        [Op.lte]: todaysDate,
       }
     );
   }
-
 
   return automation.findAndCountAll({
     where: {
@@ -171,6 +115,7 @@ const paginationData = (req, res) => {
     .then(async (data) => {
       const page = parseInt(req.query.page, 10) || 1; // current page number
       const numberOfPages = Math.ceil(data.count / limit); // all pages count
+      let automationRawQuery = sqlAutomationRawQuery;
       offset = limit * (page - 1);
 
       // check if number of pages is less than the current page number to show next page number
@@ -182,77 +127,24 @@ const paginationData = (req, res) => {
         prevPage = page - 1;
       }
       const { slackAutomation, emailAutomation, freckleAutomation } = req.query;
-      let sql = 'SELECT a.id FROM automation as a '
-      + `
-        left join 
-        (SELECT 
-        "automationId", 
-        SUM(
-            (
-                CASE 
-                    WHEN status=? THEN 0
-                    ELSE 1
-                END
-            )
-        )
-        as status
-        
-        from "slackAutomation"
-        group by "automationId"
-        ) as s
-        on "s"."automationId"="a"."id"
-        
-        left join 
-        (SELECT 
-        "automationId", 
-        SUM(
-            (
-                CASE 
-                    WHEN status=? THEN 0
-                    ELSE 1
-                END
-            )
-        )
-        as status
-        
-        from "emailAutomation"
-        group by "automationId"
-        ) as e
-        on "e"."automationId"="a"."id"
-        left join 
-        (SELECT 
-        "automationId", 
-        SUM(
-            (
-                CASE 
-                    WHEN status=? THEN 0
-                    ELSE 1
-                END
-            )
-        )
-        as status
-        
-        from "freckleAutomation"
-        group by "automationId"
-        ) as f
-        on "f"."automationId"="a"."id"
-        where 1=1
-      `;
+
       if (slackAutomation) {
-        sql += 'AND "s"."status" = 0 ';
+        automationRawQuery += 'AND "s"."status" = 0 ';
       }
       if (emailAutomation) {
-        sql += 'AND "e"."status" = 0 ';
+        automationRawQuery += 'AND "e"."status" = 0 ';
       }
       if (freckleAutomation) {
-        sql += 'AND "f"."status" = 0 ';
+        automationRawQuery += 'AND "f"."status" = 0 ';
       }
-      const orderBy = order.map((item) => {
-        return item.join(' ');
-      }).join();
-      sql += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
+      const orderBy = order.map(item => item.join(' ')).join();
+      if (dateQuery.length > 0) {
+        automationRawQuery += `AND "a"."createdAt" ${dateQuery}`;
+      }
+
+      automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
       const automationIds = await models.sequelize.query(
-        sql,
+        automationRawQuery,
         {
           replacements: [
             slackAutomation || 'success',
@@ -264,16 +156,11 @@ const paginationData = (req, res) => {
       );
 
       return automation.findAll({
-        // include: filterObjectInJSON(req),
         include,
-        // limit,
-        // offset,
-        // order,
+        order,
         where: {
           id: {
-            $in: automationIds.map(($da) => {
-              return $da.id;
-            }),
+            $in: automationIds.map($da => $da.id),
           },
         },
         logging: console.log,
