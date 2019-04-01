@@ -45,7 +45,16 @@ const checkQueryObject = res => (
   }))
 );
 
+
+/**
+ * Returns dateQuery
+ * @param {string} dateQuery - date query
+ * @param {string} date - date string
+ * @param {object} res - response object
+ * @returns {object} dateQuery
+ */
 const dateQueryFunc = (dateQuery, date, res) => {
+  // eslint-disable-next-line no-unused-vars
   let createdAt;
   let dateTo;
   let dateFrom;
@@ -101,6 +110,14 @@ const dateQueryFunc = (dateQuery, date, res) => {
   return { dateQuery };
 };
 
+/**
+ *  Returns query strings
+ * @param {string} dateQuery - date query string
+ * @param {string} slackAutomation - slack query string
+ * @param {string} emailAutomation - email query string
+ * @param {string} freckleAutomation - freckle query string
+ * @returns {object} queries
+ */
 const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation) => {
   let myQueryCounter = queryCounter;
   let automationRawQuery = sqlAutomationRawQuery;
