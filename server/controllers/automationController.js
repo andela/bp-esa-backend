@@ -5,7 +5,7 @@ import { Op } from 'sequelize';
 import moment from 'moment';
 import models from '../models';
 import { formatAutomationResponse, paginationResponse } from '../utils/formatter';
-import sqlAutomationRawQuery from '../utils/rawSQLQueries';
+import sqlAutomationRawQuery, { queryCounter } from '../utils/rawSQLQueries';
 
 const automation = models.Automation;
 export const include = [
@@ -58,20 +58,26 @@ const paginationData = (req, res) => {
   let offset = 0;
   let prevPage;
   let nextPage;
+  let dateTo;
+  let dateFrom;
   let dateQuery = '';
   const limit = parseInt(req.query.limit, 10) || 10;
   const { date } = req.query;
-  const todaysDate = moment().format('YYYY-MM-DD');
+  const todaysDate = moment();
 
 
   // check if date object exists in the req body
   if (date) {
-    const dateTo = moment(date.to).format('YYYY-MM-DD');
-    const dateFrom = moment(date.from).format('YYYY-MM-DD');
+    if (date.to) {
+      dateTo = moment(date.to).format('YYYY-MM-DD');
+    }
+    if (date.from) {
+      dateFrom = moment(date.from).format('YYYY-MM-DD');
+    }
 
     // check if date.from is greater than date.to or today, return an error
     if ((dateFrom > dateTo) || (dateFrom > todaysDate)) {
-      return res.status(400).json({ error: 'date.from cannot be greater than date.now or today' });
+      return res.status(400).json({ error: 'date[from] cannot be greater than date[now] or today' });
     }
 
     // check if both date from and to are provided
@@ -107,15 +113,41 @@ const paginationData = (req, res) => {
     );
   }
 
-  return automation.findAndCountAll({
-    where: {
-      createdAt,
-    },
+  let myQueryCounter = queryCounter;
+  let automationRawQuery = sqlAutomationRawQuery;
+  const { slackAutomation, emailAutomation, freckleAutomation } = req.query;
+
+  if (slackAutomation) {
+    automationRawQuery += 'AND "s"."status" = 0 ';
+    myQueryCounter += 'AND "s"."status" = 0 ';
+  }
+  if (emailAutomation) {
+    automationRawQuery += 'AND "e"."status" = 0 ';
+    myQueryCounter += 'AND "e"."status" = 0 ';
+  }
+  if (freckleAutomation) {
+    automationRawQuery += 'AND "f"."status" = 0 ';
+    myQueryCounter += 'AND "f"."status" = 0 ';
+  }
+  const orderBy = order.map(item => item.join(' ')).join();
+  if (dateQuery.length > 0) {
+    automationRawQuery += `AND "a"."createdAt" ${dateQuery}`;
+    myQueryCounter += `AND "a"."createdAt" ${dateQuery}`;
+  }
+
+  return models.sequelize.query(myQueryCounter, {
+    replacements: [
+      slackAutomation || 'success',
+      emailAutomation || 'success',
+      freckleAutomation || 'success',
+    ],
+    type: models.sequelize.QueryTypes.SELECT,
   })
-    .then(async (data) => {
+    .then(async (countData) => {
+      const data = countData.shift();
       const page = parseInt(req.query.page, 10) || 1; // current page number
       const numberOfPages = Math.ceil(data.count / limit); // all pages count
-      let automationRawQuery = sqlAutomationRawQuery;
+
       offset = limit * (page - 1);
 
       // check if number of pages is less than the current page number to show next page number
@@ -126,21 +158,7 @@ const paginationData = (req, res) => {
       if (page > 1) {
         prevPage = page - 1;
       }
-      const { slackAutomation, emailAutomation, freckleAutomation } = req.query;
 
-      if (slackAutomation) {
-        automationRawQuery += 'AND "s"."status" = 0 ';
-      }
-      if (emailAutomation) {
-        automationRawQuery += 'AND "e"."status" = 0 ';
-      }
-      if (freckleAutomation) {
-        automationRawQuery += 'AND "f"."status" = 0 ';
-      }
-      const orderBy = order.map(item => item.join(' ')).join();
-      if (dateQuery.length > 0) {
-        automationRawQuery += `AND "a"."createdAt" ${dateQuery}`;
-      }
 
       automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
       const automationIds = await models.sequelize.query(
@@ -163,7 +181,6 @@ const paginationData = (req, res) => {
             $in: automationIds.map($da => $da.id),
           },
         },
-        logging: console.log,
       })
         .then(allData => paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage));
     });
