@@ -45,6 +45,29 @@ const checkQueryObject = res => (
   }))
 );
 
+const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation) => {
+  let myQueryCounter = queryCounter;
+  let automationRawQuery = sqlAutomationRawQuery;
+
+  if (slackAutomation) {
+    automationRawQuery += 'AND "s"."status" = 0 ';
+    myQueryCounter += 'AND "s"."status" = 0 ';
+  }
+  if (emailAutomation) {
+    automationRawQuery += 'AND "e"."status" = 0 ';
+    myQueryCounter += 'AND "e"."status" = 0 ';
+  }
+  if (freckleAutomation) {
+    automationRawQuery += 'AND "f"."status" = 0 ';
+    myQueryCounter += 'AND "f"."status" = 0 ';
+  }
+  if (dateQuery.length > 0) {
+    automationRawQuery += `AND "a"."createdAt" ${dateQuery}`;
+    myQueryCounter += `AND "a"."createdAt" ${dateQuery}`;
+  }
+
+  return { myQueryCounter, automationRawQuery };
+};
 
 /**
  * Returns pagination in JSON format
@@ -61,6 +84,7 @@ const paginationData = (req, res) => {
   let dateTo;
   let dateFrom;
   let dateQuery = '';
+  const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
     date, slackAutomation, emailAutomation, freckleAutomation,
@@ -74,7 +98,7 @@ const paginationData = (req, res) => {
     ],
     type: models.sequelize.QueryTypes.SELECT,
   };
-  const todaysDate = moment();
+  const todaysDate = moment().format('YYYY-MM-DD');
 
 
   // check if date object exists in the req body
@@ -116,7 +140,7 @@ const paginationData = (req, res) => {
     }
   } else {
     // if date object is not provided return all data up to today
-    dateQuery = `<= '${todaysDate.format('YYYY-MM-DD')}'`;
+    dateQuery = `<= '${todaysDate}'`;
     (
       createdAt = {
         [Op.lte]: todaysDate,
@@ -124,30 +148,10 @@ const paginationData = (req, res) => {
     );
   }
 
-  let myQueryCounter = queryCounter;
-  let automationRawQuery = sqlAutomationRawQuery;
+  // eslint-disable-next-line prefer-const
+  let { automationRawQuery, myQueryCounter } = filterQuery(dateQuery, slackAutomation, emailAutomation, freckleAutomation);
 
-  if (slackAutomation) {
-    automationRawQuery += 'AND "s"."status" = 0 ';
-    myQueryCounter += 'AND "s"."status" = 0 ';
-  }
-  if (emailAutomation) {
-    automationRawQuery += 'AND "e"."status" = 0 ';
-    myQueryCounter += 'AND "e"."status" = 0 ';
-  }
-  if (freckleAutomation) {
-    automationRawQuery += 'AND "f"."status" = 0 ';
-    myQueryCounter += 'AND "f"."status" = 0 ';
-  }
-  const orderBy = order.map(item => item.join(' ')).join();
-  if (dateQuery.length > 0) {
-    automationRawQuery += `AND "a"."createdAt" ${dateQuery}`;
-    myQueryCounter += `AND "a"."createdAt" ${dateQuery}`;
-  }
-
-  return models.sequelize.query(myQueryCounter, {
-    ...querySettings,
-  })
+  return models.sequelize.query(myQueryCounter, { ...querySettings })
     .then(async (countData) => {
       const data = countData.shift();
       const page = parseInt(req.query.page, 10) || 1; // current page number
@@ -168,9 +172,7 @@ const paginationData = (req, res) => {
       automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
       const automationIds = await models.sequelize.query(
         automationRawQuery,
-        {
-          ...querySettings,
-        },
+        { ...querySettings },
       );
 
       return automation.findAll({
