@@ -62,7 +62,9 @@ const paginationData = (req, res) => {
   let dateFrom;
   let dateQuery = '';
   const limit = parseInt(req.query.limit, 10) || 10;
-  const { date } = req.query;
+  const {
+    date, slackAutomation, emailAutomation, freckleAutomation,
+  } = req.query;
   const todaysDate = moment();
 
 
@@ -105,7 +107,7 @@ const paginationData = (req, res) => {
     }
   } else {
     // if date object is not provided return all data up to today
-    dateQuery = `<= '${todaysDate}'`;
+    dateQuery = `<= '${todaysDate.format('YYYY-MM-DD')}'`;
     (
       createdAt = {
         [Op.lte]: todaysDate,
@@ -115,7 +117,6 @@ const paginationData = (req, res) => {
 
   let myQueryCounter = queryCounter;
   let automationRawQuery = sqlAutomationRawQuery;
-  const { slackAutomation, emailAutomation, freckleAutomation } = req.query;
 
   if (slackAutomation) {
     automationRawQuery += 'AND "s"."status" = 0 ';
