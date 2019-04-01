@@ -1,6 +1,5 @@
 import chaiHttp from 'chai-http';
 import chai, { expect } from 'chai';
-import faker from 'faker';
 import app from '../../server';
 
 

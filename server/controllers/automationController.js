@@ -191,7 +191,6 @@ const paginationData = (req, res) => {
         prevPage = page - 1;
       }
 
-
       automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
       const automationIds = await models.sequelize.query(
         automationRawQuery,
