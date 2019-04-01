@@ -65,6 +65,15 @@ const paginationData = (req, res) => {
   const {
     date, slackAutomation, emailAutomation, freckleAutomation,
   } = req.query;
+
+  const querySettings = {
+    replacements: [
+      slackAutomation || 'success',
+      emailAutomation || 'success',
+      freckleAutomation || 'success',
+    ],
+    type: models.sequelize.QueryTypes.SELECT,
+  };
   const todaysDate = moment();
 
 
@@ -137,12 +146,7 @@ const paginationData = (req, res) => {
   }
 
   return models.sequelize.query(myQueryCounter, {
-    replacements: [
-      slackAutomation || 'success',
-      emailAutomation || 'success',
-      freckleAutomation || 'success',
-    ],
-    type: models.sequelize.QueryTypes.SELECT,
+    ...querySettings,
   })
     .then(async (countData) => {
       const data = countData.shift();
@@ -165,12 +169,7 @@ const paginationData = (req, res) => {
       const automationIds = await models.sequelize.query(
         automationRawQuery,
         {
-          replacements: [
-            slackAutomation || 'success',
-            emailAutomation || 'success',
-            freckleAutomation || 'success',
-          ],
-          type: models.sequelize.QueryTypes.SELECT,
+          ...querySettings,
         },
       );
 
