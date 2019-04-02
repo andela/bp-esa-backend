@@ -63,7 +63,7 @@ jobs:
       - store_artifacts:
           path: coverage
           prefix: coverage
-  deploy_staging: # Deploy application to GCP staging
+  deploy_gcp: # Deploy application to GCP staging
     docker:
       - image: circleci/node:10.15.0
         environment:
@@ -81,10 +81,11 @@ workflows:
   build_deploy:
     jobs:
       - build
-      - deploy_staging:
+      - deploy_gcp:
           requires:
             - build
           filters:
             branches:
               only:
                 - develop
+                - master
