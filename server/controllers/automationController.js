@@ -31,20 +31,6 @@ const order = [
 
 
 /**
- * Returns all data
- *
- * @param {object} res REST Response object
- * @returns {object} Response containing all data
- */
-const checkQueryObject = res => (
-  automation.findAll({ include, order }).then(data => res.status(200).json({
-    status: 'success',
-    message: 'Successfully fetched automations',
-    data: formatAutomationResponse(data),
-  }))
-);
-
-/**
  * Get Automation Model Objects from Raw Query
  *
  * @param   {string}  automationRawQuery  raw Sql string
@@ -195,16 +181,10 @@ export default class AutomationController {
    */
 
   static async getAutomations(req, res) {
-    // if url doesn't contain a query objects send back all the data
-    if (Object.entries(req.query).length === 0 && req.query.constructor === Object) {
-      return checkQueryObject(res);
-    }
     try {
       return await paginationData(req, res);
     } catch (err) {
-      console.log("\n******\n");
       console.error(err);
-      console.log("\n******\n");
       return res.status(499).json({ err: err.message });
     }
   }
