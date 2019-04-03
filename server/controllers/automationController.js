@@ -107,8 +107,8 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomat
     myQueryCounter += `AND "a"."createdAt" ${dateQuery}`;
   }
   if (type && type.length > 0) {
-    automationRawQuery += `AND "a"."type" ${type}`;
-    myQueryCounter += `AND "a"."type" ${type}`;
+    automationRawQuery += `AND "a"."type"='${type}'`;
+    myQueryCounter += `AND "a"."type"='${type}'`;
   }
 
   return { myQueryCounter, automationRawQuery };
