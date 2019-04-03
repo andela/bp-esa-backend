@@ -71,11 +71,11 @@ async function getAutomationDataFromIds(automationIds, options = {}) {
  * @param {object} res - response object
  * @returns {object} dateQuery
  */
-const dateQueryFunc = (dateQuery, date = {}, res) => {
+const dateQueryFunc = (dateQuery, date = { to: new Date() }, res) => {
   // eslint-disable-next-line no-unused-vars
   let createdAt;
   const todaysDate = moment().format('YYYY-MM-DD');
-  const dateTo = date.to ? moment(date.to).format('YYYY-MM-DD') : todaysDate;
+  const dateTo = moment(date.to).format('YYYY-MM-DD');
   const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;
 
   // check if date.from is greater than date.to or today, return an error
