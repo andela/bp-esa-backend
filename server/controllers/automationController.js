@@ -83,9 +83,10 @@ const dateQueryFunc = (date = { to: new Date() }) => {
  * @param {string} slackAutomation - slack query string
  * @param {string} emailAutomation - email query string
  * @param {string} freckleAutomation - freckle query string
+ * @param {string} type - freckle query string
  * @returns {object} queries
  */
-const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation) => {
+const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation, type) => {
   let myQueryCounter = queryCounter;
   let automationRawQuery = sqlAutomationRawQuery;
 
@@ -104,6 +105,10 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomat
   if (dateQuery.length > 0) {
     automationRawQuery += `AND "a"."createdAt" ${dateQuery}`;
     myQueryCounter += `AND "a"."createdAt" ${dateQuery}`;
+  }
+  if (type && type.length > 0) {
+    automationRawQuery += `AND "a"."type" ${type}`;
+    myQueryCounter += `AND "a"."type" ${type}`;
   }
 
   return { myQueryCounter, automationRawQuery };
@@ -147,7 +152,7 @@ const paginationData = async (req, res) => {
   const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
-    date, slackAutomation, emailAutomation, freckleAutomation,
+    date, slackAutomation, emailAutomation, freckleAutomation, type = null,
   } = req.query;
   const querySettings = {
     replacements: [
@@ -159,7 +164,7 @@ const paginationData = async (req, res) => {
   };
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
-  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation);
+  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type);
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
   const page = parseInt(req.query.page, 10) || 1;

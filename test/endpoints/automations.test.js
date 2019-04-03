@@ -93,4 +93,34 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('Should filter automation data with type onboarding', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=5&type=onboarding')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
+  it('Should filter automation data with type offboarding', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=5&type=offboarding')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
 });
