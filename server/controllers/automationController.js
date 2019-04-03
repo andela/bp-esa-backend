@@ -160,13 +160,11 @@ function getPaginationMeta(page, count, limit) {
  */
 const paginationData = async (req, res) => {
   const dateQuery = '';
-
   const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
     date, slackAutomation, emailAutomation, freckleAutomation,
   } = req.query;
-
   const querySettings = {
     replacements: [
       slackAutomation || 'success',
@@ -175,19 +173,15 @@ const paginationData = async (req, res) => {
     ],
     type: models.sequelize.QueryTypes.SELECT,
   };
-
   const { dateQuery: myDateQuery } = dateQueryFunc(dateQuery, date, res);
-
   // eslint-disable-next-line prefer-const
   let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation);
-
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
   let page;
   const {
     numberOfPages, offset, nextPage, prevPage,
   } = getPaginationMeta(req, data.count, limit);
-
   automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
   const automationIds = await models.sequelize.query(
     automationRawQuery,
