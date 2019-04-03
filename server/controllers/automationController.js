@@ -44,7 +44,25 @@ const checkQueryObject = res => (
     data: formatAutomationResponse(data),
   }))
 );
-
+/**
+ * Get Automations by Ids 
+ *
+ * @param   {array}  automationIds  Automation Ids
+ * @param   {SequelizeOptions}  options  Options for sequelize
+ *
+ * @return  {array} Array of Automation Objects
+ */
+async function getAutomationDataFromIds(automationIds, options = {}) {
+  const allData = await automation.findAll({
+    ...options,
+    where: {
+      id: {
+        $in: automationIds.map($da => $da.id),
+      },
+    },
+  });
+  return allData;
+}
 
 /**
  * Returns dateQuery
@@ -53,61 +71,25 @@ const checkQueryObject = res => (
  * @param {object} res - response object
  * @returns {object} dateQuery
  */
-const dateQueryFunc = (dateQuery, date, res) => {
+const dateQueryFunc = (dateQuery, date = {}, res) => {
   // eslint-disable-next-line no-unused-vars
   let createdAt;
-  let dateTo;
-  let dateFrom;
   const todaysDate = moment().format('YYYY-MM-DD');
+  const dateTo = date.to ? moment(date.to).format('YYYY-MM-DD') : todaysDate;
+  const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;
 
-  // check if date object exists in the req body
-  if (date) {
-    if (date.to) {
-      dateTo = moment(date.to).format('YYYY-MM-DD');
-    }
-    if (date.from) {
-      dateFrom = moment(date.from).format('YYYY-MM-DD');
-    }
-
-    // check if date.from is greater than date.to or today, return an error
-    if ((dateFrom > dateTo) || (dateFrom > todaysDate)) {
-      return res.status(400).json({ error: 'date[from] cannot be greater than date[now] or today' });
-    }
-
-    // check if both date from and to are provided
-    if (dateFrom && dateTo) {
-      dateQuery = `BETWEEN '${dateFrom}' AND '${dateTo}' `;
-      createdAt = {
-        [Op.between]: [dateFrom, dateTo],
-      };
-    }
-
-    // if only the date from is provided then return data up to now
-    if (dateFrom && !dateTo) {
-      dateQuery = `BETWEEN '${dateFrom}' AND '${todaysDate}' `;
-      createdAt = {
-        [Op.between]: [dateFrom, todaysDate],
-      };
-    }
-
-    // if only the date.to has been provided, return all data up to date.to
-    if (!dateFrom && dateTo) {
-      dateQuery = `<= '${dateTo}'`;
-      createdAt = {
-        [Op.lte]: dateTo,
-      };
-    }
-  } else {
-    // if date object is not provided return all data up to today
-    dateQuery = `<= '${todaysDate}'`;
-    (
-      createdAt = {
-        [Op.lte]: todaysDate,
-      }
-    );
+  // check if date.from is greater than date.to or today, return an error
+  if ((dateFrom > dateTo) || (dateFrom > todaysDate)) {
+    return res.status(400).json({ error: 'date[from] cannot be greater than date[now] or today' });
   }
 
-  return { dateQuery };
+  // check if both date from and to are provided
+  if (dateFrom && dateTo) {
+    return { dateQuery: `BETWEEN '${dateFrom}' AND '${dateTo}' ` };
+  }
+
+
+  return { dateQuery: `<= '${dateTo}'` };
 };
 
 /**
@@ -197,16 +179,8 @@ const paginationData = (req, res) => {
         { ...querySettings },
       );
 
-      return automation.findAll({
-        include,
-        order,
-        where: {
-          id: {
-            $in: automationIds.map($da => $da.id),
-          },
-        },
-      })
-        .then(allData => paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage));
+      const allData = await getAutomationDataFromIds(automationIds, { include, order });
+      return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
     });
 };
 
@@ -228,3 +202,5 @@ export default class AutomationController {
     return paginationData(req, res);
   }
 }
+
+
