@@ -2,6 +2,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 import moment from 'moment';
+import * as util from 'util';
 import models from '../models';
 import { paginationResponse } from '../utils/formatter';
 import sqlAutomationRawQuery, { queryCounter } from '../utils/rawSQLQueries';
@@ -59,6 +60,9 @@ async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, 
  */
 const dateQueryFunc = (date = { to: new Date() }) => {
   // eslint-disable-next-line no-unused-vars
+  if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
+    throw new Error('Invalid date format provided please provide date in iso 8601 string');
+  }
   const todaysDate = moment().format('YYYY-MM-DD');
   const dateTo = moment(date.to).format('YYYY-MM-DD');
   const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;
@@ -103,12 +107,12 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomat
     myQueryCounter += 'AND "f"."status" = 0 ';
   }
   if (dateQuery.length > 0) {
-    automationRawQuery += `AND "a"."createdAt" ${dateQuery}`;
-    myQueryCounter += `AND "a"."createdAt" ${dateQuery}`;
+    automationRawQuery += `AND to_char("a"."createdAt", 'YYYY-MM-DD') ${dateQuery}`;
+    myQueryCounter += `AND to_char("a"."createdAt", 'YYYY-MM-DD') ${dateQuery}`;
   }
   if (type && type.length > 0) {
     automationRawQuery += `AND "a"."type"='${type}'`;
-    myQueryCounter += `AND "a"."type"='${type}'`;
+    myQueryCounter += `AND "a"."type"='${util.format('%s', type)}'`;
   }
 
   return { myQueryCounter, automationRawQuery };
