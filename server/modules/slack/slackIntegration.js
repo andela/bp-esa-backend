@@ -5,7 +5,7 @@ import { getSlackAutomation } from '../automations';
 
 dotenv.config();
 const { SLACK_TOKEN } = process.env;
-export const slackClient = new WebClient(SLACK_TOKEN);
+export const slackClient = new WebClient(SLACK_TOKEN, { retryConfig: { minTimeout: 10 * 1000 } });
 
 const channelData = channelName => ({
   slackUserId: null,
