@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 import moment from 'moment';
 import models from '../models';
-import { formatAutomationResponse, paginationResponse } from '../utils/formatter';
+import { paginationResponse } from '../utils/formatter';
 import sqlAutomationRawQuery, { queryCounter } from '../utils/rawSQLQueries';
 
 const automation = models.Automation;
@@ -184,8 +184,7 @@ export default class AutomationController {
     try {
       return await paginationData(req, res);
     } catch (err) {
-      console.error(err);
-      return res.status(499).json({ err: err.message });
+      return res.status(400).json({ error: err.message });
     }
   }
 }
