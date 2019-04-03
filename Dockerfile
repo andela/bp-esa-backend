@@ -16,13 +16,13 @@ COPY server /usr/src/app/server/
 COPY .sequelizerc /usr/src/app/
 COPY .babelrc /usr/src/app/
 
-RUN npm install 
+RUN yarn install 
 
 # Uncomment this when using the application locally
 # COPY .env .
 
 #Bundle apps source code
-RUN npm run build
+RUN yarn build
 
 ENV NODE_ENV=staging
 ENV PORT=6050

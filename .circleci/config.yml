@@ -14,6 +14,10 @@ defaults: &defaults
         environment:
           REDIS_PORT: 6379
           REDIS_HOST: 127.0.0.1
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+          POSTGRES_USER: esa
+          POSTGRES_DB: esa
 
     working_directory: ~/repo
 jobs:
@@ -54,10 +58,12 @@ jobs:
             ./cc-test-reporter before-build
             yarn test
             ./cc-test-reporter after-build --coverage-input-type lcov --exit-code $?
+          environment:
+            DB_TEST_URL: "postgres://esa@localhost:5432/esa"
       - store_artifacts:
           path: coverage
           prefix: coverage
-  deploy_staging: # Deploy application to GCP staging
+  deploy_gcp: # Deploy application to GCP staging
     docker:
       - image: circleci/node:10.15.0
         environment:
@@ -75,10 +81,11 @@ workflows:
   build_deploy:
     jobs:
       - build
-      - deploy_staging:
+      - deploy_gcp:
           requires:
             - build
           filters:
             branches:
               only:
                 - develop
+                - master

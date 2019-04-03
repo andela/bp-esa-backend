@@ -6,11 +6,11 @@ import { executeEmailAutomation } from '../helpers';
  * @desc Automates developer onboarding on email
  *
  * @param {object} placement Placement record whose developer is to be offboarded
- * @param {object} automationResult Result of automation job
+ * @param {object} automationId ID of the particular automation
  * @returns {void}
  */
-const emailOnboarding = async (placement) => {
-  executeEmailAutomation([sendDevOnboardingMail, sendSOPOnboardingMail], placement);
+const emailOnboarding = async (placement, automationId) => {
+  executeEmailAutomation([sendDevOnboardingMail, sendSOPOnboardingMail], placement, automationId);
 };
 
 export default emailOnboarding;

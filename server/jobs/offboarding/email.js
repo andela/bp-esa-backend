@@ -6,9 +6,9 @@ import { executeEmailAutomation } from '../helpers';
  * @desc Automates developer offboarding via email
  *
  * @param {object} placement Placement record whose developer is to be offboarded
- * @param {object} automationResult Result of automation job
+ * @param {object} automationId ID of the particular automation
  * @returns {void}
  */
-export default function emailOffboarding(placement) {
-  executeEmailAutomation([sendSOPOffboardingMail, sendITOffboardingMail], placement);
+export default function emailOffboarding(placement, automationId) {
+  executeEmailAutomation([sendSOPOffboardingMail, sendITOffboardingMail], placement, automationId);
 }
