@@ -57,7 +57,7 @@ async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, 
  * @param {string} date - date string
  * @returns {object} dateQuery
  */
-const dateQueryFunc = (date = { to: new Date().toJSON() }) => {
+const dateQueryFunc = (date = { to: new Date() }) => {
   // eslint-disable-next-line no-unused-vars
   const todaysDate = moment().format('YYYY-MM-DD');
   const dateTo = moment(date.to).format('YYYY-MM-DD');

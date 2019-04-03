@@ -39,7 +39,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter automation data', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=Fri Feb 01 2019 00:00:00 GMT+0300 (East Africa Time)&date[to]=Sun Mar 10 2019 00:00:00 GMT+0300 (East Africa Time)')
+      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -54,7 +54,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter automation data with date[from] missing', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=5&slackAutomation=success&date[to]=Sun Mar 10 2019 00:00:00 GMT+0300 (East Africa Time)')
+      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&date[to]=${(new Date()).toJSON()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -69,7 +69,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter automation data with date[to] missing', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=5&slackAutomation=success&date[from]=Sun Mar 10 2019 00:00:00 GMT+0300 (East Africa Time)')
+      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&date[from]=${(new Date(2019, 2, 10)).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -84,7 +84,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should return error if date[from] > date[to] ', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=5&date[from]=Fri Feb 01 2020 00:00:00 GMT+0300 (East Africa Time)&date[to]=Sun Mar 10 2019 00:00:00 GMT+0300 (East Africa Time)')
+      .get(`/api/v1/automations?page=1&limit=5&date[from]=${(new Date(2020, 1, 1)).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(400);
         expect(res.body)
