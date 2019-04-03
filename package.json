@@ -7,7 +7,7 @@
     "start": "NODE_ENV=production npm run build && node ./build/index.js",
     "debug": "NODE_ENV=production npm run build && node --inspect-brk=0.0.0.0:9229 ./build/index.js",
     "start:dev": "NODE_ENV=development nodemon ./server/index --exec babel-node --watch ./server",
-    "start:debug": "NODE_ENV=development nodemon ./server/index --exec babel-node  --inspect-brk=0.0.0.0:9229 --debug --watch ./server",
+    "start:debug": "NODE_ENV=development nodemon ./server/index --exec babel-node  --inspect-brk=0.0.0.0:9229 --watch ./server",
     "build": "babel ./server -d ./build",
     "pretest": "NODE_ENV=test npm run undo:all:migrations && NODE_ENV=test npm run migrations",
     "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:@babel/register --require @babel/polyfill --timeout 10000 --exit",

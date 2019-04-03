@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 /* eslint-disable no-console */
-import { Op } from 'sequelize';
 import moment from 'moment';
 import models from '../models';
 import { formatAutomationResponse, paginationResponse } from '../utils/formatter';
@@ -44,15 +43,18 @@ const checkQueryObject = res => (
     data: formatAutomationResponse(data),
   }))
 );
+
 /**
- * Get Automations by Ids
+ * Get Automation Model Objects from Raw Query
  *
- * @param   {array}  automationIds  Automation Ids
- * @param   {SequelizeOptions}  options  Options for sequelize
+ * @param   {string}  automationRawQuery  raw Sql string
+ * @param   {object}  querySettings       query options
+ * @param   {object}  options             sequelize model query options
  *
- * @return  {array} Array of Automation Objects
+ * @return  {array}                       array of automation objects
  */
-async function getAutomationDataFromIds(automationIds, options = {}) {
+async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, options = {}) {
+  const automationIds = await models.sequelize.query(automationRawQuery, { ...querySettings }, options);
   const allData = await automation.findAll({
     ...options,
     where: {
@@ -66,21 +68,18 @@ async function getAutomationDataFromIds(automationIds, options = {}) {
 
 /**
  * Returns dateQuery
- * @param {string} dateQuery - date query
  * @param {string} date - date string
- * @param {object} res - response object
  * @returns {object} dateQuery
  */
-const dateQueryFunc = (dateQuery, date = { to: new Date() }, res) => {
+const dateQueryFunc = (date = { to: new Date() }) => {
   // eslint-disable-next-line no-unused-vars
-  let createdAt;
   const todaysDate = moment().format('YYYY-MM-DD');
   const dateTo = moment(date.to).format('YYYY-MM-DD');
   const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;
 
   // check if date.from is greater than date.to or today, return an error
   if ((dateFrom > dateTo) || (dateFrom > todaysDate)) {
-    return res.status(400).json({ error: 'date[from] cannot be greater than date[now] or today' });
+    throw new Error('date[from] cannot be greater than date[now] or today');
   }
 
   // check if both date from and to are provided
@@ -159,7 +158,6 @@ function getPaginationMeta(page, count, limit) {
  * @returns {object} JSON object
  */
 const paginationData = async (req, res) => {
-  const dateQuery = '';
   const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
@@ -173,21 +171,17 @@ const paginationData = async (req, res) => {
     ],
     type: models.sequelize.QueryTypes.SELECT,
   };
-  const { dateQuery: myDateQuery } = dateQueryFunc(dateQuery, date, res);
+  const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
   let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation);
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
-  let page;
+  const page = parseInt(req.query.page, 10) || 1;
   const {
     numberOfPages, offset, nextPage, prevPage,
-  } = getPaginationMeta(req, data.count, limit);
+  } = getPaginationMeta(page, data.count, limit);
   automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
-  const automationIds = await models.sequelize.query(
-    automationRawQuery,
-    { ...querySettings },
-  );
-  const allData = await getAutomationDataFromIds(automationIds, { include, order });
+  const allData = await getAutomationDataFromIds(automationRawQuery, { ...querySettings }, { include, order });
   return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
 };
 
@@ -200,12 +194,18 @@ export default class AutomationController {
    * @returns {object} Response containing status message and automation data
    */
 
-  static getAutomations(req, res) {
+  static async getAutomations(req, res) {
     // if url doesn't contain a query objects send back all the data
     if (Object.entries(req.query).length === 0 && req.query.constructor === Object) {
       return checkQueryObject(res);
     }
-
-    return paginationData(req, res);
+    try {
+      return await paginationData(req, res);
+    } catch (err) {
+      console.log("\n******\n");
+      console.error(err);
+      console.log("\n******\n");
+      return res.status(499).json({ err: err.message });
+    }
   }
 }
