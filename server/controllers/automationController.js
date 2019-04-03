@@ -45,7 +45,7 @@ const checkQueryObject = res => (
   }))
 );
 /**
- * Get Automations by Ids 
+ * Get Automations by Ids
  *
  * @param   {array}  automationIds  Automation Ids
  * @param   {SequelizeOptions}  options  Options for sequelize
@@ -125,17 +125,42 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomat
 };
 
 /**
+ * Get pagination meta
+ *
+ * @param   {number}  page current page
+ * @param   {number}  count total data count
+ * @param   {number}  limit total per page
+ *
+ * @return  {object} an object containing offset nextPage and prevPage properties
+ */
+function getPaginationMeta(page, count, limit) {
+  let prevPage;
+  let nextPage;
+  const numberOfPages = Math.ceil(count / limit); // all pages count
+  const offset = limit * (page - 1);
+  // check if number of pages is less than the current page number to show next page number
+  if (page < numberOfPages) {
+    nextPage = page + 1;
+  }
+  // show previous page number if page is greater than 1
+  if (page > 1) {
+    prevPage = page - 1;
+  }
+  return {
+    numberOfPages, offset, nextPage, prevPage,
+  };
+}
+
+/**
  * Returns pagination in JSON format
  *
  * @param {Object} req request object
  * @param {Object} res response object
  * @returns {object} JSON object
  */
-const paginationData = (req, res) => {
+const paginationData = async (req, res) => {
   const dateQuery = '';
-  let offset = 0;
-  let prevPage;
-  let nextPage;
+
   const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
@@ -156,32 +181,20 @@ const paginationData = (req, res) => {
   // eslint-disable-next-line prefer-const
   let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation);
 
-  return models.sequelize.query(myQueryCounter, { ...querySettings })
-    .then(async (countData) => {
-      const data = countData.shift();
-      const page = parseInt(req.query.page, 10) || 1; // current page number
-      const numberOfPages = Math.ceil(data.count / limit); // all pages count
+  const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
+  const data = countData.shift();
+  let page;
+  const {
+    numberOfPages, offset, nextPage, prevPage,
+  } = getPaginationMeta(req, data.count, limit);
 
-      offset = limit * (page - 1);
-
-      // check if number of pages is less than the current page number to show next page number
-      if (page < numberOfPages) {
-        nextPage = page + 1;
-      }
-      // show previous page number if page is greater than 1
-      if (page > 1) {
-        prevPage = page - 1;
-      }
-
-      automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
-      const automationIds = await models.sequelize.query(
-        automationRawQuery,
-        { ...querySettings },
-      );
-
-      const allData = await getAutomationDataFromIds(automationIds, { include, order });
-      return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
-    });
+  automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
+  const automationIds = await models.sequelize.query(
+    automationRawQuery,
+    { ...querySettings },
+  );
+  const allData = await getAutomationDataFromIds(automationIds, { include, order });
+  return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
 };
 
 export default class AutomationController {
@@ -202,5 +215,3 @@ export default class AutomationController {
     return paginationData(req, res);
   }
 }
-
-
