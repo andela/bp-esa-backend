@@ -53,7 +53,7 @@ export function formatAutomations(automationArray, activities, props) {
  * @returns {Object} Formated automation to be returned by the API
  */
 export function formatPayload(automation) {
-  const props = ['id', 'fellowId', 'fellowName', 'email', 'partnerId', 'partnerName', 'type', 'createdAt', 'updatedAt'];
+  const props = ['id', 'fellowId', 'fellowName', 'partnerId', 'partnerName', 'type', 'createdAt', 'updatedAt'];
   const formattedAutomation = objectCopy(automation, props);
 
   formattedAutomation.slackAutomations = formatAutomations(
@@ -84,3 +84,35 @@ export function formatPayload(automation) {
 export function formatAutomationResponse(payload) {
   return payload.map(automation => formatPayload(automation));
 }
+
+
+/**
+ * Returns a response JSON object
+ *
+ * @param {object} res Response object
+ * @param {object} allData data object returned from the database
+ * @param {integer} page page number
+ * @param {integer} numberOfPages total number of pages
+ * @param {object} data data object
+ * @param {integer} nextPage next page number
+ * @param {integer} prevPage previous page number
+ * @returns {object} Response containing paginated object
+ */
+export const paginationResponse = (res,
+  allData,
+  page,
+  numberOfPages,
+  data,
+  nextPage,
+  prevPage) => res.status(200).json({
+  status: 'success',
+  message: 'Successfully fetched automations',
+  data: formatAutomationResponse(allData),
+  pagination: {
+    currentPage: page,
+    numberOfPages,
+    dataCount: data.count,
+    nextPage,
+    prevPage,
+  },
+});

@@ -18,7 +18,7 @@ COPY server /usr/src/app/server/
 COPY .sequelizerc /usr/src/app/
 COPY .babelrc /usr/src/app/
 
-RUN npm install 
+RUN yarn install 
 
 # Uncomment this when using the application locally
 # COPY .env .
@@ -43,4 +43,4 @@ RUN apk add --update --no-cache --virtual .build-deps-wget wget bash \
     && mv wait-for-it.sh /usr/local/bin/wait-for-it \
     && apk del .build-deps-wget
 
-CMD [ "npm", "run", "start:dev" ]
+CMD [ "yarn", "start:dev" ]

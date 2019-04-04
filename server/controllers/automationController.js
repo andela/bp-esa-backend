@@ -1,59 +1,146 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 /* eslint-disable no-console */
+import moment from 'moment';
+import * as util from 'util';
 import models from '../models';
-import { formatAutomationResponse } from '../utils/formatter';
+import { paginationResponse } from '../utils/formatter';
+import sqlAutomationRawQuery, { queryCounter } from '../utils/rawSQLQueries';
 
 const automation = models.Automation;
 export const include = [
-  { model: models.EmailAutomation, as: 'emailAutomations' },
-  { model: models.SlackAutomation, as: 'slackAutomations' },
-  { model: models.FreckleAutomation, as: 'freckleAutomations' },
+  {
+    model: models.EmailAutomation,
+    as: 'emailAutomations',
+    required: false,
+  },
+  {
+    model: models.SlackAutomation,
+    as: 'slackAutomations',
+    required: false,
+  },
+  {
+    model: models.FreckleAutomation,
+    as: 'freckleAutomations',
+    required: false,
+  },
 ];
 
 const order = [
-  ['createdAt', 'DESC'],
+  ['id', 'DESC'],
 ];
 
-/**
- * Returns all data
- *
- * @param {object} res REST Response object
- * @returns {object} Response containing all data
- */
-const checkQueryObject = res => (
-  automation.findAll({ include, order }).then(data => res.status(200).json({
-    status: 'success',
-    message: 'Successfully fetched automations',
-    data: formatAutomationResponse(data),
-  }))
-);
-
 
 /**
- * Returns a response JSON object
+ * Get Automation Model Objects from Raw Query
  *
- * @param {object} res Response object
- * @param {object} allData data object returned from the database
- * @param {integer} page page number
- * @param {integer} numberOfPages total number of pages
- * @param {object} data data object
- * @param {integer} nextPage next page number
- * @param {integer} prevPage previous page number
- * @returns {object} Response containing paginated object
+ * @param   {string}  automationRawQuery  raw Sql string
+ * @param   {object}  querySettings       query options
+ * @param   {object}  options             sequelize model query options
+ *
+ * @return  {array}                       array of automation objects
  */
-const paginationResponse = (res, allData, page, numberOfPages, data, nextPage, prevPage) => res.status(200).json({
-  status: 'success',
-  message: 'Successfully fetched automations',
-  data: formatAutomationResponse(allData),
-  pagination: {
-    currentPage: page,
-    numberOfPages,
-    dataCount: data.count,
-    nextPage,
-    prevPage,
-  },
-});
+async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, options = {}) {
+  const automationIds = await models.sequelize.query(automationRawQuery, { ...querySettings }, options);
+  const allData = await automation.findAll({
+    ...options,
+    where: {
+      id: {
+        $in: automationIds.map($da => $da.id),
+      },
+    },
+  });
+  return allData;
+}
 
+/**
+ * Returns dateQuery
+ * @param {string} date - date string
+ * @returns {object} dateQuery
+ */
+const dateQueryFunc = (date = { to: new Date() }) => {
+  // eslint-disable-next-line no-unused-vars
+  const todaysDate = moment().format('YYYY-MM-DD');
+  const dateTo = moment(date.to).format('YYYY-MM-DD');
+  const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;
+
+  // check if date.from is greater than date.to or today, return an error
+  if ((dateFrom > dateTo) || (dateFrom > todaysDate)) {
+    throw new Error('date[from] cannot be greater than date[now] or today');
+  }
+
+  // check if both date from and to are provided
+  if (dateFrom && dateTo) {
+    return { dateQuery: `BETWEEN '${dateFrom}' AND '${dateTo}' ` };
+  }
+
+
+  return { dateQuery: `<= '${dateTo}'` };
+};
+
+/**
+ *  Returns query strings
+ * @param {string} dateQuery - date query string
+ * @param {string} slackAutomation - slack query string
+ * @param {string} emailAutomation - email query string
+ * @param {string} freckleAutomation - freckle query string
+ * @param {string} type - freckle query string
+ * @returns {object} queries
+ */
+const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation, type) => {
+  let myQueryCounter = queryCounter;
+  let automationRawQuery = sqlAutomationRawQuery;
+
+  if (slackAutomation) {
+    automationRawQuery += 'AND "s"."status" = 0 ';
+    myQueryCounter += 'AND "s"."status" = 0 ';
+  }
+  if (emailAutomation) {
+    automationRawQuery += 'AND "e"."status" = 0 ';
+    myQueryCounter += 'AND "e"."status" = 0 ';
+  }
+  if (freckleAutomation) {
+    automationRawQuery += 'AND "f"."status" = 0 ';
+    myQueryCounter += 'AND "f"."status" = 0 ';
+  }
+  if (dateQuery.length > 0) {
+    automationRawQuery += `AND to_char("a"."createdAt", 'YYYY-MM-DD') ${dateQuery}`;
+    myQueryCounter += `AND to_char("a"."createdAt", 'YYYY-MM-DD') ${dateQuery}`;
+  }
+  if (type && type.length > 0) {
+    automationRawQuery += `AND "a"."type"='${type}'`;
+    myQueryCounter += `AND "a"."type"='${util.format('%s', type)}'`;
+  }
+
+  return { myQueryCounter, automationRawQuery };
+};
+
+/**
+ * Get pagination meta
+ *
+ * @param   {number}  page current page
+ * @param   {number}  count total data count
+ * @param   {number}  limit total per page
+ *
+ * @return  {object} an object containing offset nextPage and prevPage properties
+ */
+function getPaginationMeta(page, count, limit) {
+  let prevPage;
+  let nextPage;
+  const numberOfPages = Math.ceil(count / limit); // all pages count
+  const offset = limit * (page - 1);
+  // check if number of pages is less than the current page number to show next page number
+  if (page < numberOfPages) {
+    nextPage = page + 1;
+  }
+  // show previous page number if page is greater than 1
+  if (page > 1) {
+    prevPage = page - 1;
+  }
+  return {
+    numberOfPages, offset, nextPage, prevPage,
+  };
+}
 
 /**
  * Returns pagination in JSON format
@@ -62,36 +149,32 @@ const paginationResponse = (res, allData, page, numberOfPages, data, nextPage, p
  * @param {Object} res response object
  * @returns {object} JSON object
  */
-const paginationData = (req, res) => {
+const paginationData = async (req, res) => {
+  const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
-  let offset = 0;
-  let prevPage;
-  let nextPage;
-
-  return automation.findAndCountAll()
-    .then((data) => {
-      const page = parseInt(req.query.page, 10) || 1; // current page number
-      const numberOfPages = Math.ceil(data.count / limit); // all pages count
-      offset = limit * (page - 1);
-
-      // check if number of pages is less than the current page number to show next page number
-      if (page < numberOfPages) {
-        nextPage = page + 1;
-      }
-      // show previous page number if page is greater than 1
-      if (page > 1) {
-        prevPage = page - 1;
-      }
-
-
-      return automation.findAll({
-        include,
-        limit,
-        offset,
-        order,
-      })
-        .then(allData => paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage));
-    });
+  const {
+    date, slackAutomation, emailAutomation, freckleAutomation, type = null,
+  } = req.query;
+  const querySettings = {
+    replacements: [
+      slackAutomation || 'success',
+      emailAutomation || 'success',
+      freckleAutomation || 'success',
+    ],
+    type: models.sequelize.QueryTypes.SELECT,
+  };
+  const { dateQuery: myDateQuery } = dateQueryFunc(date);
+  // eslint-disable-next-line prefer-const
+  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type);
+  const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
+  const data = countData.shift();
+  const page = parseInt(req.query.page, 10) || 1;
+  const {
+    numberOfPages, offset, nextPage, prevPage,
+  } = getPaginationMeta(page, data.count, limit);
+  automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
+  const allData = await getAutomationDataFromIds(automationRawQuery, { ...querySettings }, { include, order });
+  return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
 };
 
 export default class AutomationController {
@@ -103,12 +186,15 @@ export default class AutomationController {
    * @returns {object} Response containing status message and automation data
    */
 
-  static getAutomations(req, res) {
-    // if url doesn't contain a query objects send back all the data
-    if (Object.entries(req.query).length === 0 && req.query.constructor === Object) {
-      return checkQueryObject(res);
+  static async getAutomations(req, res) {
+    try {
+      const { date = {} } = req.query;
+      if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
+        throw new Error('Invalid date format provided please provide date in iso 8601 string');
+      }
+      return await paginationData(req, res);
+    } catch (err) {
+      return res.status(400).json({ error: err.message });
     }
-
-    return paginationData(req, res);
   }
 }
