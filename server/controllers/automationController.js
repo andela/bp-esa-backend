@@ -118,7 +118,6 @@ const dateQueryFunc = (date = { to: new Date() }) => {
 const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation, type, search) => {
   let myQueryCounter = queryCounter + addSearchQuery(search);
   let automationRawQuery = sqlAutomationRawQuery + addSearchQuery(search);
-  console.log(automationRawQuery, myQueryCounter);
   if (slackAutomation) {
     automationRawQuery += 'AND "s"."status" = 0 ';
     myQueryCounter += 'AND "s"."status" = 0 ';
