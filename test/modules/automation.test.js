@@ -42,24 +42,6 @@ describe('Automation Database Operations', () => {
     await automations.createOrUpdateSlackAutomation(automationDetails);
     expect(mockModels.SlackAutomation.upsertById.calledWith(automationDetails)).to.be.true;
   });
-  it('should get a slackAutomation record from the DB', async () => {
-    const automationDetails = {
-      slackAutomationId: '99',
-      channelName: 'p-test',
-      // ...other properties...
-    };
-    await automations.getSlackAutomation(automationDetails);
-    expect(
-      mockModels.SlackAutomation.find.calledWith({
-        where: {
-          [Op.or]: [
-            { id: automationDetails.slackAutomationId },
-            { channelName: automationDetails.channelName },
-          ],
-        },
-      }),
-    ).to.be.true;
-  });
   it('should upsert an emailAutomation record in the DB', async () => {
     const automationDetails = {
       automationId: '3',

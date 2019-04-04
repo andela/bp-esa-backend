@@ -10,5 +10,9 @@ import { executeEmailAutomation } from '../helpers';
  * @returns {void}
  */
 export default function emailOffboarding(placement, automationId) {
-  executeEmailAutomation([sendSOPOffboardingMail, sendITOffboardingMail], placement, automationId);
+  return executeEmailAutomation(
+    [sendSOPOffboardingMail, sendITOffboardingMail],
+    placement,
+    automationId,
+  );
 }

@@ -1,7 +1,5 @@
-import sequelize from 'sequelize';
 import db from '../models';
 
-const { Op } = sequelize;
 const {
   SlackAutomation, EmailAutomation, FreckleAutomation, Partner,
 } = db;
@@ -26,27 +24,7 @@ const {
 export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
 
 /**
- * @func getSlackAutomation
- * @desc Get an already created slackAutomation from the database.
- * Either the channelName or the slackAutomationId should be provided for this operation.
- *
- * @param {object} automationDetails Details about the slack automation to be fetched
- * @param {string} [automationDetails.channelName] Name of the created slack channel
- * @param {string} [automationDetails.slackAutomationId] ID of existing slackAutomation.
- *
- * @return {Promise} Promise that resolves the fetched slackAutomation.
- */
-export const getSlackAutomation = (automationDetails) => {
-  const { slackAutomationId, channelName } = automationDetails;
-  return SlackAutomation.find({
-    where: {
-      [Op.or]: [{ id: slackAutomationId }, { channelName }],
-    },
-  });
-};
-
-/**
- * @func createOrUpdateEmaillAutomation
+ * @func createOrUpdateEmailAutomation
  * @desc create or update an emailAutomation in the Database.
  *
  * @param {object} automationDetails Details about the email automation to be created
@@ -63,7 +41,7 @@ export const getSlackAutomation = (automationDetails) => {
  * @return {Promise} Promise that resolves the created/updated emailAutomation.
  */
 // eslint-disable-next-line max-len
-export const createOrUpdateEmaillAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
+export const createOrUpdateEmailAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
 
 /**
  * @func createOrUpdateFreckleAutomation
@@ -114,4 +92,4 @@ export const creatOrUpdatePartnerRecord = async (partnerDetails) => {
  * @param {string} partnerId The id of the partner(from the placement data).
  * @returns {Promise} Promise that resolves to the found partner record.
  */
-export const getPartnerRecord = partnerId => Partner.find({ where: { partnerId } });
+export const getPartnerRecord = partnerId => Partner.findOne({ where: { partnerId } });

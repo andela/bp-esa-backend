@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { accessChannel, createPartnerChannel } from '../../modules/slack/slackIntegration';
+import { accessChannel, findOrCreatePartnerChannel } from '../../modules/slack/slackIntegration';
 import {
   creatOrUpdatePartnerRecord,
   createOrUpdateSlackAutomation,
@@ -21,21 +21,27 @@ const slackOnBoarding = async (placement, automationId) => {
   const { client_name: partnerName, client_id: partnerId } = placement;
   accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'kick').then(response => createOrUpdateSlackAutomation({ ...response, automationId }));
   accessChannel(fellow.email, SLACK_RACK_CITY_CHANNEL_ID, 'invite').then(response => createOrUpdateSlackAutomation({ ...response, automationId }));
-  const [internalSlackChannel, generalSlackChannel] = await Promise.all([
-    createPartnerChannel(partnerName, 'internal'),
-    createPartnerChannel(partnerName, 'general'),
+  const [internalChannelId, generalChannelId] = await Promise.all([
+    findOrCreatePartnerChannel({ name: partnerName }, 'internal', 'onboarding').then(
+      (internalChannel) => {
+        createOrUpdateSlackAutomation({ ...internalChannel, automationId });
+        return internalChannel.channelId;
+      },
+    ),
+    findOrCreatePartnerChannel({ name: partnerName }, 'general', 'onboarding').then(
+      (generalChannel) => {
+        createOrUpdateSlackAutomation({ ...generalChannel, automationId });
+        accessChannel(fellow.email, generalChannel.channelId, 'invite').then(result => createOrUpdateSlackAutomation({ ...result, automationId }));
+        return generalChannel.channelId;
+      },
+    ),
   ]);
-  createOrUpdateSlackAutomation({ ...internalSlackChannel, automationId });
-  createOrUpdateSlackAutomation({ ...generalSlackChannel, automationId });
-  accessChannel(fellow.email, generalSlackChannel.channelId, 'invite').then(
-    result => createOrUpdateSlackAutomation({ ...result, automationId }),
-  );
   creatOrUpdatePartnerRecord({
     partnerId,
     name: partnerName,
     slackChannels: {
-      internal: internalSlackChannel.channelId,
-      general: generalSlackChannel.channelId,
+      internal: internalChannelId,
+      general: generalChannelId,
     },
   });
 };

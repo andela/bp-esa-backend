@@ -9,8 +9,6 @@ import { executeEmailAutomation } from '../helpers';
  * @param {object} automationId ID of the particular automation
  * @returns {void}
  */
-const emailOnboarding = async (placement, automationId) => {
-  executeEmailAutomation([sendDevOnboardingMail, sendSOPOnboardingMail], placement, automationId);
-};
+const emailOnboarding = async (placement, automationId) => executeEmailAutomation([sendDevOnboardingMail, sendSOPOnboardingMail], placement, automationId);
 
 export default emailOnboarding;

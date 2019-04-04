@@ -1,56 +1,64 @@
 import axios from 'axios';
-import redis from 'redis';
-import dotenv from 'dotenv';
 import ms from 'ms';
+import util from 'util';
 import client from '../helpers/redis';
+import db from '../models';
+import { findOrCreatePartnerChannel } from './slack/slackIntegration';
+import { getPartnerRecord } from './automations';
 
-dotenv.config();
+require('dotenv').config();
+
+const redis = {
+  set: util.promisify(client.set).bind(client),
+  get: util.promisify(client.get).bind(client),
+};
 
 // Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 // Updates the local redis store with latest Partner List
-export const updatePartnerStore = () => axios.get(process.env.ANDELA_PARTNERS).then((response) => {
-  client.set('partners', JSON.stringify(response.data), redis.print);
-  return response.data;
-});
-
-const resolvePartner = (partnerId, result, resolve) => {
-  if (result) {
-    return resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
-  }
-  return resolve(null);
-};
-
-/**
- * @desc Fetch partner data from external api
- *
- * @param {string} partnerId ID of the partner
- *
- * @returns {Promise} Promise of the partner data to be fetched
- */
-const retrievePartner = partnerId => new Promise((resolve, reject) => {
-  client.get('partners', (error, result) => {
-    if (error) {
-      reject(error);
+export const getPartnerFromStore = async (partnerId) => {
+  const result = await redis.get(partnerId);
+  if (!result) {
+    try {
+      const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`);
+      redis.set(data.id, JSON.stringify(data));
+      return data;
+    } catch ({ response, message }) {
+      throw new Error(response ? response.data.error : message);
     }
-    return resolvePartner(partnerId, result, resolve);
-  });
-});
+  }
+  return JSON.parse(result);
+};
+const generateInternalChannel = (newPartner, jobType) => {
+  if (!newPartner.channel_id.length) {
+    return findOrCreatePartnerChannel(newPartner, 'internal', jobType);
+  }
+  return {};
+};
 
 /**
  * @desc Get partner details from radis db or fetch new partner data
  *
  * @param {string} partnerId ID of the partner
+ * @param {string} jobType Type of job being executed: onboarding || offboarding
  *
  * @returns {object} Data of the partner
  */
-export async function findPartnerById(partnerId) {
-  let partner = await retrievePartner(partnerId);
+export async function findPartnerById(partnerId, jobType) {
+  const partner = await getPartnerRecord(partnerId);
   if (!partner) {
-    const { values } = await updatePartnerStore();
-    [partner] = values.filter(data => data.id === partnerId);
-    if (!partner) throw new Error('Partner record was not found');
+    const newPartner = await getPartnerFromStore(partnerId);
+    if (!newPartner) throw new Error('Partner record was not found');
+    const [genChannel = {}, intChannel = {}] = await Promise.all([
+      findOrCreatePartnerChannel(newPartner, 'general', jobType),
+      generateInternalChannel(newPartner, jobType),
+    ]);
+    newPartner.slackChannels = {
+      general: genChannel.channelId,
+      internal: intChannel.channelId || newPartner.channel_id,
+    };
+    return db.Partner.create(newPartner);
   }
   return partner;
 }

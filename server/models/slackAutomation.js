@@ -9,7 +9,7 @@ export default (sequelize, DataTypes) => {
       slackUserId: DataTypes.STRING,
       type: {
         type: DataTypes.ENUM,
-        values: ['create', 'kick', 'invite'],
+        values: ['create', 'kick', 'invite', 'retrieve'],
         allowNull: false,
       },
     }),

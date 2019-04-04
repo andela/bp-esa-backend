@@ -48,7 +48,7 @@ worker.init();
 http.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
   console.log(`Timer Interval is set to ${process.env.TIMER_INTERVAL}`);
-  setInterval(() => worker.exec(), ms(process.env.TIMER_INTERVAL || '1d'));
+  worker.exec();
 });
 
 export default app;

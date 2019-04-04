@@ -4,12 +4,10 @@ import onboardingAllocations from '../mocks/allocations';
 import slackMocks from '../mocks/slack';
 
 const createOrUpdateSlackAutomation = sinon.stub();
-const getSlackAutomation = sinon.stub();
 
 const slack = proxyquire('../../server/modules/slack/slackIntegration', {
   '../automations': {
     createOrUpdateSlackAutomation,
-    getSlackAutomation,
   },
 });
 
@@ -29,13 +27,12 @@ describe('Slack Integration Test Suite', async () => {
   beforeEach(() => {
     Object.keys(fakeSlackClient).forEach(fake => fakeSlackClient[fake].resetHistory());
     createOrUpdateSlackAutomation.resetHistory();
-    getSlackAutomation.resetHistory();
   });
 
   it('Should create internal slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
-    const createResult = await slack.createPartnerChannel(partnerName, 'internal');
+    const createResult = await slack.findOrCreatePartnerChannel({ name: partnerName }, 'internal');
     const expectedResult = {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,
@@ -47,7 +44,7 @@ describe('Slack Integration Test Suite', async () => {
   it('Should create general slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
-    const createResult = await slack.createPartnerChannel(partnerName, 'general');
+    const createResult = await slack.findOrCreatePartnerChannel({ name: partnerName }, 'general');
     const expectedResult = {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,

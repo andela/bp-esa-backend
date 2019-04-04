@@ -1,7 +1,8 @@
+/* eslint-disable no-param-reassign */
 import dotenv from 'dotenv';
 import { accessChannel } from '../../modules/slack/slackIntegration';
-import { getPartnerRecord, createOrUpdateSlackAutomation } from '../../modules/automations';
-/* eslint-disable no-param-reassign */
+import { createOrUpdateSlackAutomation } from '../../modules/automations';
+import { findPartnerById } from '../../modules/allocations';
 
 dotenv.config();
 const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
@@ -16,12 +17,20 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
 export default async function slackOffboarding(placement, automationId) {
   const { fellow, client_id: partnerId } = placement;
   accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'invite').then(response => createOrUpdateSlackAutomation({ ...response, automationId }));
-  getPartnerRecord(partnerId).then(async (partnerRecord) => {
+  try {
+    const partnerRecord = await findPartnerById(partnerId, 'offboarding');
     const response = await accessChannel(
       fellow.email,
-      partnerRecord && partnerRecord.channelId,
+      partnerRecord && partnerRecord.slackChannels.general,
       'kick',
     );
     return createOrUpdateSlackAutomation({ ...response, automationId });
-  });
+  } catch (error) {
+    return createOrUpdateSlackAutomation({
+      automationId,
+      status: 'failure',
+      statusMessage: error.message,
+      type: 'kick',
+    });
+  }
 }

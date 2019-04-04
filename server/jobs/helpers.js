@@ -1,5 +1,5 @@
 import { findPartnerById } from '../modules/allocations';
-import { createOrUpdateEmaillAutomation } from '../modules/automations';
+import { createOrUpdateEmailAutomation } from '../modules/automations';
 import { sendPlacementFetchAlertEmail } from '../modules/email/emailModule';
 
 export const count = { FAILED_COUNT_NUMBER: 0 };
@@ -54,5 +54,7 @@ export const checkFailureCount = async (failCount) => {
 export async function executeEmailAutomation(emailFunctions, placement, automationId) {
   const mailInfo = await getMailInfo(placement);
   const emailAutomations = await Promise.all(emailFunctions.map(func => func(mailInfo)));
-  emailAutomations.map(automationData => createOrUpdateEmaillAutomation({ ...automationData, automationId }));
+  await Promise.all(
+    emailAutomations.map(automationData => createOrUpdateEmailAutomation({ ...automationData, automationId })),
+  );
 }
