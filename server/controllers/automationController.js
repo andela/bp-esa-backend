@@ -60,9 +60,6 @@ async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, 
  */
 const dateQueryFunc = (date = { to: new Date() }) => {
   // eslint-disable-next-line no-unused-vars
-  if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
-    throw new Error('Invalid date format provided please provide date in iso 8601 string');
-  }
   const todaysDate = moment().format('YYYY-MM-DD');
   const dateTo = moment(date.to).format('YYYY-MM-DD');
   const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;
@@ -166,6 +163,9 @@ const paginationData = async (req, res) => {
     ],
     type: models.sequelize.QueryTypes.SELECT,
   };
+  if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
+    throw new Error('Invalid date format provided please provide date in iso 8601 string');
+  }
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
   let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type);
