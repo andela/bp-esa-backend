@@ -168,4 +168,33 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('should return stats of total successfull automations', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations?page=1&limit=5&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
+  it('should return stats of onboarding successfull automations', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations?page=1&limit=5&type=onboarding&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('automation');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
 });
