@@ -126,7 +126,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should search automation data for partners or fellows name containing a string', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?q=conroy')
+      .get('/api/v1/automations?searchTerm=conroy')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -141,7 +141,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should search automation with fellow name containing a string', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?q=val&queryType=fellow')
+      .get('/api/v1/automations?searchTerm=val&searchBy=fellow')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -156,7 +156,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should search automation with partner name containing a string', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?q=conroy&queryType=partner')
+      .get('/api/v1/automations?searchTerm=conroy&searchBy=partner')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)

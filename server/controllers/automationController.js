@@ -6,7 +6,6 @@ import * as util from 'util';
 import models from '../models';
 import { paginationResponse } from '../utils/formatter';
 import sqlAutomationRawQuery, { queryCounter } from '../utils/rawSQLQueries';
-import { searchconsole_v1 } from 'googleapis';
 
 const automation = models.Automation;
 export const include = [
@@ -60,15 +59,15 @@ async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, 
  *
  * @return  {string}       sql query for search
  */
-function addSearchQuery({ q, queryType }) {
-  if (!q) {
+function addSearchQuery({ searchTerm, searchBy }) {
+  if (!searchTerm) {
     return '';
   }
-  switch (queryType) {
+  switch (searchBy) {
     case 'partner':
-      return util.format(' AND "a"."partnerName" ILIKE \'%%%s%%\'', q);
+      return util.format(' AND "a"."partnerName" ILIKE \'%%%s%%\'', searchTerm);
     case 'fellow':
-      return util.format(' AND "a"."fellowName" ILIKE \'%%%s%%\'', q);
+      return util.format(' AND "a"."fellowName" ILIKE \'%%%s%%\'', searchTerm);
     default:
       return util.format(`
           AND (
@@ -76,7 +75,7 @@ function addSearchQuery({ q, queryType }) {
             "a"."fellowName" ILIKE '%%%s%%'
           )
 
-          `, q, q);
+          `, searchTerm, searchTerm);
   }
 }
 
@@ -180,7 +179,7 @@ const paginationData = async (req, res) => {
   const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
-    date, slackAutomation, emailAutomation, freckleAutomation, type = null, queryType, q,
+    date, slackAutomation, emailAutomation, freckleAutomation, type = null, searchBy, searchTerm,
   } = req.query;
   const querySettings = {
     replacements: [
@@ -188,11 +187,11 @@ const paginationData = async (req, res) => {
       emailAutomation || 'success',
       freckleAutomation || 'success',
     ],
-    type: models.sequelize.QueryTypes.SELECT,
+    type: models.sequelize.searchBys.SELECT,
   };
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
-  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type, { q, queryType });
+  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type, { searchTerm, searchBy });
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
   const page = parseInt(req.query.page, 10) || 1;
