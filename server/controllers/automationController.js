@@ -163,9 +163,6 @@ const paginationData = async (req, res) => {
     ],
     type: models.sequelize.QueryTypes.SELECT,
   };
-  if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
-    throw new Error('Invalid date format provided please provide date in iso 8601 string');
-  }
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
   let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type);
@@ -191,6 +188,10 @@ export default class AutomationController {
 
   static async getAutomations(req, res) {
     try {
+      const { date = {} } = req.query;
+      if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
+        throw new Error('Invalid date format provided please provide date in iso 8601 string');
+      }
       return await paginationData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
