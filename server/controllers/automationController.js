@@ -6,6 +6,7 @@ import * as util from 'util';
 import models from '../models';
 import { paginationResponse } from '../utils/formatter';
 import sqlAutomationRawQuery, { queryCounter } from '../utils/rawSQLQueries';
+import { searchconsole_v1 } from 'googleapis';
 
 const automation = models.Automation;
 export const include = [
@@ -52,6 +53,32 @@ async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, 
   });
   return allData;
 }
+/**
+ * Get search query
+ *
+ * @param   {object}  req  request object
+ *
+ * @return  {string}       sql query for search
+ */
+function addSearchQuery({ q, queryType }) {
+  if (!q) {
+    return '';
+  }
+  switch (queryType) {
+    case 'partner':
+      return util.format(' AND "a"."partnerName" ILIKE \'%%%s%%\'', q);
+    case 'fellow':
+      return util.format(' AND "a"."fellowName" ILIKE \'%%%s%%\'', q);
+    default:
+      return util.format(`
+          AND (
+            "a"."partnerName" ILIKE '%%%s%%' OR 
+            "a"."fellowName" ILIKE '%%%s%%'
+          )
+
+          `, q, q);
+  }
+}
 
 /**
  * Returns dateQuery
@@ -85,12 +112,13 @@ const dateQueryFunc = (date = { to: new Date() }) => {
  * @param {string} emailAutomation - email query string
  * @param {string} freckleAutomation - freckle query string
  * @param {string} type - freckle query string
+ * @param {string} search - search query string
  * @returns {object} queries
  */
-const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation, type) => {
-  let myQueryCounter = queryCounter;
-  let automationRawQuery = sqlAutomationRawQuery;
-
+const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation, type, search) => {
+  let myQueryCounter = queryCounter + addSearchQuery(search);
+  let automationRawQuery = sqlAutomationRawQuery + addSearchQuery(search);
+  console.log(automationRawQuery, myQueryCounter);
   if (slackAutomation) {
     automationRawQuery += 'AND "s"."status" = 0 ';
     myQueryCounter += 'AND "s"."status" = 0 ';
@@ -153,7 +181,7 @@ const paginationData = async (req, res) => {
   const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
-    date, slackAutomation, emailAutomation, freckleAutomation, type = null,
+    date, slackAutomation, emailAutomation, freckleAutomation, type = null, queryType, q,
   } = req.query;
   const querySettings = {
     replacements: [
@@ -165,7 +193,7 @@ const paginationData = async (req, res) => {
   };
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
-  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type);
+  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type, { q, queryType });
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
   const page = parseInt(req.query.page, 10) || 1;
