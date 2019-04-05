@@ -190,7 +190,7 @@ describe('Tests for automation endpoints\n', () => {
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
-          .to.have.property('automation')
+          .to.have.property('onboarding')
           .to.have.property('success');
         expect(res.body.pagination)
           .to.have.property('currentPage')
@@ -205,7 +205,22 @@ describe('Tests for automation endpoints\n', () => {
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
-          .to.have.property('automation')
+          .to.have.property('offboarding')
+          .to.have.property('success');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
+  it('should return stats of slack successfull automations', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations?page=1&limit=5&slackAutomation="success"&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('slack')
           .to.have.property('success');
         expect(res.body.pagination)
           .to.have.property('currentPage')
