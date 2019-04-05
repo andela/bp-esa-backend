@@ -171,7 +171,7 @@ describe('Tests for automation endpoints\n', () => {
   it('should return stats of total successfull automations', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .get(`/api/v1/automations/status?page=1&limit=5&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -186,7 +186,7 @@ describe('Tests for automation endpoints\n', () => {
   it('should return stats of onboarding successfull automations', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&type=onboarding&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .get(`/api/v1/automations/status?page=1&limit=5&type=onboarding&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -201,7 +201,7 @@ describe('Tests for automation endpoints\n', () => {
   it('should return stats of successfull automations', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .get(`/api/v1/automations/status?page=1&limit=5&&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -216,7 +216,7 @@ describe('Tests for automation endpoints\n', () => {
   it('should return stats of slack successfull automations', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&slackAutomation="success"&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .get(`/api/v1/automations/status?page=1&limit=5&slackAutomation="success"&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -231,7 +231,7 @@ describe('Tests for automation endpoints\n', () => {
   it('should return stats of offboarding successfull automations', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&type=offboarding&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .get(`/api/v1/automations/status?page=1&limit=5&type=offboarding&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
