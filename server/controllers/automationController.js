@@ -187,7 +187,7 @@ const paginationData = async (req, res) => {
       emailAutomation || 'success',
       freckleAutomation || 'success',
     ],
-    type: models.sequelize.searchBys.SELECT,
+    type: models.sequelize.QueryTypes.SELECT,
   };
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
