@@ -65,9 +65,9 @@ function addSearchQuery({ searchTerm, searchBy }) {
   }
   switch (searchBy) {
     case 'partner':
-      return util.format(' AND "a"."partnerName" ILIKE \'%%%s%%\'', searchTerm);
+      return util.format(' AND "a"."partnerName" ILIKE \'%%%s%%\' ', searchTerm);
     case 'fellow':
-      return util.format(' AND "a"."fellowName" ILIKE \'%%%s%%\'', searchTerm);
+      return util.format(' AND "a"."fellowName" ILIKE \'%%%s%%\' ', searchTerm);
     default:
       return util.format(`
           AND (
