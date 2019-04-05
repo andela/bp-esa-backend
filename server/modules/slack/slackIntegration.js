@@ -4,8 +4,19 @@ import makeChannelNames from '../../helpers/slackHelpers';
 import { getSlackAutomation } from '../automations';
 
 dotenv.config();
+let rejectRateLimit = false;
+if (typeof process.env.REJECT_RATE_LIMIT !== 'undefined') {
+  rejectRateLimit = process.env.REJECT_RATE_LIMIT;
+}
 const { SLACK_TOKEN } = process.env;
-export const slackClient = new WebClient(SLACK_TOKEN);
+export const slackClient = new WebClient(SLACK_TOKEN, {
+  rejectRateLimitCalls: rejectRateLimit,
+  retryConfig: {
+    retries: 0,
+    minTimeout: 10 * 1000,
+    maxTimeout: 10 * 1000,
+  },
+});
 
 const channelData = channelName => ({
   slackUserId: null,
