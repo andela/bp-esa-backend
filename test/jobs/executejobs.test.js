@@ -10,5 +10,5 @@ describe('Jobs Execution Test Suite', async () => {
     await executejobs('onboarding');
     sinon.assert.called(fakeIoEmit);
     fakeIoEmit.restore();
-  }).timeout(20 * 1000);
+  }).timeout(30 * 1000);
 });
