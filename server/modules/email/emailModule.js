@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import emailTransport from './emailTransport';
+import { getAppRoot, getTemplatesPath } from '../../utils/helpers';
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ const opsEmail = process.env.OPS_EMAIL;
 const itEmail = process.env.IT_EMAIL;
 const supportEmail = process.env.SUPPORT_EMAIL;
 
-const getEmailTemplatePath = emailTemplate => path.join(__dirname, `emailTemplates/${emailTemplate}`);
+const getEmailTemplatePath = emailTemplate => path.join(getTemplatesPath(), `email/${emailTemplate}`);
 const developerOnboardingTemplatePath = getEmailTemplatePath('developer-onboarding-email.html');
 const successOnboardingTemplatePath = getEmailTemplatePath('success-onboarding-email.html');
 const itOffboardingPath = getEmailTemplatePath('it-offboarding-email.html');

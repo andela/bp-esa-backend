@@ -15,6 +15,7 @@ COPY db /usr/src/app/db/
 COPY server /usr/src/app/server/
 COPY .sequelizerc /usr/src/app/
 COPY .babelrc /usr/src/app/
+COPY templates /usr/src/app/templates/
 
 RUN yarn install 
 
