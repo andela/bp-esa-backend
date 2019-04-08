@@ -123,4 +123,49 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('Should search automation data for partners or fellows name containing a string', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?searchTerm=conroy')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
+  it('Should search automation with fellow name containing a string', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?searchTerm=val&searchBy=fellow')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
+  it('Should search automation with partner name containing a string', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?searchTerm=conroy&searchBy=partner')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.pagination)
+          .to.have.property('currentPage')
+          .to.be.equal(1);
+        done();
+      });
+  });
 });
