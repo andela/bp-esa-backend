@@ -6,12 +6,14 @@ import dotenv from 'dotenv';
 import '@babel/polyfill';
 import bodyParser from 'body-parser';
 import ms from 'ms';
+import path from 'path';
+import { setAppRoot } from './utils/helpers';
 import validateEnvironmentVars from './validator';
 import routes from './routes';
 import worker from './jobs/worker';
 
 dotenv.config();
-
+setAppRoot(path.join(__dirname, '../'));
 // Set up the express app
 const app = express();
 const http = HTTP.Server(app);
