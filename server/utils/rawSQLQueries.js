@@ -137,6 +137,7 @@ export const totalAutomationsQuery = `
                 group by "automationId"
             ) as f
             on "f"."automationId"="a"."id"
+            where a."createdAt" BETWEEN ? and ?
     ;
 `;
 
@@ -199,6 +200,7 @@ export const totalSuccessAutomationQuery = `
             and s.status = 0
             and e.status = 0
             and f.status = 0
+            and a."createdAt" BETWEEN ? and ?
     ;
 `;
 
@@ -228,6 +230,7 @@ export const totalOnboardingAutomationsQuery = `
     ) as f
     on "f"."automationId"="a"."id"
     where "a"."type"='onboarding'
+    and a."createdAt" BETWEEN ? and ?
     ;
 `;
 
@@ -291,6 +294,7 @@ export const successOnboardingAutomationsQuery = `
     and s.status = 0
     and e.status = 0
     and f.status = 0
+    and a."createdAt" BETWEEN ? and ?
     ;
 `;
 
@@ -320,6 +324,7 @@ export const totalOffboardingAutomationsQuery = `
     ) as f
     on "f"."automationId"="a"."id"
     where "a"."type"='offboarding'
+    and a."createdAt" BETWEEN ? and ?
     ;
 `;
 
@@ -383,6 +388,7 @@ export const successOffboardingAutomationsQuery = `
     and s.status = 0
     and e.status = 0
     and f.status = 0
+    and a."createdAt" BETWEEN ? and ?
     ;
 `;
 
@@ -395,6 +401,7 @@ export const totalSlackAutomationsQuery = `
         group by "automationId"
     ) as s
     on "s"."automationId"="a"."id"
+    where a."createdAt" BETWEEN ? and ?
 ;
 `;
 
@@ -419,6 +426,7 @@ export const successSlackAutomationsQuery = `
     on "s"."automationId"="a"."id"
     WHERE 1=1
     and s.status = 0
+    and a."createdAt" BETWEEN ? and ?
 ;
 `;
 
@@ -431,6 +439,7 @@ export const totalFreckleAutomationsQuery = `
         group by "automationId"
     ) as f
     on "f"."automationId"="a"."id"
+    where a."createdAt" BETWEEN ? and ?
 ;
 `;
 
@@ -455,6 +464,7 @@ export const successFreckleAutomationsQuery = `
     on "f"."automationId"="a"."id"
     WHERE 1=1
     and f.status = 0
+    and a."createdAt" BETWEEN ? and ?
 ;
 `;
 
@@ -467,6 +477,7 @@ export const totalEmailAutomationsQuery = `
         group by "automationId"
     ) as e
     on "e"."automationId"="a"."id"
+    where a."createdAt" BETWEEN ? and ?
 ;
 `;
 
@@ -491,6 +502,7 @@ export const successEmailAutomationsQuery = `
     on "e"."automationId"="a"."id"
     WHERE 1=1
     and e.status = 0
+    and a."createdAt" BETWEEN ? and ?
 ;
 `;
 
