@@ -64,7 +64,7 @@ export function formatPayload(automation) {
   formattedAutomation.emailAutomations = formatAutomations(
     automation.emailAutomations,
     'emailActivities',
-    ['status', 'statusMessage', 'emailTo', 'subject'],
+    ['status', 'statusMessage', 'recipient', 'subject'],
   );
   formattedAutomation.freckleAutomations = formatAutomations(
     automation.freckleAutomations,
