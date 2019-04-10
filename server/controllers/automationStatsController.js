@@ -23,7 +23,7 @@ import {
  *
  * @returns {number} - resolved value of the count query
  */
-const queryCountResolver = queryCount => queryCount[0].count;
+const queryCountResolver = queryCount => Number(queryCount[0].count);
 
 /**
  * controller for the 'api/v1/automation/stats' endpoint that aggregate the automation stats
