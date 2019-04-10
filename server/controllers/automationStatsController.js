@@ -46,7 +46,6 @@ export default async (req, res) => {
     const totalAutomations = queryCountResolver(
       await models.sequelize.query(totalAutomationsQuery, querySettings),
     );
-
     const successAutomations = queryCountResolver(
       await models.sequelize.query(totalSuccessAutomationQuery, querySettings),
     );

@@ -174,9 +174,6 @@ describe('Tests for automation endpoints\n', () => {
       .get('/api/v1/automations/stats')
       .end((err, res) => {
         expect(res).to.have.status(200);
-        console.log('====================================');
-        console.log(res.body);
-        console.log('====================================');
         expect(res.body)
           .to.have.property('automation')
           .to.have.property('total');
