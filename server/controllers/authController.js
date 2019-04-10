@@ -6,21 +6,42 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const authResponse = async function (req, res, next) {
+
+/**
+ * Decodes a token
+ * @param {string} token provided by user
+ * @returns {object} decoded token
+*/
+async function decodeToken(token) {
   try {
-    const token = req.body.token;
     const decode = await jwt.decode(token);
-    res.json({
+    return decode;
+  } catch (err) {
+    return false;
+  }
+}
+
+
+/**
+ * Does Auth
+ *  @param {object} req provided by user
+ *  @param {object} res provided by user
+ *  @returns {object} decoded token
+*/
+async function authResponse(req, res) {
+  const { token } = req.body;
+  const decode = await decodeToken(token);
+  if (decode) {
+    res.status(200).json({
       confirmation: 'success',
       decode,
     });
-  } catch (err) {
-    console.error(err);
-    next(err);
-    res.json({
+  } else {
+    res.status(401).json({
       confirmation: 'fail',
       message: 'Invalid Token',
     });
   }
-};
+}
+
 export default authResponse;
