@@ -19,7 +19,7 @@ async function generatePlacements(status) {
   const { members } = await list();
   const emails = members.reduce(
     (result, { deleted, profile: { email } }) => {
-      return ((email && !deleted) ? [...result, email] : result);
+      return ((email && !deleted && email !== 'esa@andela.com') ? [...result, email] : result);
     },
     [],
   );
