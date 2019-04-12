@@ -2,7 +2,6 @@ import chaiHttp from 'chai-http';
 import chai, { expect } from 'chai';
 import app from '../../server';
 
-
 chai.use(chaiHttp);
 
 describe('Tests for automation endpoints\n', () => {
@@ -39,7 +38,13 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter automation data', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${(new Date(2019, 1, 1)).toISOString()}&date[to]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .get(
+        `/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${new Date(
+          2019,
+          1,
+          1,
+        ).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`,
+      )
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -54,7 +59,9 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter automation data with date[from] missing', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&date[to]=${(new Date()).toJSON()}`)
+      .get(
+        `/api/v1/automations?page=1&limit=5&slackAutomation=success&date[to]=${new Date().toJSON()}`,
+      )
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -69,7 +76,13 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter automation data with date[to] missing', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&date[from]=${(new Date(2019, 2, 10)).toISOString()}`)
+      .get(
+        `/api/v1/automations?page=1&limit=5&slackAutomation=success&date[from]=${new Date(
+          2019,
+          2,
+          10,
+        ).toISOString()}`,
+      )
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -84,7 +97,13 @@ describe('Tests for automation endpoints\n', () => {
   it('Should return error if date[from] > date[to] ', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&date[from]=${(new Date(2020, 1, 1)).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`)
+      .get(
+        `/api/v1/automations?page=1&limit=5&date[from]=${new Date(
+          2020,
+          1,
+          1,
+        ).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`,
+      )
       .end((err, res) => {
         expect(res).to.have.status(400);
         expect(res.body)
@@ -165,6 +184,45 @@ describe('Tests for automation endpoints\n', () => {
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
+        done();
+      });
+  });
+  it('should return stats of total automations', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations/stats')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('automation')
+          .to.have.property('total')
+          .to.be.equal(0);
+        done();
+      });
+  });
+  it('should return stats of total automations of a given date', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations/stats?date=${new Date(2018, 4, 1).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('automation')
+          .to.have.property('total')
+          .to.be.equal(0);
+        done();
+      });
+  });
+  it('should return stats of onboarding successfull automations', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations/stats')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('onboarding')
+          .to.have.property('success')
+          .to.be.equal(0);
         done();
       });
   });

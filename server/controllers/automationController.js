@@ -2,10 +2,12 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 import moment from 'moment';
+
 import * as util from 'util';
 import models from '../models';
 import { paginationResponse } from '../utils/formatter';
-import sqlAutomationRawQuery, { queryCounter } from '../utils/rawSQLQueries';
+import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
+
 
 const automation = models.Automation;
 export const include = [
