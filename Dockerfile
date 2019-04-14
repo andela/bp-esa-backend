@@ -17,10 +17,10 @@ COPY .sequelizerc /usr/src/app/
 COPY .babelrc /usr/src/app/
 COPY templates /usr/src/app/templates/
 
-RUN yarn install 
+RUN yarn install
 
 # Uncomment this when using the application locally
-# COPY .env .
+COPY .env .
 
 #Bundle apps source code
 RUN yarn build
@@ -32,7 +32,7 @@ ENV PORT=6050
 # instruction to have it mapped by the docker daemon:
 EXPOSE 6050
 
-# define the command to run your app using 
+# define the command to run your app using
 # CMD which defines your runtime
 
 CMD [ "node", "./build/index.js" ]
