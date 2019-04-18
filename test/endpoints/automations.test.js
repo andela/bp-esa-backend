@@ -1,10 +1,24 @@
 import chaiHttp from 'chai-http';
 import chai, { expect } from 'chai';
 import app from '../../server';
+import models from '../../server/models';
+import createAutomationFakeData, { createSlackAutomation, createFreckleAutomation, createEmailAutomation } from '../mocks/getAutomations';
 
 chai.use(chaiHttp);
 
 describe('Tests for automation endpoints\n', () => {
+  beforeEach(async () => {
+    const getAutomation = await models.Automation.bulkCreate(createAutomationFakeData());
+    await models.SlackAutomation.bulkCreate(createSlackAutomation(getAutomation));
+    await models.FreckleAutomation.bulkCreate(createFreckleAutomation(getAutomation));
+    await models.EmailAutomation.bulkCreate(createEmailAutomation(getAutomation));
+  });
+  afterEach(async () => {
+    await models.FreckleAutomation.truncate();
+    await models.SlackAutomation.truncate();
+    await models.EmailAutomation.truncate();
+    await models.Automation.truncate({ cascade: true });
+  });
   it('Should return all data with a 200 response code', (done) => {
     chai
       .request(app)
@@ -16,14 +30,15 @@ describe('Tests for automation endpoints\n', () => {
           .to.equal('Successfully fetched automations');
         expect(res.body)
           .to.have.property('data')
-          .to.be.an('array');
+          .to.be.an('array')
+          .to.have.length(10);
         done();
       });
   });
-  it('Should return paginated automation data with a 200 response code', (done) => {
+  it('Should return paginated data in page 1', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=1')
+      .get('/api/v1/automations?page=1&limit=5')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -31,84 +46,152 @@ describe('Tests for automation endpoints\n', () => {
           .to.equal('Successfully fetched automations');
         expect(res.body)
           .to.have.property('data')
-          .to.be.an('array');
+          .to.be.an('array')
+          .to.have.length(5);
+        expect(res.body)
+          .to.have.property('pagination')
+          .to.be.an('object')
+          .to.include({
+            currentPage: 1, numberOfPages: 2, dataCount: '10', nextPage: 2,
+          });
         done();
       });
   });
-  it('Should filter automation data', (done) => {
+  it('Should return paginated data in page 2', (done) => {
     chai
       .request(app)
-      .get(
-        `/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${new Date(
-          2019,
-          1,
-          1,
-        ).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`,
-      )
+      .get('/api/v1/automations?page=2&limit=5')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
+        expect(res.body)
+          .to.have.property('data')
+          .to.be.an('array')
+          .to.have.length(5);
+        expect(res.body)
+          .to.have.property('pagination')
+          .to.be.an('object')
+          .to.include({
+            currentPage: 2, numberOfPages: 2, dataCount: '10', prevPage: 1,
+          });
         done();
       });
   });
-  it('Should filter automation data with date[from] missing', (done) => {
+  it('Should return data from date[from] is provided', (done) => {
     chai
       .request(app)
-      .get(
-        `/api/v1/automations?page=1&limit=5&slackAutomation=success&date[to]=${new Date().toJSON()}`,
-      )
+      .get(`/api/v1/automations?page=1&limit=5&date[from]=${new Date('March 26 2019 12:30').toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
+        expect(res.body)
+          .to.have.property('data')
+          .to.be.an('array')
+          .to.not.equal(10);
         done();
       });
   });
-  it('Should filter automation data with date[to] missing', (done) => {
+  it('Should return data up to date[to] when provided', (done) => {
     chai
       .request(app)
-      .get(
-        `/api/v1/automations?page=1&limit=5&slackAutomation=success&date[from]=${new Date(
-          2019,
-          2,
-          10,
-        ).toISOString()}`,
-      )
+      .get(`/api/v1/automations?page=1&limit=5&date[to]=${new Date('February 01 2019 12:30').toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
+        expect(res.body)
+          .to.have.property('data')
+          .to.be.an('array')
+          .to.not.equal(10);
         done();
       });
   });
-  it('Should return error if date[from] > date[to] ', (done) => {
+  it('Should return data between date[from] and date[to]', (done) => {
     chai
       .request(app)
-      .get(
-        `/api/v1/automations?page=1&limit=5&date[from]=${new Date(
-          2020,
-          1,
-          1,
-        ).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`,
-      )
+      .get(`/api/v1/automations?page=1&limit=5&date[from]=${new Date('January 01 2019 12:30').toISOString()}&date[to]=${new Date('February 01 2019 12:30').toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body)
+          .to.have.property('data')
+          .to.be.an('array')
+          .to.not.equal(10);
+        done();
+      });
+  });
+  it('Should return error message when date[from] is greater than date[to]', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations?page=1&limit=5&date[from]=${new Date('March 01 2019 12:30').toISOString()}&date[to]=${new Date('February 01 2019 12:30').toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(400);
         expect(res.body)
           .to.have.property('error')
           .to.equal('date[from] cannot be greater than date[now] or today');
+        done();
+      });
+  });
+  it('Should filter successful freckleAutomations data', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=5&freckleAutomation=success')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body)
+          .to.have.property('data')
+          .to.have.lengthOf.below(10);
+        expect(res.body.data[0].freckleAutomations.status)
+          .to.be.equal('success');
+        done();
+      });
+  });
+  it('Should filter successful slackAutomations data', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=5&slackAutomation=success')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.data[0].slackAutomations.status)
+          .to.be.equal('success');
+        done();
+      });
+  });
+  it('Should filter successful emailAutomations data', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=5&emailAutomation=success')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.data)
+          .to.have.lengthOf.below(10);
+        done();
+      });
+  });
+  it('Should filter slackAutomation, emailAutomation  slackAutomation, date[from], and date[to] to return less than 10 items', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${(new Date('January 31 2019 12:30')).toISOString()}&date[to]=${(new Date('March 31 2019 12:30')).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body.data)
+          .to.have.lengthOf.below(10);
         done();
       });
   });
@@ -121,9 +204,9 @@ describe('Tests for automation endpoints\n', () => {
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
+        expect(res.body.data[0])
+          .to.have.property('type')
+          .to.be.equal('onboarding');
         done();
       });
   });
@@ -136,55 +219,70 @@ describe('Tests for automation endpoints\n', () => {
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
+        expect(res.body.data[0])
+          .to.have.property('type')
+          .to.be.equal('offboarding');
         done();
       });
   });
   it('Should search automation data for partners or fellows name containing a string', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?searchTerm=conroy')
+      .get('/api/v1/automations')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
-        done();
+        const { fellowName } = res.body.data[0];
+        chai
+          .request(app)
+          .get(`/api/v1/automations?searchTerm=${fellowName}`)
+          .end((error, response) => {
+            expect(response.body.data[0].fellowName)
+              .to.have.string(fellowName);
+            done();
+          });
       });
   });
   it('Should search automation with fellow name containing a string', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?searchTerm=val&searchBy=fellow')
+      .get('/api/v1/automations')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
-        done();
+        const { fellowName } = res.body.data[0];
+        chai
+          .request(app)
+          .get(`/api/v1/automations?searchTerm=${fellowName}&searchBy=fellow`)
+          .end((error, response) => {
+            expect(response.body.data[0].fellowName)
+              .to.have.string(fellowName);
+            done();
+          });
       });
   });
   it('Should search automation with partner name containing a string', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?searchTerm=conroy&searchBy=partner')
+      .get('/api/v1/automations')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.pagination)
-          .to.have.property('currentPage')
-          .to.be.equal(1);
-        done();
+        const { partnerName } = res.body.data[0];
+        chai
+          .request(app)
+          .get(`/api/v1/automations?searchTerm=${partnerName}&searchBy=partner`)
+          .end((error, response) => {
+            expect(response.body.data[0].partnerName)
+              .to.have.string(partnerName);
+            done();
+          });
       });
   });
   it('should return stats of total automations', (done) => {
