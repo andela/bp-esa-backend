@@ -92,6 +92,8 @@ describe('Tests for automation endpoints\n', () => {
       });
   });
   it('Should return data from date[from] is provided', (done) => {
+    //sort all automations by date
+    //get all automation from a particutlar date
     const dates = automationsSortedByDate.keys();
     console.log(automationsSortedByDate.entries());
     const currentDate = dates.next().value;
@@ -101,6 +103,7 @@ describe('Tests for automation endpoints\n', () => {
       .get(`/api/v1/automations?page=1&limit=5&date[from]=${dateToUse.toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
+        console.log(res.body.data);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
