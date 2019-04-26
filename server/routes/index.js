@@ -7,5 +7,5 @@ export default (app) => {
   app.get('/worker-status', workerStatus);
   app.use('/mock-api', mockAndelAPI);
   app.use('/api/v1/automations', automationsAPI);
-  app.use('/api/v1/auth', authApi);
+  app.post('/api/v1/auth', authApi);
 };
