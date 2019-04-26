@@ -1,5 +1,6 @@
 import chaiHttp from 'chai-http';
 import chai, { expect } from 'chai';
+import moment from 'moment';
 import app from '../../server';
 import models from '../../server/models';
 import createAutomationFakeData, { createSlackAutomation, createFreckleAutomation, createEmailAutomation } from '../mocks/getAutomations';
@@ -7,11 +8,22 @@ import createAutomationFakeData, { createSlackAutomation, createFreckleAutomatio
 chai.use(chaiHttp);
 
 describe('Tests for automation endpoints\n', () => {
+  let getAutomation;
+  let automationsSortedByDate;
   beforeEach(async () => {
-    const getAutomation = await models.Automation.bulkCreate(createAutomationFakeData());
+    getAutomation = await models.Automation.bulkCreate(createAutomationFakeData());
     await models.SlackAutomation.bulkCreate(createSlackAutomation(getAutomation));
     await models.FreckleAutomation.bulkCreate(createFreckleAutomation(getAutomation));
     await models.EmailAutomation.bulkCreate(createEmailAutomation(getAutomation));
+    automationsSortedByDate = getAutomation.reduce((accum, item) => {
+      const date = moment(item.createdAt).format('YYYY-MM-DD');
+      if (!accum.has(date)) {
+        accum.set(date, []);
+      }
+      const currentDate = accum.get(date);
+      currentDate.push(item);
+      return accum;
+    }, new Map());
   });
   afterEach(async () => {
     await models.FreckleAutomation.truncate();
@@ -80,9 +92,13 @@ describe('Tests for automation endpoints\n', () => {
       });
   });
   it('Should return data from date[from] is provided', (done) => {
+    const dates = automationsSortedByDate.keys();
+    console.log(automationsSortedByDate.entries());
+    const currentDate = dates.next().value;
+    const dateToUse = moment(currentDate, 'YYYY-MM-DD');
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&date[from]=${new Date('March 26 2019 12:30').toISOString()}`)
+      .get(`/api/v1/automations?page=1&limit=5&date[from]=${dateToUse.toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -91,7 +107,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res.body)
           .to.have.property('data')
           .to.be.an('array')
-          .to.not.equal(10);
+          .to.length.equal(automationsSortedByDate.get(currentDate).length);
         done();
       });
   });
@@ -185,6 +201,8 @@ describe('Tests for automation endpoints\n', () => {
       });
   });
   it('Should filter slackAutomation, emailAutomation  slackAutomation, date[from], and date[to] to return less than 10 items', (done) => {
+    const automationDates = Object.keys(automationsSortedByDate);
+    
     chai
       .request(app)
       .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${(new Date('January 31 2019 12:30')).toISOString()}&date[to]=${(new Date('March 31 2019 12:30')).toISOString()}`)
