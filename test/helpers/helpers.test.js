@@ -1,7 +1,9 @@
 import sinon from 'sinon';
+import axios from 'axios';
 import response from '../../server/helpers/response';
 import { getMailInfo, checkFailureCount } from '../../server/jobs/helpers';
 import { automationData } from '../../server/jobs';
+import { redis, getAndelaPartners } from '../../server/mockAndelaApi/mockPlacement';
 
 import * as allocation from '../../server/modules/allocations';
 import { samplePartner } from '../mocks/partners';
@@ -45,5 +47,33 @@ describe('Test that helper functions work as expected', () => {
     const allocationsFetchFailCount = process.env.FETCH_FAIL_AUTOMATION_COUNT - 5;
     const sendResponse = await checkFailureCount(allocationsFetchFailCount);
     expect(sendResponse.message).to.equal('Max failures not reached yet');
+  });
+  it('Should return list of mock partners from radis', async () => {
+    const getFromRadis = sinon
+      .stub(redis, 'get')
+      .callsFake(() => JSON.stringify(samplePartner.data.values));
+    const axiosGetPartners = sinon.spy(axios, 'get');
+    const partners = await getAndelaPartners();
+    expect(partners).to.be.an('array');
+    expect(partners[0].name).to.equal('Sample Partner');
+    sinon.assert.notCalled(axiosGetPartners);
+
+    getFromRadis.restore();
+    axiosGetPartners.restore();
+  });
+  it('Should return list of mock partners from staging-api', async () => {
+    const getFromRadis = sinon.stub(redis, 'get').callsFake(() => null);
+    const saveToRadis = sinon.spy(redis, 'set');
+    const axiosGetPartners = sinon.stub(axios, 'get').callsFake(() => samplePartner);
+
+    const partners = await getAndelaPartners();
+    expect(partners).to.be.an('array');
+    expect(partners[0].name).to.equal('Sample Partner');
+    sinon.assert.called(axiosGetPartners);
+    sinon.assert.called(saveToRadis);
+
+    getFromRadis.restore();
+    saveToRadis.restore();
+    axiosGetPartners.restore();
   });
 });

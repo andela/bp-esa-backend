@@ -18,14 +18,12 @@ async function generatePlacements(status) {
   const placements = [];
   const { members } = await list();
   const emails = members.reduce(
-    (result, { deleted, profile: { email } }) => {
-      return ((email && !deleted && email !== 'esa@andela.com') ? [...result, email] : result);
-    },
+    (result, { deleted, profile: { email } }) => (email && !deleted && email !== 'esa@andela.com' ? [...result, email] : result),
     [],
   );
   // max: 3, min: 1
   for (let index = 0; index < Math.floor(Math.random() * 3) + 1; index++) {
-    placements.push(mockPlacement(status, emails[faker.random.number(emails.length - 1)]));
+    placements.push(await mockPlacement(status, emails[faker.random.number(emails.length - 1)]));
   }
   return placements;
 }
