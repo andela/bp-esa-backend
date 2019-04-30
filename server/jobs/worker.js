@@ -1,4 +1,5 @@
 import client from '../helpers/redis';
+// eslint-disable-next-line import/no-cycle
 import executeJobs from './index';
 
 export default {

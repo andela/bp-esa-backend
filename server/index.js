@@ -10,6 +10,7 @@ import path from 'path';
 import { setAppRoot } from './utils/helpers';
 import validateEnvironmentVars from './validator';
 import routes from './routes';
+// eslint-disable-next-line import/no-cycle
 import worker from './jobs/worker';
 
 dotenv.config();
@@ -46,8 +47,10 @@ app.set('port', port);
 worker.init();
 
 http.listen(port, () => {
+  /* eslint-disable no-console */
   console.log(`App listening on port ${app.get('port')}`);
   console.log(`Timer Interval is set to ${process.env.TIMER_INTERVAL}`);
+  /* eslint-enable no-console */
   setInterval(() => worker.exec(), ms(process.env.TIMER_INTERVAL || '1d'));
 });
 

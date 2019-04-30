@@ -12,10 +12,6 @@ describe('Tests for mockAndelaApi endpoint\n', () => {
     const fakeUserList = sinon
       .stub(slackClient.users, 'list')
       .callsFake(() => new Promise(r => r(slackMocks.userList)));
-    const userEmails = slackMocks.userList.members.reduce(
-      (result, { profile: { email } }) => (email ? [...result, email] : result),
-      [],
-    );
     chai
       .request(app)
       .get(`/mock-api/placements?status=${status}`)

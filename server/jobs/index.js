@@ -5,7 +5,9 @@
 import fs from 'fs';
 import ms from 'ms';
 import * as Helper from './helpers';
+
 import { fetchNewPlacements } from '../modules/allocations';
+// eslint-disable-next-line import/no-cycle
 import { io } from '..';
 import { formatPayload } from '../utils/formatter';
 import { include } from '../controllers/automationController';
@@ -94,7 +96,7 @@ export default function executeJobs(type) {
     .then(async (newPlacements) => {
       if (!fetchPlacementError) {
         Helper.count.FAILED_COUNT_NUMBER = 0;
-        return automationProcess(newPlacements, type, jobList);
       }
+      return automationProcess(newPlacements, type, jobList);
     });
 }

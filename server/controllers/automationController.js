@@ -1,13 +1,9 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable max-len */
-/* eslint-disable no-console */
 import moment from 'moment';
 
 import * as util from 'util';
 import models from '../models';
 import { paginationResponse } from '../utils/formatter';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
-
 
 const automation = models.Automation;
 export const include = [
@@ -28,10 +24,7 @@ export const include = [
   },
 ];
 
-const order = [
-  ['id', 'DESC'],
-];
-
+const order = [['id', 'DESC']];
 
 /**
  * Get Automation Model Objects from Raw Query
@@ -43,7 +36,11 @@ const order = [
  * @return  {array}                       array of automation objects
  */
 async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, options = {}) {
-  const automationIds = await models.sequelize.query(automationRawQuery, { ...querySettings }, options);
+  const automationIds = await models.sequelize.query(
+    automationRawQuery,
+    { ...querySettings },
+    options,
+  );
   const allData = await automation.findAll({
     ...options,
     where: {
@@ -71,13 +68,17 @@ function addSearchQuery({ searchTerm, searchBy }) {
     case 'fellow':
       return util.format(' AND "a"."fellowName" ILIKE \'%%%s%%\' ', searchTerm);
     default:
-      return util.format(`
+      return util.format(
+        `
           AND (
             "a"."partnerName" ILIKE '%%%s%%' OR 
             "a"."fellowName" ILIKE '%%%s%%'
           )
 
-          `, searchTerm, searchTerm);
+          `,
+        searchTerm,
+        searchTerm,
+      );
   }
 }
 
@@ -87,13 +88,12 @@ function addSearchQuery({ searchTerm, searchBy }) {
  * @returns {object} dateQuery
  */
 const dateQueryFunc = (date = { to: new Date() }) => {
-  // eslint-disable-next-line no-unused-vars
   const todaysDate = moment().format('YYYY-MM-DD');
   const dateTo = moment(date.to).format('YYYY-MM-DD');
   const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;
 
   // check if date.from is greater than date.to or today, return an error
-  if ((dateFrom > dateTo) || (dateFrom > todaysDate)) {
+  if (dateFrom > dateTo || dateFrom > todaysDate) {
     throw new Error('date[from] cannot be greater than date[now] or today');
   }
 
@@ -101,7 +101,6 @@ const dateQueryFunc = (date = { to: new Date() }) => {
   if (dateFrom && dateTo) {
     return { dateQuery: `BETWEEN '${dateFrom}' AND '${dateTo}' ` };
   }
-
 
   return { dateQuery: `<= '${dateTo}'` };
 };
@@ -116,7 +115,14 @@ const dateQueryFunc = (date = { to: new Date() }) => {
  * @param {string} search - search query string
  * @returns {object} queries
  */
-const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation, type, search) => {
+const filterQuery = (
+  dateQuery,
+  slackAutomation,
+  emailAutomation,
+  freckleAutomation,
+  type,
+  search,
+) => {
   let myQueryCounter = queryCounter + addSearchQuery(search);
   let automationRawQuery = sqlAutomationRawQuery + addSearchQuery(search);
   if (slackAutomation) {
@@ -166,7 +172,10 @@ function getPaginationMeta(page, count, limit) {
     prevPage = page - 1;
   }
   return {
-    numberOfPages, offset, nextPage, prevPage,
+    numberOfPages,
+    offset,
+    nextPage,
+    prevPage,
   };
 }
 
@@ -192,7 +201,7 @@ const paginationData = async (req, res) => {
     type: models.sequelize.QueryTypes.SELECT,
   };
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
-  // eslint-disable-next-line prefer-const
+  // eslint-disable-next-line prefer-const, max-len
   let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type, { searchTerm, searchBy });
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
