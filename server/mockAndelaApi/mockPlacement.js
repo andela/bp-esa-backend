@@ -19,10 +19,10 @@ axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_AP
  * @returns {Promise} A promise to return a list of andela partners
  */
 export async function getAndelaPartners() {
-  const partners = await redis.get('andela-mock-partners');
+  const partners = await redis.get('andela-partners');
   if (!partners) {
-    const { data } = await axios.get(process.env.ANDELA_PARTNERS);
-    await redis.set('andela-mock-partners', JSON.stringify(data.values));
+    const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/?limit=100`);
+    await redis.set('andela-partners', JSON.stringify(data.values));
     return data.values;
   }
   return JSON.parse(partners);
