@@ -1,9 +1,7 @@
 /* eslint-disable no-param-reassign */
+import db from '../../models';
 import { getOrCreateProject, assignProject } from '../../modules/freckle/projects';
-import {
-  creatOrUpdatePartnerRecord,
-  createOrUpdateFreckleAutomation,
-} from '../../modules/automations';
+import { createOrUpdateFreckleAutomation } from '../../modules/automations';
 
 /**
  * @desc Automates freckle developer onboarding.
@@ -17,7 +15,7 @@ const freckleOnboarding = async (placement, automationId) => {
   getOrCreateProject(placement.client_name).then(async (project) => {
     createOrUpdateFreckleAutomation({ ...project, automationId });
     assignProject(fellow.email, project.id).then(result => createOrUpdateFreckleAutomation({ ...result, automationId }));
-    creatOrUpdatePartnerRecord({
+    db.Partner.upsert({
       partnerId,
       name: partnerName,
       freckleProjectId: project.id,

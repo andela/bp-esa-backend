@@ -4,7 +4,7 @@ export default (sequelize, DataTypes) => {
     {
       freckleProjectId: DataTypes.STRING,
       name: DataTypes.STRING,
-      partnerId: DataTypes.STRING,
+      partnerId: { type: DataTypes.STRING, allowNull: false, unique: true },
       slackChannels: DataTypes.JSON,
     },
     {

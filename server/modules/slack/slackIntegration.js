@@ -1,8 +1,7 @@
 import { WebClient } from '@slack/client';
 import dotenv from 'dotenv';
-import util from 'util';
 import makeChannelNames from '../../helpers/slackHelpers';
-import client from '../../helpers/redis';
+import { redisdb } from '../../helpers/redis';
 
 dotenv.config();
 const { SCAN_RANGE, REJECT_RATE_LIMIT, SLACK_TOKEN } = process.env;
@@ -18,9 +17,6 @@ export const slackClient = new WebClient(SLACK_TOKEN, {
     maxTimeout: 10 * 1000,
   },
 });
-const scanKeys = util.promisify(client.scan).bind(client);
-const setItem = util.promisify(client.set).bind(client);
-const getItem = util.promisify(client.get).bind(client);
 
 /**
  * @func createChannel
@@ -33,7 +29,7 @@ const createChannel = async (channelDetails) => {
   const data = { ...channelDetails };
   try {
     const { group } = await slackClient.groups.create({ name: data.channelName });
-    setItem(group.name, JSON.stringify(group));
+    redisdb.set(group.name, JSON.stringify(group));
     data.channelId = group.id;
     return data;
   } catch (error) {
@@ -55,7 +51,7 @@ const automationData = (partnerName, channelType) => {
 const findChannels = async (options, channelName, { response_metadata: metaData, channels }) => {
   // Check if channel name matches any in results of the current page
   const matchedChannels = channels.reduce((list, channel) => {
-    setItem(channel.name, JSON.stringify(channel));
+    redisdb.set(channel.name, JSON.stringify(channel));
     if (channel.name.includes(channelName)) list.push(channel);
     return list;
   }, []);
@@ -74,7 +70,7 @@ const findChannels = async (options, channelName, { response_metadata: metaData,
 
 const getMatchingChannels = async (channelName, actual = null) => {
   const name = actual ? channelName : channelName.slice(0, 7);
-  const [, result] = await scanKeys(0, 'match', `*${name}*`, 'count', SCAN_RANGE);
+  const [, result] = await redisdb.scan(0, 'match', `*${name}*`, 'count', SCAN_RANGE);
   if (!result.length) {
     const options = { limit: 999, exclude_archived: true, types: 'public_channel,private_channel' };
     return findChannels(options, name, await slackClient.conversations.list(options));
@@ -108,7 +104,7 @@ export const findOrCreatePartnerChannel = async (partnerData, channelType, jobTy
       return channelType === 'general' ? searchKey !== '-int' : searchKey === '-int';
     });
     if (result) {
-      existingChannel = result.name ? result : JSON.parse(await getItem(result));
+      existingChannel = result.name ? result : JSON.parse(await redisdb.get(result));
     }
   }
   if (existingChannel) {
@@ -145,6 +141,11 @@ export const getSlackUserId = async (email) => {
   return user.id;
 };
 
+const contextObject = {
+  invite: { message: 'invited to', target: 'users' },
+  kick: { message: 'kicked from', target: 'user' },
+};
+
 /**
  * @desc Add or remove a fellow from a channel after being placed or rolled-off
  *
@@ -158,23 +159,23 @@ export const getSlackUserId = async (email) => {
 export const accessChannel = async (email, channelId, context) => {
   let channelInfo;
   try {
-    channelInfo = await slackClient.groups.info({ channel: channelId });
-    const slackAction = slackClient.groups[context];
+    channelInfo = await slackClient.conversations.info({ channel: channelId });
+    const slackAction = slackClient.conversations[context];
     const userId = await getSlackUserId(email);
-    await slackAction({ user: userId, channel: channelId });
+    await slackAction({ [contextObject[context].target]: userId, channel: channelId });
     return {
       slackUserId: userId,
       channelId,
-      channelName: channelInfo.group.name,
+      channelName: channelInfo.channel.name,
       type: context,
       status: 'success',
-      statusMessage: `${email} ${context === 'invite' ? 'invited to' : 'kicked from'} channel`,
+      statusMessage: `${email} ${contextObject[context].message} channel`,
     };
   } catch (error) {
     return {
       slackUserId: null,
       channelId,
-      channelName: channelInfo && channelInfo.group.name,
+      channelName: channelInfo && channelInfo.channel.name,
       type: context,
       status: 'failure',
       statusMessage: `${error.message}`,

@@ -1,28 +1,25 @@
 import axios from 'axios';
 import ms from 'ms';
-import util from 'util';
-import client from '../helpers/redis';
+import https from 'https';
+import { redisdb } from '../helpers/redis';
 import db from '../models';
 import { findOrCreatePartnerChannel } from './slack/slackIntegration';
 import { getPartnerRecord } from './automations';
 
 require('dotenv').config();
 
-const redis = {
-  set: util.promisify(client.set).bind(client),
-  get: util.promisify(client.get).bind(client),
-};
-
 // Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 // Updates the local redis store with latest Partner List
 export const getPartnerFromStore = async (partnerId) => {
-  const result = await redis.get(partnerId);
+  const result = await redisdb.get(partnerId);
   if (!result) {
     try {
-      const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`);
-      redis.set(data.id, JSON.stringify(data));
+      const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`, {
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      });
+      redisdb.set(data.id, JSON.stringify(data));
       return data;
     } catch ({ response, message }) {
       throw new Error(response ? response.data.error : message);
@@ -58,7 +55,8 @@ export async function findPartnerById(partnerId, jobType) {
       general: genChannel.channelId,
       internal: intChannel.channelId || newPartner.channel_id,
     };
-    return db.Partner.create(newPartner);
+    const [{ dataValues }] = await db.Partner.upsert(newPartner, { returning: true });
+    return dataValues;
   }
   return partner;
 }

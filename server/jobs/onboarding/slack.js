@@ -1,9 +1,7 @@
 import dotenv from 'dotenv';
+import db from '../../models';
 import { accessChannel, findOrCreatePartnerChannel } from '../../modules/slack/slackIntegration';
-import {
-  creatOrUpdatePartnerRecord,
-  createOrUpdateSlackAutomation,
-} from '../../modules/automations';
+import { createOrUpdateSlackAutomation } from '../../modules/automations';
 
 dotenv.config();
 const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = process.env;
@@ -36,7 +34,7 @@ const slackOnBoarding = async (placement, automationId) => {
       },
     ),
   ]);
-  creatOrUpdatePartnerRecord({
+  return db.Partner.upsert({
     partnerId,
     name: partnerName,
     slackChannels: {
