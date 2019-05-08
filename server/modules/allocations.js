@@ -11,21 +11,22 @@ require('dotenv').config();
 // Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
+const getPartnerfromAPI = async (partnerId) => {
+  const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`, {
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+  });
+  redisdb.set(data.id, JSON.stringify(data));
+  return data;
+};
+
 // Updates the local redis store with latest Partner List
 export const getPartnerFromStore = async (partnerId) => {
-  const result = await redisdb.get(partnerId);
-  if (!result) {
-    try {
-      const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`, {
-        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-      });
-      redisdb.set(data.id, JSON.stringify(data));
-      return data;
-    } catch ({ response, message }) {
-      throw new Error(response ? response.data.error : message);
-    }
+  try {
+    const result = await redisdb.get(partnerId);
+    return !result ? getPartnerfromAPI(partnerId) : JSON.parse(result);
+  } catch ({ response, message }) {
+    throw new Error(response ? response.data.error : message);
   }
-  return JSON.parse(result);
 };
 const generateInternalChannel = (newPartner, jobType) => {
   if (!newPartner.channel_id.length) {

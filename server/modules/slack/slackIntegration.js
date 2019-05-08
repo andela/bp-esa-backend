@@ -48,13 +48,21 @@ const automationData = (partnerName, channelType) => {
   };
 };
 
+/**
+ * @desc Returns matched channels from a list of slack channels
+ * @param {Array} channels List of channels from slack API to filter
+ * @param {String} channelName The channel name to filter against
+ *
+ * @returns {Array} List of channels which match the given channelName
+ */
+const findMatches = (channels, channelName) => channels.filter((channel) => {
+  redisdb.set(channel.name, JSON.stringify(channel));
+  return channel.name.includes(channelName);
+});
+
 const findChannels = async (options, channelName, { response_metadata: metaData, channels }) => {
   // Check if channel name matches any in results of the current page
-  const matchedChannels = channels.reduce((list, channel) => {
-    redisdb.set(channel.name, JSON.stringify(channel));
-    if (channel.name.includes(channelName)) list.push(channel);
-    return list;
-  }, []);
+  const matchedChannels = findMatches(channels, channelName);
   if (matchedChannels.length) return matchedChannels;
   // When a `next_cursor` exists, recursively call this function to get the next page.
   if (metaData && metaData.next_cursor && metaData.next_cursor.length) {
@@ -78,6 +86,37 @@ const getMatchingChannels = async (channelName, actual = null) => {
   return result;
 };
 
+const searchConditions = key => ({
+  general: key !== '-int',
+  internal: key === '-int',
+});
+
+const channelDetails = async found => ({
+  true: found,
+  false: JSON.parse(await redisdb.get(found)),
+});
+const searchKey = channel => ({
+  true: channel.name.slice(-4),
+  false: channel.slice(-4),
+});
+const findOne = async (result, channelType) => {
+  if (result.length) {
+    const found = result.find((channel) => {
+      const key = searchKey(channel)[Boolean(channel.name)];
+      return searchConditions(key)[channelType];
+    });
+    return found ? channelDetails(found)[Boolean(found.name)] : null;
+  }
+};
+
+const matchedChannels = (data, partnerData) => ({
+  true: () => {
+    data.channelName = partnerData.channel_name.slice(0, -4);
+    return getMatchingChannels(data.channelName, true);
+  },
+  false: getMatchingChannels(data.channelName),
+});
+
 /**
  * @function findOrCreatePartnerChannel
  * @desc Create slack channels for a partner engagement
@@ -90,23 +129,10 @@ const getMatchingChannels = async (channelName, actual = null) => {
  */
 export const findOrCreatePartnerChannel = async (partnerData, channelType, jobType) => {
   const data = automationData(partnerData.name, channelType);
-  let result;
-  if (partnerData.channel_name && partnerData.channel_name.length) {
-    data.channelName = partnerData.channel_name.slice(0, -4);
-    result = await getMatchingChannels(data.channelName, true);
-  } else {
-    result = await getMatchingChannels(data.channelName);
-  }
-  let existingChannel;
-  if (result.length) {
-    result = result.find((channel) => {
-      const searchKey = channel.name ? channel.name.slice(-4) : channel.slice(-4);
-      return channelType === 'general' ? searchKey !== '-int' : searchKey === '-int';
-    });
-    if (result) {
-      existingChannel = result.name ? result : JSON.parse(await redisdb.get(result));
-    }
-  }
+  const result = await matchedChannels(data, partnerData)[
+    Boolean(partnerData.channel_name && partnerData.channel_name.length)
+  ];
+  const existingChannel = await findOne(result, channelType);
   if (existingChannel) {
     return {
       ...data,
