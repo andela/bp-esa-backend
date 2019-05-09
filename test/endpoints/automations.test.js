@@ -5,6 +5,7 @@ import app from '../../server';
 import models from '../../server/models';
 import createAutomationFakeData, { createSlackAutomation, createFreckleAutomation, createEmailAutomation } from '../mocks/getAutomations';
 
+
 chai.use(chaiHttp);
 
 describe('Tests for automation endpoints\n', () => {
@@ -92,32 +93,52 @@ describe('Tests for automation endpoints\n', () => {
       });
   });
   it('Should return data from date[from] is provided', (done) => {
-    //sort all automations by date
-    //get all automation from a particutlar date
+    const checkArrayDate = [];
     const dates = automationsSortedByDate.keys();
-    console.log(automationsSortedByDate.entries());
+    // extracting the first date in the dateToAutomation map
     const currentDate = dates.next().value;
     const dateToUse = moment(currentDate, 'YYYY-MM-DD');
+    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line no-restricted-syntax
+    for (const dataDate of automationsSortedByDate.entries()) {
+      if (dataDate[0] >= currentDate) {
+        // create a flat array of all automation created on or after dateToUse
+        checkArrayDate.push(...dataDate[1]);
+      }
+    }
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&date[from]=${dateToUse.toISOString()}`)
+      .get(`/api/v1/automations?page=1&limit=10&date[from]=${dateToUse.toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
-        console.log(res.body.data);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
         expect(res.body)
           .to.have.property('data')
-          .to.be.an('array')
-          .to.length.equal(automationsSortedByDate.get(currentDate).length);
+          .to.be.an('array');
+        expect(res.body.data.length)
+          .to.equal(checkArrayDate.length);
         done();
       });
   });
   it('Should return data up to date[to] when provided', (done) => {
+    const checkArrayDate = [];
+    const dates = automationsSortedByDate.keys();
+    // extracting the first date in the dateToAutomation map
+    const currentDate = dates.next().value;
+    const dateToUse = moment(currentDate, 'YYYY-MM-DD');
+    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line no-restricted-syntax
+    for (const dataDate of automationsSortedByDate.entries()) {
+      if (dataDate[0] <= currentDate) {
+        // create a flat array of all automation created on or after dateToUse
+        checkArrayDate.push(...dataDate[1]);
+      }
+    }
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&date[to]=${new Date('February 01 2019 12:30').toISOString()}`)
+      .get(`/api/v1/automations?page=1&limit=10&date[to]=${dateToUse.toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -125,15 +146,31 @@ describe('Tests for automation endpoints\n', () => {
           .to.equal('Successfully fetched automations');
         expect(res.body)
           .to.have.property('data')
-          .to.be.an('array')
-          .to.not.equal(10);
+          .to.be.an('array');
+        expect(res.body.data.length)
+          .to.equal(checkArrayDate.length);
         done();
       });
   });
   it('Should return data between date[from] and date[to]', (done) => {
+    const checkArrayDate = [];
+    const dates = automationsSortedByDate.keys();
+    // extracting the first date in the dateToAutomation map
+    const currentDate = dates.next().value;
+    const dateFrom = moment(currentDate, 'YYYY-MM-DD');
+    const dateTo = moment(moment(new Date('March 31 2019 12:30')).format('YYYY-MM-DD', 'YYYY-MM-DD'));
+    // console.log({ dateTo });
+    // eslint-disable-next-line prefer-const
+    // eslint-disable-next-line no-restricted-syntax
+    for (const dataDate of automationsSortedByDate.entries()) {
+      if (dataDate[0] >= currentDate || dataDate[0] <= dateTo) {
+        // create a flat array of all automation created on or after dateToUse
+        checkArrayDate.push(...dataDate[1]);
+      }
+    }
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=5&date[from]=${new Date('January 01 2019 12:30').toISOString()}&date[to]=${new Date('February 01 2019 12:30').toISOString()}`)
+      .get(`/api/v1/automations?page=1&limit=10&date[from]=${dateFrom.toISOString()}&date[to]=${dateTo.toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -141,8 +178,9 @@ describe('Tests for automation endpoints\n', () => {
           .to.equal('Successfully fetched automations');
         expect(res.body)
           .to.have.property('data')
-          .to.be.an('array')
-          .to.not.equal(10);
+          .to.be.an('array');
+        expect(res.body.data.length)
+          .to.equal(checkArrayDate.length);
         done();
       });
   });
@@ -161,7 +199,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter successful freckleAutomations data', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=5&freckleAutomation=success')
+      .get('/api/v1/automations?page=1&limit=10&freckleAutomation=success')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -204,8 +242,6 @@ describe('Tests for automation endpoints\n', () => {
       });
   });
   it('Should filter slackAutomation, emailAutomation  slackAutomation, date[from], and date[to] to return less than 10 items', (done) => {
-    const automationDates = Object.keys(automationsSortedByDate);
-    
     chai
       .request(app)
       .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${(new Date('January 31 2019 12:30')).toISOString()}&date[to]=${(new Date('March 31 2019 12:30')).toISOString()}`)
