@@ -15,10 +15,10 @@ const fakeSlackClient = {
   lookupByEmail: sinon
     .stub(slack.slackClient.users, 'lookupByEmail')
     .callsFake(() => slackMocks.slackUser),
-  invite: sinon.stub(slack.slackClient.groups, 'invite').callsFake(() => slackMocks.inviteUser),
-  kick: sinon.stub(slack.slackClient.groups, 'kick').callsFake(() => slackMocks.removeUser),
+  invite: sinon.stub(slack.slackClient.conversations, 'invite').callsFake(() => slackMocks.inviteUser),
+  kick: sinon.stub(slack.slackClient.conversations, 'kick').callsFake(() => slackMocks.removeUser),
   create: sinon.stub(slack.slackClient.groups, 'create').callsFake(() => slackMocks.createGroups),
-  groupInfo: sinon.stub(slack.slackClient.groups, 'info').callsFake(() => slackMocks.groupInfo),
+  info: sinon.stub(slack.slackClient.conversations, 'info').callsFake(() => slackMocks.groupInfo),
 };
 
 /* eslint-disable no-unused-expressions */
@@ -32,7 +32,11 @@ describe('Slack Integration Test Suite', async () => {
   it('Should create internal slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
-    const createResult = await slack.findOrCreatePartnerChannel({ name: partnerName }, 'internal');
+    const createResult = await slack.findOrCreatePartnerChannel(
+      { name: partnerName },
+      'internal',
+      'onboarding',
+    );
     const expectedResult = {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,
@@ -41,30 +45,35 @@ describe('Slack Integration Test Suite', async () => {
     expect(createResult.channelId).to.equal(expectedResult.id);
     expect(createResult.channelName).to.equal(`${expectedResult.name}-int`);
   });
-  it('Should create general slack channels and save the automation to DB', async () => {
+  it('Should retrieve general slack channels', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
-    const createResult = await slack.findOrCreatePartnerChannel({ name: partnerName }, 'general');
+    const createResult = await slack.findOrCreatePartnerChannel(
+      { name: partnerName },
+      'general',
+      'onboarding',
+    );
     const expectedResult = {
       id: slackMocks.createGroups.group.id,
       name: slackMocks.createGroups.group.name,
     };
-    expect(fakeSlackClient.create.calledOnce).to.be.true;
+    expect(fakeSlackClient.create.calledOnce).to.be.false;
     expect(createResult.channelId).to.equal(expectedResult.id);
     expect(createResult.channelName).to.equal(expectedResult.name);
+    expect(createResult.type).to.equal('retrieve');
   });
   it('Should add developers to respective channels and save the automation to DB', async () => {
-    const email = 'johndoe@mail.com';
-    const channel = 'GBRR4B5E3';
+    const email = 'ebelensoffor@gmail.com';
+    const channel = 'CJFG3JWCX';
     await slack.accessChannel(email, channel, 'invite');
     expect(fakeSlackClient.invite.calledOnce).to.be.true;
-    expect(fakeSlackClient.groupInfo.calledOnce).to.be.true;
+    expect(fakeSlackClient.info.calledOnce).to.be.true;
   });
   it('Should remove developers from channels and save the automation to DB', async () => {
-    const email = 'johndoe@mail.com';
-    const channel = 'GBRR4B5E3';
+    const email = 'ebelensoffor@gmail.com';
+    const channel = 'CJFG3JWCX';
     await slack.accessChannel(email, channel, 'kick');
     expect(fakeSlackClient.kick.calledOnce).to.be.true;
-    expect(fakeSlackClient.groupInfo.calledOnce).to.be.true;
+    expect(fakeSlackClient.info.calledOnce).to.be.true;
   });
 });

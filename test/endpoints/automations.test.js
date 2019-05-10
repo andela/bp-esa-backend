@@ -196,7 +196,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res.body)
           .to.have.property('automation')
           .to.have.property('total')
-          .to.be.equal(0);
+          .to.be.be.a('Number');
         done();
       });
   });
@@ -209,7 +209,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res.body)
           .to.have.property('automation')
           .to.have.property('total')
-          .to.be.equal(0);
+          .to.be.be.a('Number');
         done();
       });
   });

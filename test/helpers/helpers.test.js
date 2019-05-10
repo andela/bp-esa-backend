@@ -3,7 +3,8 @@ import axios from 'axios';
 import response from '../../server/helpers/response';
 import { getMailInfo, checkFailureCount } from '../../server/jobs/helpers';
 import { automationData } from '../../server/jobs';
-import { redis, getAndelaPartners } from '../../server/mockAndelaApi/mockPlacement';
+import { redisdb } from '../../server/helpers/redis';
+import { getAndelaPartners } from '../../server/mockAndelaApi/mockPlacement';
 
 import * as allocation from '../../server/modules/allocations';
 import { samplePartner } from '../mocks/partners';
@@ -50,7 +51,7 @@ describe('Test that helper functions work as expected', () => {
   });
   it('Should return list of mock partners from radis', async () => {
     const getFromRadis = sinon
-      .stub(redis, 'get')
+      .stub(redisdb, 'get')
       .callsFake(() => JSON.stringify(samplePartner.data.values));
     const axiosGetPartners = sinon.spy(axios, 'get');
     const partners = await getAndelaPartners();
@@ -62,8 +63,8 @@ describe('Test that helper functions work as expected', () => {
     axiosGetPartners.restore();
   });
   it('Should return list of mock partners from staging-api', async () => {
-    const getFromRadis = sinon.stub(redis, 'get').callsFake(() => null);
-    const saveToRadis = sinon.spy(redis, 'set');
+    const getFromRadis = sinon.stub(redisdb, 'get').callsFake(() => null);
+    const saveToRadis = sinon.spy(redisdb, 'set');
     const axiosGetPartners = sinon.stub(axios, 'get').callsFake(() => samplePartner);
 
     const partners = await getAndelaPartners();

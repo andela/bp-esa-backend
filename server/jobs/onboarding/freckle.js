@@ -6,16 +6,16 @@ import { createOrUpdateFreckleAutomation } from '../../modules/automations';
 /**
  * @desc Automates freckle developer onboarding.
  *
- * @param {object} placement Placement record whose developer is to be onboarded
- * @param {object} automationId Result of automation job
- * @returns {undefined}
+ * @param {Object} placement Placement record whose developer is to be onboarded
+ * @param {Object} automationId Result of automation job
+ * @returns {Promise} Promise to return the result of partner upserted after automation
  */
 const freckleOnboarding = async (placement, automationId) => {
   const { fellow, client_id: partnerId, client_name: partnerName } = placement;
   getOrCreateProject(placement.client_name).then(async (project) => {
     createOrUpdateFreckleAutomation({ ...project, automationId });
     assignProject(fellow.email, project.id).then(result => createOrUpdateFreckleAutomation({ ...result, automationId }));
-    db.Partner.upsert({
+    return db.Partner.upsert({
       partnerId,
       name: partnerName,
       freckleProjectId: project.id,

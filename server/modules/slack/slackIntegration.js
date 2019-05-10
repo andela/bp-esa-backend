@@ -23,7 +23,7 @@ export const slackClient = new WebClient(SLACK_TOKEN, {
  * @desc Create a slack channel(and store it in the database)
  *
  * @param {Object} channelDetails The details of the channel to be created
- * @returns {object} The details of the slack channel created.
+ * @returns {Promise} Promise to return the details of the slack channel created.
  */
 const createChannel = async (channelDetails) => {
   const data = { ...channelDetails };
@@ -39,6 +39,13 @@ const createChannel = async (channelDetails) => {
   }
 };
 
+/**
+ *@desc Generate automation data using partner name and channelType
+ *
+ * @param {String} partnerName Name of the partner being onboarded or offboarded
+ * @param {String} channelType The type of channel name to generate
+ * @returns {Object} Details of the automation to be carried out
+ */
 const automationData = (partnerName, channelType) => {
   const channelName = makeChannelNames(partnerName, channelType);
   return {
@@ -60,82 +67,104 @@ const findMatches = (channels, channelName) => channels.filter((channel) => {
   return channel.name.includes(channelName);
 });
 
-const findChannels = async (options, channelName, { response_metadata: metaData, channels }) => {
+/**
+ *@desc Search matching channels by name from slack conversations API
+ *
+ * @param {String} options Custom options to apply like limit, types and exclude_archived
+ * @param {String} channelName Search key with which to find channels with matching names
+ * @param {Object} apiResponse Response data for the page of slack channels retrieved
+ * @returns {Promise} Promise to return an array of slack channel objects matching the search key
+ */
+const searchChannels = async (options, channelName, apiResponse) => {
+  const { response_metadata: metaData, channels } = apiResponse;
   // Check if channel name matches any in results of the current page
   const matchedChannels = findMatches(channels, channelName);
   if (matchedChannels.length) return matchedChannels;
   // When a `next_cursor` exists, recursively call this function to get the next page.
   if (metaData && metaData.next_cursor && metaData.next_cursor.length) {
     // Make a copy of options
-    const pageOptions = { ...options };
-    // Add the `cursor` argument
-    pageOptions.cursor = metaData.next_cursor;
-    return findChannels(options, channelName, await slackClient.conversations.list(pageOptions));
+    const pageOptions = { ...options, cursor: metaData.next_cursor };
+    return searchChannels(options, channelName, await slackClient.conversations.list(pageOptions));
   }
-  // Otherwise, we're done, channel not found
+  // Otherwise, we're done, no channel found
   return [];
 };
 
+/**
+ *@desc Retrieve matching channels from redisDB or slack API
+ *
+ * @param {String} channelName Search key with which to find channels with matching names
+ * @param {Boolean} [actual=null] Is the channelName generated or from Andela Partner API?
+ * @returns {Promise} Promise to return an array of matching channels
+ */
 const getMatchingChannels = async (channelName, actual = null) => {
   const name = actual ? channelName : channelName.slice(0, 7);
   const [, result] = await redisdb.scan(0, 'match', `*${name}*`, 'count', SCAN_RANGE);
   if (!result.length) {
     const options = { limit: 999, exclude_archived: true, types: 'public_channel,private_channel' };
-    return findChannels(options, name, await slackClient.conversations.list(options));
+    return searchChannels(options, name, await slackClient.conversations.list(options));
   }
   return result;
 };
 
-const searchConditions = key => ({
+const findConditions = key => ({
   general: key !== '-int',
   internal: key === '-int',
 });
 
-const channelDetails = async found => ({
-  true: found,
-  false: JSON.parse(await redisdb.get(found)),
-});
-const searchKey = channel => ({
-  true: channel.name.slice(-4),
-  false: channel.slice(-4),
-});
+const searchKey = channel => (channel.name ? channel.name.slice(-4) : channel.slice(-4));
+/**
+ *@desc Find exact matching channel from list of searched channels
+ *
+ * @param {Array} result List of channels (search results),from which to find a channel
+ * @param {String} channelType The type of channel to find: internal || general
+ * @returns {Object} The details of the channel found
+ */
 const findOne = async (result, channelType) => {
   if (result.length) {
     const found = result.find((channel) => {
-      const key = searchKey(channel)[Boolean(channel.name)];
-      return searchConditions(key)[channelType];
+      const key = searchKey(channel);
+      return findConditions(key)[channelType];
     });
-    return found ? channelDetails(found)[Boolean(found.name)] : null;
+    if (found) {
+      return found.name ? found : JSON.parse(await redisdb.get(found));
+    }
   }
 };
 
-const matchedChannels = (data, partnerData) => ({
+/**
+ *@desc Retrieve matching channels based on partner channelName given
+ *
+ * @param {Object} channelData Details of the channel with which to carry out automation
+ * @param {Object} partnerData Details of the partner involved in the engagement
+ * @returns {Object} Contains the functions to call, given partner channelName or not
+ */
+const matchedChannels = (channelData, partnerData) => ({
   true: () => {
-    data.channelName = partnerData.channel_name.slice(0, -4);
-    return getMatchingChannels(data.channelName, true);
+    channelData.channelName = partnerData.channel_name.slice(0, -4);
+    return getMatchingChannels(channelData.channelName, true);
   },
-  false: getMatchingChannels(data.channelName),
+  false: () => getMatchingChannels(channelData.channelName),
 });
 
 /**
  * @function findOrCreatePartnerChannel
- * @desc Create slack channels for a partner engagement
+ * @desc Find or create slack channels for a partner engagement
  *
  * @param {Object} partnerData Details of the partner
  * @param {String} channelType The type of channel: internal || general
  * @param {String} jobType The type of job being executed: onboarding || offboarding
  *
- * @returns {Object} An object containing details of the created channels
+ * @returns {Promise} Promise to return an object containing details of the channel
  */
 export const findOrCreatePartnerChannel = async (partnerData, channelType, jobType) => {
-  const data = automationData(partnerData.name, channelType);
-  const result = await matchedChannels(data, partnerData)[
-    Boolean(partnerData.channel_name && partnerData.channel_name.length)
-  ];
+  const channelData = automationData(partnerData.name, channelType);
+  const partnerChannelGiven = Boolean(partnerData.channel_name && partnerData.channel_name.length);
+  const result = await matchedChannels(channelData, partnerData)[partnerChannelGiven]();
   const existingChannel = await findOne(result, channelType);
   if (existingChannel) {
     return {
-      ...data,
+      ...channelData,
       channelName: existingChannel.name,
       channelId: existingChannel.id,
       type: 'retrieve',
@@ -143,15 +172,12 @@ export const findOrCreatePartnerChannel = async (partnerData, channelType, jobTy
     };
   }
   if (jobType === 'onboarding') {
-    data.type = 'create';
-    data.statusMessage = `${data.channelName} slack channel created`;
-    return createChannel(data);
+    channelData.type = 'create';
+    channelData.statusMessage = `${channelData.channelName} slack channel created`;
+    return createChannel(channelData);
   }
-  return {
-    ...data,
-    status: 'failure',
-    statusMessage: 'Could not find partner channel for the offboarding',
-  };
+  // Could not find partner channel for the offboarding
+  return { status: 'failure' };
 };
 
 /**
@@ -159,7 +185,7 @@ export const findOrCreatePartnerChannel = async (partnerData, channelType, jobTy
  * @desc Search for a slack user by email
  *
  * @param {String} email The user's email
- * @returns {string} The slack user's id
+ * @returns {String} The slack user's id
  */
 export const getSlackUserId = async (email) => {
   const { lookupByEmail } = slackClient.users;
@@ -179,7 +205,7 @@ const contextObject = {
  * @param {string} channelId The channel id
  * @param {string} context The action to perform: invite || kick
  *
- * @returns {Object} The result of the operation performed
+ * @returns {Promise} Promise to return the result of the operation performed
  */
 
 export const accessChannel = async (email, channelId, context) => {

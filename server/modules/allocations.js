@@ -4,13 +4,18 @@ import https from 'https';
 import { redisdb } from '../helpers/redis';
 import db from '../models';
 import { findOrCreatePartnerChannel } from './slack/slackIntegration';
-import { getPartnerRecord } from './automations';
 
 require('dotenv').config();
 
 // Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
+/**
+ *@desc Fetch a partner's profile from andela API and save to redisDB
+ *
+ * @param {String} partnerId The ID of the partner to fetch
+ * @returns {Promise} Promise to return the partner data retrieved
+ */
 const getPartnerfromAPI = async (partnerId) => {
   const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`, {
     httpsAgent: new https.Agent({ rejectUnauthorized: false }),
@@ -19,15 +24,26 @@ const getPartnerfromAPI = async (partnerId) => {
   return data;
 };
 
-// Updates the local redis store with latest Partner List
-export const getPartnerFromStore = async (partnerId) => {
-  try {
-    const result = await redisdb.get(partnerId);
-    return !result ? getPartnerfromAPI(partnerId) : JSON.parse(result);
-  } catch ({ response, message }) {
-    throw new Error(response ? response.data.error : message);
-  }
+/**
+ *@desc Retrieve partner data from redisDB or Andela API
+ *
+ * @param {String} partnerId The ID of the partner to retrieve
+ * @returns {Promise} Promise to return the partner's data
+ */
+export const retrievePartner = async (partnerId) => {
+  const result = await redisdb.get(partnerId);
+  return !result ? getPartnerfromAPI(partnerId) : JSON.parse(result);
 };
+
+/**
+ *@desc Find or create the slack internal channel of a partner
+ *
+ * @param {Object} newPartner The details of the target partner
+ * @param {String} jobType The type of automation carried out: onboarding || offboarding,
+ * if onboarding, does not create channel when channel not found
+ *
+ * @returns {Promise} Promise to return the partner channel Object found or created
+ */
 const generateInternalChannel = (newPartner, jobType) => {
   if (!newPartner.channel_id.length) {
     return findOrCreatePartnerChannel(newPartner, 'internal', jobType);
@@ -41,13 +57,12 @@ const generateInternalChannel = (newPartner, jobType) => {
  * @param {string} partnerId ID of the partner
  * @param {string} jobType Type of job being executed: onboarding || offboarding
  *
- * @returns {object} Data of the partner
+ * @returns {Promise} Promise to return the data of the partner
  */
 export async function findPartnerById(partnerId, jobType) {
-  const partner = await getPartnerRecord(partnerId);
+  const partner = await db.Partner.findOne({ where: { partnerId } });
   if (!partner) {
-    const newPartner = await getPartnerFromStore(partnerId);
-    if (!newPartner) throw new Error('Partner record was not found');
+    const newPartner = await retrievePartner(partnerId);
     const [genChannel = {}, intChannel = {}] = await Promise.all([
       findOrCreatePartnerChannel(newPartner, 'general', jobType),
       generateInternalChannel(newPartner, jobType),
@@ -66,7 +81,6 @@ export async function findPartnerById(partnerId, jobType) {
  * @desc Fetches new placements by status, from the last TIME_INTERVAL
  *
  * @param {string} status The status of placements to fetch from allocations
- *
  * @returns {Promise} Promise to return list of placements
  */
 export const fetchNewPlacements = async (status) => {

@@ -1,10 +1,17 @@
 import sinon from 'sinon';
 import axios from 'axios';
 import ms from 'ms';
-import client from '../../server/helpers/redis';
+import { redisdb } from '../../server/helpers/redis';
 import * as resource from '../../server/modules/allocations';
 import onboardingAllocations from '../mocks/allocations';
-import { stringifiedPartners, samplePartner } from '../mocks/partners';
+import { stringifiedPartner } from '../mocks/partners';
+
+class Axios404Error extends Error {
+  constructor(message, response) {
+    super(message);
+    this.response = response;
+  }
+}
 
 describe('Partner and Allocations Test Suite', async () => {
   beforeEach(() => {
@@ -33,20 +40,15 @@ describe('Partner and Allocations Test Suite', async () => {
   });
   it('Should successfully fetch partner when partnerId is provided', async () => {
     // Mock successful request
-    const fakeClientGet = sinon
-      .stub(client, 'get')
-      .callsFake((value, cb) => cb.apply(this, [null, stringifiedPartners]));
+    const fakeClientGet = sinon.stub(redisdb, 'get').callsFake(() => stringifiedPartner);
 
     const partner = await resource.findPartnerById('ABCDEFZYXWVU');
-    expect(partner.id).to.equal('ABCDEFZYXWVU');
-
+    expect(partner.partnerId || partner.id).to.equal('ABCDEFZYXWVU');
     fakeClientGet.restore();
   });
   it('Should throw error if radis encounters error getting partner data', async () => {
     const errorMessage = 'Error retrieving data from radis';
-    const fakeClientGet = sinon
-      .stub(client, 'get')
-      .callsFake((value, cb) => cb.apply(this, [new Error(errorMessage), null]));
+    const fakeClientGet = sinon.stub(redisdb, 'get').callsFake(() => new Error(errorMessage));
 
     try {
       await resource.findPartnerById('ABCDEFZYXWVU');
@@ -56,24 +58,21 @@ describe('Partner and Allocations Test Suite', async () => {
     fakeClientGet.restore();
   });
   it('Should throw an error when no partner record was found', async () => {
-    // Mock successful request
-    const fakeAxiosGet = sinon.stub(axios, 'get').callsFake(
-      () => new Promise((resolve) => {
-        resolve(samplePartner);
-      }),
-    );
-    const fakeClientGet = sinon
-      .stub(client, 'get')
-      .callsFake((value, cb) => cb.apply(this, [null, stringifiedPartners]));
-    const fakeClientSet = sinon.stub(client, 'set').callsFake(() => undefined);
-    const errorMessage = 'Partner record was not found';
-
+    const errorResponse = {
+      data: {
+        error: 'Partner not found',
+      },
+    };
+    const fakeAxiosGet = sinon.stub(axios, 'get').callsFake(() => {
+      throw new Axios404Error('no partner', errorResponse);
+    });
+    const fakeClientGet = sinon.stub(redisdb, 'get').callsFake(() => null);
+    const fakeClientSet = sinon.stub(redisdb, 'set').callsFake(() => undefined);
     try {
       await resource.findPartnerById('not-found-id');
-    } catch (error) {
-      expect(error.message).to.equal(errorMessage);
+    } catch ({ response }) {
+      expect(response.data.error).to.equal(response.data.error);
     }
-
     fakeAxiosGet.restore();
     fakeClientGet.restore();
     fakeClientSet.restore();

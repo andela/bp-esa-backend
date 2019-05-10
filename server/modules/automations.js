@@ -1,8 +1,6 @@
 import db from '../models';
 
-const {
-  SlackAutomation, EmailAutomation, FreckleAutomation, Partner,
-} = db;
+const { SlackAutomation, EmailAutomation, FreckleAutomation } = db;
 
 /**
  * @func createOrUpdateSlackAutomation
@@ -18,7 +16,7 @@ const {
  * @param {string} [automationDetails.id] ID of existing slackAutomation.
  * For updating purpose alone.
  *
- * @return {Promise} Promise that resolves the created/updated slackAutomation.
+ * @return {Promise} Promise to return the created/updated slackAutomation.
  */
 // eslint-disable-next-line max-len
 export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
@@ -38,7 +36,7 @@ export const createOrUpdateSlackAutomation = automationDetails => SlackAutomatio
  * @param {string} [automationDetails.id] ID of existing emailAutomation.
  * For updating purpose alone.
  *
- * @return {Promise} Promise that resolves the created/updated emailAutomation.
+ * @return {Promise} Promise to return the created/updated emailAutomation.
  */
 // eslint-disable-next-line max-len
 export const createOrUpdateEmailAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
@@ -57,16 +55,7 @@ export const createOrUpdateEmailAutomation = automationDetails => EmailAutomatio
  * @param {string} [automationDetails.id] ID of existing freckleAutomation.
  * For updating purpose alone.
  *
- * @returns {Promise} Promise that resolves to the created/updated freckleAutomation.
+ * @returns {Promise} Promise to return the created/updated freckleAutomation.
  */
 // eslint-disable-next-line max-len
 export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutomation.upsertById(automationDetails);
-
-/**
- * @func getPartnerRecord
- * @desc Get a partner record from the database
- *
- * @param {string} partnerId The id of the partner(from the placement data).
- * @returns {Promise} Promise that resolves to the found partner record.
- */
-export const getPartnerRecord = partnerId => Partner.findOne({ where: { partnerId } });

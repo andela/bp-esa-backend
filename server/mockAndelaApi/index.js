@@ -14,7 +14,7 @@ const { list } = slackClient.users;
  *
  * @param {String} status The status of the placement to generate
  *
- * @returns {Array} The list of placements generated
+ * @returns {Promise} Promise to return a list of placements generated
  */
 async function generatePlacements(status) {
   const placements = [];
