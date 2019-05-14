@@ -33,13 +33,28 @@ const queryCountResolver = queryCount => Number(queryCount[0].count);
  *
  * @returns {object} response reporting automation stats
  */
+
+const dateSubtractor = (duration) => {
+  const date = duration === 'days'
+    ? 0
+    : 1;
+  return date;
+};
+
 export default async (req, res) => {
-  const date = req.query.date
+  const { duration } = req.query;
+  if (duration !== 'days' && duration !== 'weeks' && duration !== 'months' && duration !== 'years') {
+    return res.status(400).json({ error: 'invalid duration input' });
+  }
+  const dateEnd = req.query.date
     ? moment(req.query.date).format('YYYY-MM-DD')
     : moment().format('YYYY-MM-DD');
+  const dateStart = req.query.date
+    ? moment(req.query.date).subtract(dateSubtractor(duration), duration).format('YYYY-MM-DD')
+    : moment().subtract(dateSubtractor(duration), duration).format('YYYY-MM-DD');
 
   const querySettings = {
-    replacements: [`${date} 00:00:00.00`, `${date} 23:59:59.99`],
+    replacements: [`${dateStart} 00:00:00.00`, `${dateEnd} 23:59:59.99`],
     type: models.sequelize.QueryTypes.SELECT,
   };
   try {
