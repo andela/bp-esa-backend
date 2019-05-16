@@ -11,12 +11,45 @@ chai.use(chaiHttp);
 describe('Tests for automation endpoints\n', () => {
   let getAutomation;
   let automationsSortedByDate;
+  let getSlackAutomations;
+  let getFreckleAutomations;
+  let getEmailAutomations;
+  let allSlackAutomations;
+  let allFreckleAutomations;
+  let allEmailAutomations;
   beforeEach(async () => {
     getAutomation = await models.Automation.bulkCreate(createAutomationFakeData());
-    await models.SlackAutomation.bulkCreate(createSlackAutomation(getAutomation));
-    await models.FreckleAutomation.bulkCreate(createFreckleAutomation(getAutomation));
-    await models.EmailAutomation.bulkCreate(createEmailAutomation(getAutomation));
+    getSlackAutomations = await models.SlackAutomation.bulkCreate(createSlackAutomation(getAutomation));
+    getFreckleAutomations = await models.FreckleAutomation.bulkCreate(createFreckleAutomation(getAutomation));
+    getEmailAutomations = await models.EmailAutomation.bulkCreate(createEmailAutomation(getAutomation));
     automationsSortedByDate = getAutomation.reduce((accum, item) => {
+      const date = moment(item.createdAt).format('YYYY-MM-DD');
+      if (!accum.has(date)) {
+        accum.set(date, []);
+      }
+      const currentDate = accum.get(date);
+      currentDate.push(item);
+      return accum;
+    }, new Map());
+    allSlackAutomations = getSlackAutomations.reduce((accum, item) => {
+      const date = moment(item.createdAt).format('YYYY-MM-DD');
+      if (!accum.has(date)) {
+        accum.set(date, []);
+      }
+      const currentDate = accum.get(date);
+      currentDate.push(item);
+      return accum;
+    }, new Map());
+    allFreckleAutomations = getFreckleAutomations.reduce((accum, item) => {
+      const date = moment(item.createdAt).format('YYYY-MM-DD');
+      if (!accum.has(date)) {
+        accum.set(date, []);
+      }
+      const currentDate = accum.get(date);
+      currentDate.push(item);
+      return accum;
+    }, new Map());
+    allEmailAutomations = getEmailAutomations.reduce((accum, item) => {
       const date = moment(item.createdAt).format('YYYY-MM-DD');
       if (!accum.has(date)) {
         accum.set(date, []);
@@ -197,6 +230,14 @@ describe('Tests for automation endpoints\n', () => {
       });
   });
   it('Should filter successful freckleAutomations data', (done) => {
+    const successfulFreckleAutomations = [];
+    allFreckleAutomations.forEach((value) => {
+      value.forEach((element) => {
+        if (element.dataValues.status === 'success') {
+          successfulFreckleAutomations.push(element.dataValues);
+        }
+      });
+    });
     chai
       .request(app)
       .get('/api/v1/automations?page=1&limit=10&freckleAutomation=success')
@@ -206,38 +247,53 @@ describe('Tests for automation endpoints\n', () => {
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
         expect(res.body)
-          .to.have.property('data')
-          .to.have.lengthOf.below(10);
-        expect(res.body.data[0].freckleAutomations.status)
-          .to.be.equal('success');
+          .to.have.property('data');
+        expect(res.body.data.length)
+          .to.equal(successfulFreckleAutomations.length);
         done();
       });
   });
   it('Should filter successful slackAutomations data', (done) => {
+    const successfulSlackAutomations = [];
+    allSlackAutomations.forEach((value) => {
+      value.forEach((element) => {
+        if (element.dataValues.status === 'success') {
+          successfulSlackAutomations.push(element.dataValues);
+        }
+      });
+    });
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=5&slackAutomation=success')
+      .get('/api/v1/automations?page=1&limit=10&slackAutomation=success')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.data[0].slackAutomations.status)
-          .to.be.equal('success');
+        expect(res.body.data.length)
+          .to.equal(successfulSlackAutomations.length);
         done();
       });
   });
   it('Should filter successful emailAutomations data', (done) => {
+    const successfulEmailAutomations = [];
+    allEmailAutomations.forEach((value) => {
+      value.forEach((element) => {
+        if (element.dataValues.status === 'success') {
+          successfulEmailAutomations.push(element.dataValues);
+        }
+      });
+    });
     chai
       .request(app)
-      .get('/api/v1/automations?page=1&limit=5&emailAutomation=success')
+      .get('/api/v1/automations?page=1&limit=10&emailAutomation=success')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched automations');
-        expect(res.body.data)
-          .to.have.lengthOf.below(10);
+        expect(res.body.data.length)
+          .to.equal(successfulEmailAutomations.length);
         done();
       });
   });
