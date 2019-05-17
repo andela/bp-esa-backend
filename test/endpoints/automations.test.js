@@ -192,7 +192,6 @@ describe('Tests for automation endpoints\n', () => {
     const currentDate = dates.next().value;
     const dateFrom = moment(currentDate, 'YYYY-MM-DD');
     const dateTo = moment(moment(new Date('March 31 2019 12:30')).format('YYYY-MM-DD', 'YYYY-MM-DD'));
-    // console.log({ dateTo });
     // eslint-disable-next-line prefer-const
     // eslint-disable-next-line no-restricted-syntax
     for (const dataDate of automationsSortedByDate.entries()) {
@@ -253,6 +252,30 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('Should filter failed freckleAutomations data', (done) => {
+    const failedFreckleAutomations = [];
+    allFreckleAutomations.forEach((value) => {
+      value.forEach((element) => {
+        if (element.dataValues.status === 'failure') {
+          failedFreckleAutomations.push(element.dataValues);
+        }
+      });
+    });
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=10&freckleAutomation=failure')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body)
+          .to.have.property('data');
+        expect(res.body.data.length)
+          .to.equal(failedFreckleAutomations.length);
+        done();
+      });
+  });
   it('Should filter successful slackAutomations data', (done) => {
     const successfulSlackAutomations = [];
     allSlackAutomations.forEach((value) => {
@@ -275,6 +298,28 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('Should filter failed slackAutomations data', (done) => {
+    const failedSlackAutomations = [];
+    allSlackAutomations.forEach((value) => {
+      value.forEach((element) => {
+        if (element.dataValues.status === 'failure') {
+          failedSlackAutomations.push(element.dataValues);
+        }
+      });
+    });
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=10&slackAutomation=failure')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.data.length)
+          .to.equal(failedSlackAutomations.length);
+        done();
+      });
+  });
   it('Should filter successful emailAutomations data', (done) => {
     const successfulEmailAutomations = [];
     allEmailAutomations.forEach((value) => {
@@ -294,6 +339,28 @@ describe('Tests for automation endpoints\n', () => {
           .to.equal('Successfully fetched automations');
         expect(res.body.data.length)
           .to.equal(successfulEmailAutomations.length);
+        done();
+      });
+  });
+  it('Should filter failed emailAutomations data', (done) => {
+    const failedEmailAutomations = [];
+    allEmailAutomations.forEach((value) => {
+      value.forEach((element) => {
+        if (element.dataValues.status === 'failure') {
+          failedEmailAutomations.push(element.dataValues);
+        }
+      });
+    });
+    chai
+      .request(app)
+      .get('/api/v1/automations?page=1&limit=10&emailAutomation=failure')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched automations');
+        expect(res.body.data.length)
+          .to.equal(failedEmailAutomations.length);
         done();
       });
   });
