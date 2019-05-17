@@ -367,7 +367,7 @@ describe('Tests for automation endpoints\n', () => {
   it('Should filter slackAutomation, emailAutomation  slackAutomation, date[from], and date[to] to return less than 10 items', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations?page=1&limit=10&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${(new Date('January 31 2019 12:30')).toISOString()}&date[to]=${(new Date('March 31 2019 12:30')).toISOString()}`)
+      .get(`/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${(new Date('January 31 2019 12:30')).toISOString()}&date[to]=${(new Date('March 31 2019 12:30')).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body.data)
