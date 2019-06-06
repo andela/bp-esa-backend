@@ -6,6 +6,7 @@ export default (sequelize, DataTypes) => {
       name: DataTypes.STRING,
       partnerId: { type: DataTypes.STRING, allowNull: false, unique: true },
       slackChannels: DataTypes.JSON,
+      location: DataTypes.STRING,
     },
     {
       setterMethods: {

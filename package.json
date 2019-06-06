@@ -13,7 +13,8 @@
     "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:@babel/register --require @babel/polyfill --timeout 150000 --exit",
     "lint": "eslint .",
     "migrations": "sequelize db:migrate",
-    "reset-database": "sequelize db:drop && sequelize db:create"
+    "reset-database": "sequelize db:drop && sequelize db:create",
+    "setup": "yarn reset-database && yarn migrations"
   },
   "repository": {
     "type": "git",

@@ -48,10 +48,9 @@ const createChannel = async (channelDetails) => {
  */
 const automationData = (partnerName, channelType) => {
   const channelName = makeChannelNames(partnerName, channelType);
+  // possibly refactor to eliminate this function entirely
   return {
-    slackUserId: null,
     channelName,
-    status: 'success',
   };
 };
 
@@ -164,16 +163,13 @@ export const findOrCreatePartnerChannel = async (partnerData, channelType, jobTy
   const existingChannel = await findOne(result, channelType);
   if (existingChannel) {
     return {
-      ...channelData,
+      type: 'retrieve',
       channelName: existingChannel.name,
       channelId: existingChannel.id,
-      type: 'retrieve',
-      statusMessage: `${existingChannel.name} slack channel retrieved`,
     };
   }
   if (jobType === 'onboarding') {
     channelData.type = 'create';
-    channelData.statusMessage = `${channelData.channelName} slack channel created`;
     return createChannel(channelData);
   }
   // Could not find partner channel for the offboarding
