@@ -9,7 +9,7 @@ export const count = { FAILED_COUNT_NUMBER: 0 };
  * @param {String} partnerLocation Location of the partner to be used in the automation
  * @returns {Promise} Promise to return info of the mail to be sent
  */
-export const getMailInfo = async (placement, partnerLocation) => {
+export const getMailInfo = (placement, partnerLocation) => {
   const {
     fellow: { name: developerName, email: developerEmail, location: developerLocation },
     client_name: partnerName,

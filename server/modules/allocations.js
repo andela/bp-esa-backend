@@ -51,6 +51,25 @@ const generateInternalChannel = (newPartner, jobType) => {
   return {};
 };
 
+const channelData = (general, internal, partner) => ({
+  general: {
+    channelId: general.channelId,
+    channelName: general.channelName,
+    channelProvision: general.type,
+  },
+  internal: internal.channelId
+    ? {
+      channelId: internal.channelId,
+      channelName: internal.channelName,
+      channelProvision: internal.type,
+    }
+    : {
+      channelId: partner.channel_id,
+      channelName: partner.channel_name,
+      channelProvision: 'retrieve',
+    },
+});
+
 /**
  * @desc Get partner details from radis db or fetch new partner data
  *
@@ -71,24 +90,7 @@ export async function findPartnerById(partnerId, jobType) {
       findOrCreatePartnerChannel(newPartner, 'general', jobType),
       generateInternalChannel(newPartner, jobType),
     ]);
-    newPartner.slackChannels = {
-      general: {
-        channelId: genChannel.channelId,
-        channelName: genChannel.channelName,
-        channelProvision: genChannel.type,
-      },
-      internal: intChannel.channelId
-        ? {
-          channelId: intChannel.channelId,
-          channelName: intChannel.channelName,
-          channelProvision: intChannel.type,
-        }
-        : {
-          channelId: newPartner.channel_id,
-          channelName: newPartner.channel_name,
-          channelProvision: 'retrieve',
-        },
-    };
+    newPartner.slackChannels = channelData(genChannel, intChannel, newPartner);
     const [{ dataValues: savedPartner }] = await db.Partner.upsert(newPartner, { returning: true });
     redisdb.set(savedPartner.partnerId, JSON.stringify(savedPartner));
     return savedPartner;
