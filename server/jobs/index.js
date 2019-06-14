@@ -59,6 +59,18 @@ export const automationData = (placement, type) => {
   };
 };
 
+/**
+ * @desc Creates Automation model instances and executes automation (slack, email, freckle)
+ * process for each automation
+ *
+ * @param {Array} newPlacements A list of placements
+ *
+ * @param {string} type Type of job to execute: offboarding || onboarding
+ *
+ * @param {Array} jobList A list of automation functions to execute
+ *
+ * @returns {void} void
+ */
 const automationProcess = async (newPlacements, type, jobList) => {
   for (const placement of newPlacements) {
     const { placementId, ...defaults } = automationData(placement, type);
