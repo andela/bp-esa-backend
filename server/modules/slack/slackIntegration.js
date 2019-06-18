@@ -158,7 +158,8 @@ export const findOrCreatePartnerChannel = async (partnerData, channelType, jobTy
   }
   if (jobType === 'onboarding') {
     channelData.type = 'create';
-    return createChannel(channelData);
+    const newChannel = await createChannel(channelData);
+    return newChannel;
   }
   // Could not find partner channel for the offboarding
   return { status: 'failure' };

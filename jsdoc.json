@@ -1,0 +1,17 @@
+{
+    "source": {
+        "include": ["./server"],
+        "includePattern": ".js$",
+        "exclude": "(node_modules/docs)"
+    },
+    "plugin": [
+        "plugins/markdown"
+    ],
+    "opts": {
+        "encoding": "utf8",
+        "readme": "./readme.md",
+        "destination": "docs/",
+        "recurse": true,
+        "verbose": true
+    }
+}

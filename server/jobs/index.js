@@ -58,6 +58,17 @@ export const automationData = (placement, type) => {
   };
 };
 
+/**
+ * @desc Creates Automation model instances and executes automation (slack, email, freckle)
+ * process for each automation
+ *
+ * @param {Object} placement A placement instance
+ * @param {Object} partner The partner involved in the engagement
+ * @param {string} type Type of job to execute: offboarding || onboarding
+ * @param {Array} jobList A list of automation functions to execute
+ *
+ * @returns {void} void
+ */
 const automations = async (placement, partner, type, jobList) => {
   const { placementId, ...defaults } = automationData(placement, type);
   const [{ id: automationId }, created] = await db.Automation.findOrCreate({
@@ -97,7 +108,7 @@ export default function executeJobs(type) {
       if (!fetchPlacementError) {
         Helper.count.FAILED_COUNT_NUMBER = 0;
         const partnerList = await Promise.all(
-          newPlacements.map(({ client_id: partnerId }) => findPartnerById(partnerId)),
+          newPlacements.map(({ client_id: partnerId }) => findPartnerById(partnerId, type)),
         );
         await Promise.all(automationList(partnerList, newPlacements, type, jobList));
       }
