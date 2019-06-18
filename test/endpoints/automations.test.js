@@ -190,7 +190,7 @@ describe('Tests for automation endpoints\n', () => {
   it('should return stats of total automations', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations/stats')
+      .get('/api/v1/automations/stats?duration=days')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -203,7 +203,7 @@ describe('Tests for automation endpoints\n', () => {
   it('should return stats of total automations of a given date', (done) => {
     chai
       .request(app)
-      .get(`/api/v1/automations/stats?date=${new Date(2018, 4, 1).toISOString()}`)
+      .get(`/api/v1/automations/stats?duration=days&date=${new Date(2018, 4, 1).toISOString()}`)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -213,10 +213,61 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('should return stats of total automations of a given week', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations/stats?duration=weeks&date=${new Date(2018, 4, 1).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('automation')
+          .to.have.property('total')
+          .to.be.equal(0);
+        done();
+      });
+  });
+  it('should return stats of total automations of a given month', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations/stats?duration=months&date=${new Date(2018, 4, 1).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('automation')
+          .to.have.property('total')
+          .to.be.equal(0);
+        done();
+      });
+  });
+  it('should return stats of total automations of a given year', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations/stats?duration=years&date=${new Date(2018, 4, 1).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('automation')
+          .to.have.property('total')
+          .to.be.equal(0);
+        done();
+      });
+  });
+  it('should return an error when an invalid duration is input', (done) => {
+    chai
+      .request(app)
+      .get(`/api/v1/automations/stats?duration=invalid&date=${new Date(2018, 4, 1).toISOString()}`)
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body)
+          .to.have.property('error')
+          .to.equal('invalid duration input');
+        done();
+      });
+  });
   it('should return stats of onboarding successfull automations', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations/stats')
+      .get('/api/v1/automations/stats?duration=days')
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)

@@ -58,6 +58,18 @@ export const automationData = (placement, type) => {
   };
 };
 
+/**
+ * @desc Creates Automation model instances and executes automation (slack, email, freckle)
+ * process for each automation
+ *
+ * @param {Object} placement A placement instance
+ *
+ * @param {string} type Type of job to execute: offboarding || onboarding
+ *
+ * @param {Array} jobList A list of automation functions to execute
+ *
+ * @returns {void} void
+ */
 const automations = async (placement, type, jobList) => {
   const { placementId, ...defaults } = automationData(placement, type);
   const [{ id: automationId }, created] = await db.Automation.findOrCreate({
