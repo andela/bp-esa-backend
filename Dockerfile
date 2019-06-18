@@ -20,7 +20,7 @@ COPY templates /usr/src/app/templates/
 RUN yarn install
 
 # Uncomment this when using the application locally
-COPY .env .
+#COPY .env .
 
 #Bundle apps source code
 RUN yarn build
