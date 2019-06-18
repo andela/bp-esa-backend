@@ -6,12 +6,11 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 /**
- * Decodes a token
- * @param {string} token provided by user
- * @returns {object} decoded token
-*/
+ * @desc Decodes a token
+ * @param {String} token provided by user
+ * @returns {Promise} Promise to return the decoded token
+ */
 async function decodeToken(token) {
   try {
     const decode = await jwt.decode(token);
@@ -21,27 +20,25 @@ async function decodeToken(token) {
   }
 }
 
-
 /**
- * Does Auth
- *  @param {object} req provided by user
- *  @param {object} res provided by user
- *  @returns {object} decoded token
-*/
+ * @desc Perform authentication
+ *  @param {Object} req provided by user
+ *  @param {Object} res provided by user
+ *  @returns {Promise} Promise to return json response containing decoded token
+ */
 async function authResponse(req, res) {
   const { token } = req.body;
   const decode = await decodeToken(token);
   if (decode) {
-    res.status(200).json({
+    return res.status(200).json({
       confirmation: 'success',
       decode,
     });
-  } else {
-    res.status(401).json({
-      confirmation: 'fail',
-      message: 'Invalid Token',
-    });
   }
+  return res.status(401).json({
+    confirmation: 'fail',
+    message: 'Invalid Token',
+  });
 }
 
 export default authResponse;

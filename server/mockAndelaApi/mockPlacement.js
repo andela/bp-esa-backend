@@ -1,15 +1,8 @@
 import faker from 'faker';
 import axios from 'axios';
-import dotenv from 'dotenv';
-import { promisify } from 'util';
-import client from '../helpers/redis';
+import { redisdb } from '../helpers/redis';
 
-dotenv.config();
-
-export const redis = {
-  set: promisify(client.set).bind(client),
-  get: promisify(client.get).bind(client),
-};
+require('dotenv').config();
 
 // Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
@@ -19,10 +12,10 @@ axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_AP
  * @returns {Promise} A promise to return a list of andela partners
  */
 export async function getAndelaPartners() {
-  const partners = await redis.get('andela-partners');
+  const partners = await redisdb.get('andela-partners');
   if (!partners) {
-    const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/?limit=100`);
-    await redis.set('andela-partners', JSON.stringify(data.values));
+    const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}?limit=10`);
+    await redisdb.set('andela-partners', JSON.stringify(data.values));
     return data.values;
   }
   return JSON.parse(partners);

@@ -1,56 +1,78 @@
 import axios from 'axios';
-import redis from 'redis';
-import dotenv from 'dotenv';
 import ms from 'ms';
-import client from '../helpers/redis';
+import https from 'https';
+import { redisdb } from '../helpers/redis';
+import db from '../models';
+import { findOrCreatePartnerChannel } from './slack/slackIntegration';
 
-dotenv.config();
+require('dotenv').config();
 
 // Axios authorization header setup
 axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
 
-// Updates the local redis store with latest Partner List
-export const updatePartnerStore = () => axios.get(process.env.ANDELA_PARTNERS).then((response) => {
-  client.set('partners', JSON.stringify(response.data), redis.print);
-  return response.data;
-});
-
-const resolvePartner = (partnerId, result, resolve) => {
-  if (result) {
-    return resolve(JSON.parse(result).values.filter(partner => partner.id === partnerId)[0]);
-  }
-  return resolve(null);
+/**
+ *@desc Fetch a partner's profile from andela API and save to redisDB
+ *
+ * @param {String} partnerId The ID of the partner to fetch
+ * @returns {Promise} Promise to return the partner data retrieved
+ */
+const getPartnerfromAPI = async (partnerId) => {
+  const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`, {
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+  });
+  redisdb.set(data.id, JSON.stringify(data));
+  return data;
 };
 
 /**
- * @desc Fetch partner data from external api
+ *@desc Retrieve partner data from redisDB or Andela API
  *
- * @param {string} partnerId ID of the partner
- *
- * @returns {Promise} Promise of the partner data to be fetched
+ * @param {String} partnerId The ID of the partner to retrieve
+ * @returns {Promise} Promise to return the partner's data
  */
-const retrievePartner = partnerId => new Promise((resolve, reject) => {
-  client.get('partners', (error, result) => {
-    if (error) {
-      reject(error);
-    }
-    return resolvePartner(partnerId, result, resolve);
-  });
-});
+export const retrievePartner = async (partnerId) => {
+  const result = await redisdb.get(partnerId);
+  return !result ? getPartnerfromAPI(partnerId) : JSON.parse(result);
+};
+
+/**
+ *@desc Find or create the slack internal channel of a partner
+ *
+ * @param {Object} newPartner The details of the target partner
+ * @param {String} jobType The type of automation carried out: onboarding || offboarding,
+ * if onboarding, does not create channel when channel not found
+ *
+ * @returns {Promise} Promise to return the partner channel Object found or created
+ */
+const generateInternalChannel = (newPartner, jobType) => {
+  if (!newPartner.channel_id.length) {
+    return findOrCreatePartnerChannel(newPartner, 'internal', jobType);
+  }
+  return {};
+};
 
 /**
  * @desc Get partner details from radis db or fetch new partner data
  *
  * @param {string} partnerId ID of the partner
+ * @param {string} jobType Type of job being executed: onboarding || offboarding
  *
- * @returns {object} Data of the partner
+ * @returns {Promise} Promise to return the data of the partner
  */
-export async function findPartnerById(partnerId) {
-  let partner = await retrievePartner(partnerId);
+export async function findPartnerById(partnerId, jobType) {
+  const partner = await db.Partner.findOne({ where: { partnerId } });
   if (!partner) {
-    const { values } = await updatePartnerStore();
-    [partner] = values.filter(data => data.id === partnerId);
-    if (!partner) throw new Error('Partner record was not found');
+    const newPartner = await retrievePartner(partnerId);
+    const [genChannel = {}, intChannel = {}] = await Promise.all([
+      findOrCreatePartnerChannel(newPartner, 'general', jobType),
+      generateInternalChannel(newPartner, jobType),
+    ]);
+    newPartner.slackChannels = {
+      general: genChannel.channelId,
+      internal: intChannel.channelId || newPartner.channel_id,
+    };
+    const [{ dataValues }] = await db.Partner.upsert(newPartner, { returning: true });
+    return dataValues;
   }
   return partner;
 }
@@ -59,7 +81,6 @@ export async function findPartnerById(partnerId) {
  * @desc Fetches new placements by status, from the last TIME_INTERVAL
  *
  * @param {string} status The status of placements to fetch from allocations
- *
  * @returns {Promise} Promise to return list of placements
  */
 export const fetchNewPlacements = async (status) => {

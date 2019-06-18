@@ -1,6 +1,5 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
-/* eslint-disable  no-restricted-syntax */
 
 import fs from 'fs';
 import ms from 'ms';
@@ -63,7 +62,7 @@ export const automationData = (placement, type) => {
  * @desc Creates Automation model instances and executes automation (slack, email, freckle)
  * process for each automation
  *
- * @param {Array} newPlacements A list of placements
+ * @param {Object} placement A placement instance
  *
  * @param {string} type Type of job to execute: offboarding || onboarding
  *
@@ -71,18 +70,16 @@ export const automationData = (placement, type) => {
  *
  * @returns {void} void
  */
-const automationProcess = async (newPlacements, type, jobList) => {
-  for (const placement of newPlacements) {
-    const { placementId, ...defaults } = automationData(placement, type);
-    const [{ id: automationId }, created] = await db.Automation.findOrCreate({
-      where: { placementId },
-      defaults,
-    });
-    if (created) {
-      await Promise.all(jobList.map(job => job(placement, automationId)));
-      const newAutomation = await db.Automation.findByPk(automationId, { include });
-      io.emit('newAutomation', formatPayload(newAutomation));
-    }
+const automations = async (placement, type, jobList) => {
+  const { placementId, ...defaults } = automationData(placement, type);
+  const [{ id: automationId }, created] = await db.Automation.findOrCreate({
+    where: { placementId },
+    defaults,
+  });
+  if (created) {
+    await Promise.all(jobList.map(job => job(placement, automationId)));
+    const newAutomation = await db.Automation.findByPk(automationId, { include });
+    io.emit('newAutomation', formatPayload(newAutomation));
   }
 };
 
@@ -106,7 +103,7 @@ export default function executeJobs(type) {
     .then(async (newPlacements) => {
       if (!fetchPlacementError) {
         Helper.count.FAILED_COUNT_NUMBER = 0;
-        return automationProcess(newPlacements, type, jobList);
+        await Promise.all(newPlacements.map(placement => automations(placement, type, jobList)));
       }
     });
 }

@@ -3,6 +3,8 @@ import faker from 'faker';
 import mockPlacement from './mockPlacement';
 import { slackClient } from '../modules/slack/slackIntegration';
 
+require('dotenv').config();
+
 const router = express.Router();
 
 const { list } = slackClient.users;
@@ -12,17 +14,17 @@ const { list } = slackClient.users;
  *
  * @param {String} status The status of the placement to generate
  *
- * @returns {Array} The list of placements generated
+ * @returns {Promise} Promise to return a list of placements generated
  */
 async function generatePlacements(status) {
   const placements = [];
   const { members } = await list();
   const emails = members.reduce(
-    (result, { deleted, profile: { email } }) => (email && !deleted && email !== 'esa@andela.com' ? [...result, email] : result),
+    (result, { deleted, profile: { email } }) => (email && !deleted && email !== process.env.SLACK_ADMIN ? [...result, email] : result),
     [],
   );
-  // max: 3, min: 1
-  for (let index = 0; index < Math.floor(Math.random() * 3) + 1; index++) {
+  // max: 1, min: 1
+  for (let index = 0; index < Math.floor(Math.random() * 1) + 1; index++) {
     placements.push(await mockPlacement(status, emails[faker.random.number(emails.length - 1)]));
   }
   return placements;
