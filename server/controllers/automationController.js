@@ -5,9 +5,9 @@ import moment from 'moment';
 
 import * as util from 'util';
 import models from '../models';
-import { paginationResponse } from '../utils/formatter';
+import { paginationResponse, formatAutomationResponse } from '../utils/formatter';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
-
+import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
 
 const automation = models.Automation;
 export const include = [
@@ -73,7 +73,7 @@ function addSearchQuery({ searchTerm, searchBy }) {
     default:
       return util.format(`
           AND (
-            "a"."partnerName" ILIKE '%%%s%%' OR 
+            "a"."partnerName" ILIKE '%%%s%%' OR
             "a"."fellowName" ILIKE '%%%s%%'
           )
 
@@ -223,6 +223,40 @@ export default class AutomationController {
       return await paginationData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
+    }
+  }
+
+  /**
+   * @desc Gets automation results from db after a retry
+   *
+   * @param {object} req Get request object from client
+   * @param {object} res REST Response object
+   * @returns {object} Response containing status message and automation data
+   */
+  static async retryAutomations(req, res) {
+    try {
+      const automationId = req.params.id;
+
+      const existingPlacement = await automation.findByPk(automationId, { include });
+      const {
+        freckleAutomations, slackAutomations, emailAutomations, type,
+      } = existingPlacement;
+
+      if (type === 'onboarding') {
+        onboardingReRuns(freckleAutomations, slackAutomations,
+          emailAutomations, existingPlacement, automationId);
+      }
+      if (type === 'offboarding') {
+        offboardingReRuns(slackAutomations,
+          emailAutomations, existingPlacement, automationId);
+      }
+      return res.status(200).json({
+        status: 'success',
+        message: 'Successfully fetched individual automation',
+        data: formatAutomationResponse([existingPlacement]),
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
     }
   }
 }
