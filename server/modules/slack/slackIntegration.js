@@ -40,22 +40,6 @@ const createChannel = async (channelDetails) => {
 };
 
 /**
- *@desc Generate automation data using partner name and channelType
- *
- * @param {String} partnerName Name of the partner being onboarded or offboarded
- * @param {String} channelType The type of channel name to generate
- * @returns {Object} Details of the automation to be carried out
- */
-const automationData = (partnerName, channelType) => {
-  const channelName = makeChannelNames(partnerName, channelType);
-  return {
-    slackUserId: null,
-    channelName,
-    status: 'success',
-  };
-};
-
-/**
  * @desc Returns matched channels from a list of slack channels
  * @param {Array} channels List of channels from slack API to filter
  * @param {String} channelName The channel name to filter against
@@ -112,7 +96,10 @@ const findConditions = key => ({
   internal: key === '-int',
 });
 
+// if channel is an object, return the last 4 digits of channel.name,
+// if channel is string, return last 4 digits
 const searchKey = channel => (channel.name ? channel.name.slice(-4) : channel.slice(-4));
+
 /**
  *@desc Find exact matching channel from list of searched channels
  *
@@ -158,23 +145,21 @@ const matchedChannels = (channelData, partnerData) => ({
  * @returns {Promise} Promise to return an object containing details of the channel
  */
 export const findOrCreatePartnerChannel = async (partnerData, channelType, jobType) => {
-  const channelData = automationData(partnerData.name, channelType);
+  const channelData = { channelName: makeChannelNames(partnerData.name, channelType) };
   const partnerChannelGiven = Boolean(partnerData.channel_name && partnerData.channel_name.length);
   const result = await matchedChannels(channelData, partnerData)[partnerChannelGiven]();
   const existingChannel = await findOne(result, channelType);
   if (existingChannel) {
     return {
-      ...channelData,
+      type: 'retrieve',
       channelName: existingChannel.name,
       channelId: existingChannel.id,
-      type: 'retrieve',
-      statusMessage: `${existingChannel.name} slack channel retrieved`,
     };
   }
   if (jobType === 'onboarding') {
     channelData.type = 'create';
-    channelData.statusMessage = `${channelData.channelName} slack channel created`;
-    return createChannel(channelData);
+    const newChannel = await createChannel(channelData);
+    return newChannel;
   }
   // Could not find partner channel for the offboarding
   return { status: 'failure' };

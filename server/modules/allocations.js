@@ -25,14 +25,14 @@ const getPartnerfromAPI = async (partnerId) => {
 };
 
 /**
- *@desc Retrieve partner data from redisDB or Andela API
+ *@desc Retrieve partner data from database or Andela API
  *
  * @param {String} partnerId The ID of the partner to retrieve
  * @returns {Promise} Promise to return the partner's data
  */
 export const retrievePartner = async (partnerId) => {
-  const result = await redisdb.get(partnerId);
-  return !result ? getPartnerfromAPI(partnerId) : JSON.parse(result);
+  const result = await db.Partner.findOne({ where: { partnerId } });
+  return result || getPartnerfromAPI(partnerId);
 };
 
 /**
@@ -51,6 +51,25 @@ const generateInternalChannel = (newPartner, jobType) => {
   return {};
 };
 
+const channelData = (general, internal, partner) => ({
+  general: {
+    channelId: general.channelId,
+    channelName: general.channelName,
+    channelProvision: general.type,
+  },
+  internal: internal.channelId
+    ? {
+      channelId: internal.channelId,
+      channelName: internal.channelName,
+      channelProvision: internal.type,
+    }
+    : {
+      channelId: partner.channel_id,
+      channelName: partner.channel_name,
+      channelProvision: 'retrieve',
+    },
+});
+
 /**
  * @desc Get partner details from radis db or fetch new partner data
  *
@@ -60,21 +79,23 @@ const generateInternalChannel = (newPartner, jobType) => {
  * @returns {Promise} Promise to return the data of the partner
  */
 export async function findPartnerById(partnerId, jobType) {
-  const partner = await db.Partner.findOne({ where: { partnerId } });
+  const partner = await redisdb.get(partnerId);
   if (!partner) {
     const newPartner = await retrievePartner(partnerId);
+    if (newPartner.slackChannels) {
+      redisdb.set(newPartner.partnerId, newPartner);
+      return newPartner;
+    }
     const [genChannel = {}, intChannel = {}] = await Promise.all([
       findOrCreatePartnerChannel(newPartner, 'general', jobType),
       generateInternalChannel(newPartner, jobType),
     ]);
-    newPartner.slackChannels = {
-      general: genChannel.channelId,
-      internal: intChannel.channelId || newPartner.channel_id,
-    };
-    const [{ dataValues }] = await db.Partner.upsert(newPartner, { returning: true });
-    return dataValues;
+    newPartner.slackChannels = channelData(genChannel, intChannel, newPartner);
+    const [{ dataValues: savedPartner }] = await db.Partner.upsert(newPartner, { returning: true });
+    redisdb.set(savedPartner.partnerId, JSON.stringify(savedPartner));
+    return savedPartner;
   }
-  return partner;
+  return JSON.parse(partner);
 }
 
 /**

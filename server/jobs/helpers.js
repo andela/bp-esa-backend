@@ -1,4 +1,3 @@
-import { findPartnerById } from '../modules/allocations';
 import { createOrUpdateEmailAutomation } from '../modules/automations';
 import { sendPlacementFetchAlertEmail } from '../modules/email/emailModule';
 
@@ -7,17 +6,16 @@ export const count = { FAILED_COUNT_NUMBER: 0 };
 /**
  * @desc Retrieves necessary info. to be sent via email for any given placement
  * @param {object} placement A placement instance from allocation
+ * @param {String} partnerLocation Location of the partner to be used in the automation
  * @returns {Promise} Promise to return info of the mail to be sent
  */
-export const getMailInfo = async (placement) => {
+export const getMailInfo = (placement, partnerLocation) => {
   const {
     fellow: { name: developerName, email: developerEmail, location: developerLocation },
     client_name: partnerName,
-    client_id: partnerId,
     end_date: rollOffDate,
     start_date: dateStart,
   } = placement;
-  const { location: partnerLocation } = await findPartnerById(partnerId);
   return {
     developerName,
     partnerName,
@@ -47,12 +45,13 @@ export const checkFailureCount = async (failCount) => {
  *
  * @param {Array} emailFunctions List of functions to execute for the automation
  * @param {Object} placement Placement data with which to execute automation
+ * @param {String} location Location of partner used in the automation
  * @param {String} automationId Id of the automation being carried out
  *
  * @returns {void}
  */
-export async function executeEmailAutomation(emailFunctions, placement, automationId) {
-  const mailInfo = await getMailInfo(placement);
+export async function executeEmailAutomation(emailFunctions, placement, location, automationId) {
+  const mailInfo = await getMailInfo(placement, location);
   const emailAutomations = await Promise.all(emailFunctions.map(func => func(mailInfo)));
   await Promise.all(
     emailAutomations.map(automationData => createOrUpdateEmailAutomation({ ...automationData, automationId })),

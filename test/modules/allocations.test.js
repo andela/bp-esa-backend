@@ -42,19 +42,8 @@ describe('Partner and Allocations Test Suite', async () => {
     // Mock successful request
     const fakeClientGet = sinon.stub(redisdb, 'get').callsFake(() => stringifiedPartner);
 
-    const partner = await resource.findPartnerById('ABCDEFZYXWVU');
+    const partner = await resource.findPartnerById('ABCDEFZYXWVU', 'onboarding');
     expect(partner.partnerId || partner.id).to.equal('ABCDEFZYXWVU');
-    fakeClientGet.restore();
-  });
-  it('Should throw error if radis encounters error getting partner data', async () => {
-    const errorMessage = 'Error retrieving data from radis';
-    const fakeClientGet = sinon.stub(redisdb, 'get').callsFake(() => new Error(errorMessage));
-
-    try {
-      await resource.findPartnerById('ABCDEFZYXWVU');
-    } catch (error) {
-      expect(error.message).to.equal(errorMessage);
-    }
     fakeClientGet.restore();
   });
   it('Should throw an error when no partner record was found', async () => {
@@ -69,7 +58,7 @@ describe('Partner and Allocations Test Suite', async () => {
     const fakeClientGet = sinon.stub(redisdb, 'get').callsFake(() => null);
     const fakeClientSet = sinon.stub(redisdb, 'set').callsFake(() => undefined);
     try {
-      await resource.findPartnerById('not-found-id');
+      await resource.findPartnerById('not-found-id', 'onboarding');
     } catch ({ response }) {
       expect(response.data.error).to.equal(response.data.error);
     }

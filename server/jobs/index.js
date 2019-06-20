@@ -4,7 +4,7 @@
 import fs from 'fs';
 import ms from 'ms';
 import * as Helper from './helpers';
-import { fetchNewPlacements } from '../modules/allocations';
+import { fetchNewPlacements, findPartnerById } from '../modules/allocations';
 import { io } from '..';
 import { formatPayload } from '../utils/formatter';
 import { include } from '../controllers/automationController';
@@ -63,24 +63,28 @@ export const automationData = (placement, type) => {
  * process for each automation
  *
  * @param {Object} placement A placement instance
- *
+ * @param {Object} partner The partner involved in the engagement
  * @param {string} type Type of job to execute: offboarding || onboarding
- *
  * @param {Array} jobList A list of automation functions to execute
  *
  * @returns {void} void
  */
-const automations = async (placement, type, jobList) => {
+const automations = async (placement, partner, type, jobList) => {
   const { placementId, ...defaults } = automationData(placement, type);
   const [{ id: automationId }, created] = await db.Automation.findOrCreate({
     where: { placementId },
     defaults,
   });
   if (created) {
-    await Promise.all(jobList.map(job => job(placement, automationId)));
+    await Promise.all(jobList.map(job => job(placement, partner, automationId)));
     const newAutomation = await db.Automation.findByPk(automationId, { include });
     io.emit('newAutomation', formatPayload(newAutomation));
   }
+};
+
+const automationList = (partnerList, newPlacements, type, jobList) => {
+  const partner = clientId => partnerList.find(({ partnerId }) => partnerId === clientId);
+  return newPlacements.map(placement => automations(placement, partner(placement.client_id), type, jobList));
 };
 
 /**
@@ -103,7 +107,10 @@ export default function executeJobs(type) {
     .then(async (newPlacements) => {
       if (!fetchPlacementError) {
         Helper.count.FAILED_COUNT_NUMBER = 0;
-        await Promise.all(newPlacements.map(placement => automations(placement, type, jobList)));
+        const partnerList = await Promise.all(
+          newPlacements.map(({ client_id: partnerId }) => findPartnerById(partnerId, type)),
+        );
+        await Promise.all(automationList(partnerList, newPlacements, type, jobList));
       }
     });
 }
