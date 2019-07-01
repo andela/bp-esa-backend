@@ -1,6 +1,7 @@
 import db from '../models';
 
-const { SlackAutomation, EmailAutomation, FreckleAutomation } = db;
+const {
+  SlackAutomation, EmailAutomation, FreckleAutomation } = db;
 
 /**
  * @func createOrUpdateSlackAutomation
@@ -20,6 +21,22 @@ const { SlackAutomation, EmailAutomation, FreckleAutomation } = db;
  */
 // eslint-disable-next-line max-len
 export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
+
+export const retryAutomations = async (database, automationDetails, automationEntity) => {
+  const { automationId } = automationDetails;
+  const automationValues = Object.values(automationDetails);
+  if (automationValues.includes(null)) {
+    return 'Missing fields. Update failed';
+  }
+  const existingRecord = await database.findOne({
+    where: {
+      automationId,
+      status: automationEntity.status,
+      type: automationEntity.type,
+    },
+  });
+  return database.update(automationDetails, { where: { id: existingRecord.id } });
+};
 
 /**
  * @func createOrUpdateEmailAutomation
