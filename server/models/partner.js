@@ -1,9 +1,20 @@
 export default (sequelize, DataTypes) => {
-  const Partner = sequelize.define('partners', {
-    freckleProjectId: DataTypes.STRING,
-    name: DataTypes.STRING,
-    partnerId: DataTypes.STRING,
-    slackChannels: DataTypes.JSON,
-  });
+  const Partner = sequelize.define(
+    'partners',
+    {
+      freckleProjectId: DataTypes.STRING,
+      name: DataTypes.STRING,
+      partnerId: { type: DataTypes.STRING, allowNull: false, unique: true },
+      slackChannels: DataTypes.JSON,
+      location: DataTypes.STRING,
+    },
+    {
+      setterMethods: {
+        id(value) {
+          this.setDataValue('partnerId', value);
+        },
+      },
+    },
+  );
   return Partner;
 };

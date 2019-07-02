@@ -36,13 +36,13 @@ const slackMocks = {
   slackUser: {
     ok: true,
     user: {
-      id: 'UDABCDEFG',
+      id: 'UJ25QA667',
       team_id: 'TDG6WMQCF',
       name: 'John',
       deleted: false,
       color: 'e0a729',
-      real_name: 'John Doe',
-      tz: 'Africa/Nairobi',
+      real_name: 'Ebele Nsoffor',
+      tz: 'Africa/Lagos',
       tz_label: 'East Africa Time',
       tz_offset: 10800,
       profile: {
@@ -57,7 +57,7 @@ const slackMocks = {
         status_emoji: '',
         status_expiration: 0,
         avatar_hash: 'g380c211d1dd',
-        email: 'johndoe@mail.com',
+        email: 'ebelensoffor@gmail.com',
       },
       is_admin: false,
       is_owner: false,
@@ -111,7 +111,7 @@ const slackMocks = {
   },
   groupInfo: {
     ok: true,
-    group: {
+    channel: {
       id: 'GBRR4B5E3',
       name: 'rack-city',
       is_group: true,

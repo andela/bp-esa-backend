@@ -42,24 +42,6 @@ describe('Automation Database Operations', () => {
     await automations.createOrUpdateSlackAutomation(automationDetails);
     expect(mockModels.SlackAutomation.upsertById.calledWith(automationDetails)).to.be.true;
   });
-  it('should get a slackAutomation record from the DB', async () => {
-    const automationDetails = {
-      slackAutomationId: '99',
-      channelName: 'p-test',
-      // ...other properties...
-    };
-    await automations.getSlackAutomation(automationDetails);
-    expect(
-      mockModels.SlackAutomation.find.calledWith({
-        where: {
-          [Op.or]: [
-            { id: automationDetails.slackAutomationId },
-            { channelName: automationDetails.channelName },
-          ],
-        },
-      }),
-    ).to.be.true;
-  });
   it('should upsert an emailAutomation record in the DB', async () => {
     const automationDetails = {
       automationId: '3',
@@ -71,7 +53,7 @@ describe('Automation Database Operations', () => {
       status: 'success',
       statusMessage: 'Email sent succesfully',
     };
-    await automations.createOrUpdateEmaillAutomation(automationDetails);
+    await automations.createOrUpdateEmailAutomation(automationDetails);
     expect(mockModels.EmailAutomation.upsertById.calledWith(automationDetails)).to.be.true;
     expect(mockModels.EmailAutomation.upsertById.firstCall.args[0].statusMessage).to.equal(
       'Email sent succesfully',
@@ -83,25 +65,5 @@ describe('Automation Database Operations', () => {
     };
     await automations.createOrUpdateFreckleAutomation(automationDetails);
     expect(mockModels.FreckleAutomation.upsertById.calledWith(automationDetails)).to.be.true;
-  });
-  it('should get a partner record from the DB', async () => {
-    const partnerId = '-UTF56K';
-    await automations.getPartnerRecord(partnerId);
-    expect(mockModels.Partner.find.calledWith({ where: { partnerId } })).to.be.true;
-  });
-  it('should create or update a partner record in database', async () => {
-    const partner = {
-      name: 'Facebook Inc',
-      partnerId: 'JKb533jksdf_iu34',
-      freckleProjectId: '349icnioj3in_23',
-      slackChannels: {
-        internal: 'facebook-int',
-        general: 'facebook',
-      },
-    };
-    await automations.creatOrUpdatePartnerRecord(partner);
-    expect(mockModels.Partner.find.calledWith({ where: { partnerId: partner.partnerId } })).to.be
-      .true;
-    expect(mockModels.Partner.create.calledWith(partner)).to.be.true;
   });
 });
