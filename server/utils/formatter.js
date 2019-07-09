@@ -69,7 +69,7 @@ export function formatPayload(automation) {
   formattedAutomation.nokoAutomations = formatAutomations(
     automation.nokoAutomations,
     'nokoActivities',
-    ['status', 'statusMessage', 'type', 'nokoUserId', 'projectId'],
+    ['id', 'status', 'statusMessage', 'type', 'nokoUserId', 'projectId'],
   );
 
   return formattedAutomation;
