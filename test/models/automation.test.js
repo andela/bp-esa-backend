@@ -4,7 +4,7 @@ import {
 import automation from '../../server/models/automation';
 import slackAutomation from '../../server/models/slackAutomation';
 import emailAutomation from '../../server/models/emailAutomation';
-import freckleAutomation from '../../server/models/freckleAutomation';
+import nokoAutomation from '../../server/models/nokoAutomation';
 
 describe('server/models/automation', () => {
   const AutomationModel = automation(sequelize, dataTypes);
@@ -25,14 +25,14 @@ describe('server/models/automation', () => {
       AutomationModel.associate({
         SlackAutomation: slackAutomation,
         EmailAutomation: emailAutomation,
-        FreckleAutomation: freckleAutomation,
+        NokoAutomation: nokoAutomation,
       });
     });
 
     it('defines a one-to-many association with slackAutomaiton', () => {
       expect(AutomationModel.hasMany).to.have.been.calledWith(slackAutomation);
       expect(AutomationModel.hasMany).to.have.been.calledWith(emailAutomation);
-      expect(AutomationModel.hasMany).to.have.been.calledWith(freckleAutomation);
+      expect(AutomationModel.hasMany).to.have.been.calledWith(nokoAutomation);
     });
   });
 });

@@ -1,10 +1,10 @@
 import { baseAutomationFields, automationRelationships } from '../helpers/modelHelpers';
 
 export default (sequelize, DataTypes) => {
-  const FreckleAutomation = sequelize.define(
-    'freckleAutomation',
+  const NokoAutomation = sequelize.define(
+    'nokoAutomation',
     Object.assign(baseAutomationFields(DataTypes), {
-      freckleUserId: DataTypes.STRING,
+      nokoUserId: DataTypes.STRING,
       projectId: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -17,9 +17,9 @@ export default (sequelize, DataTypes) => {
     }),
   );
 
-  FreckleAutomation.associate = (models) => {
-    FreckleAutomation.belongsTo(models.Automation, automationRelationships);
+  NokoAutomation.associate = (models) => {
+    NokoAutomation.belongsTo(models.Automation, automationRelationships);
   };
 
-  return FreckleAutomation;
+  return NokoAutomation;
 };

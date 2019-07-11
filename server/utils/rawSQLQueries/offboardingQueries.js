@@ -19,7 +19,7 @@ export const totalOffboardingAutomationsQuery = `
     left join 
     (
         SELECT "automationId"
-        from "freckleAutomation"
+        from "nokoAutomation"
         group by "automationId"
     ) as f
     on "f"."automationId"="a"."id"
@@ -78,7 +78,7 @@ export const successOffboardingAutomationsQuery = `
     )
     as status
 
-    from "freckleAutomation"
+    from "nokoAutomation"
     group by "automationId"
     ) as f
     on "f"."automationId"="a"."id"

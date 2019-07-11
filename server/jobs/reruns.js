@@ -4,7 +4,7 @@
 import dotenv from 'dotenv';
 import db from '../models';
 
-import { getOrCreateProject, assignProject } from '../modules/freckle/projects';
+import { getOrCreateProject, assignProject } from '../modules/noko/projects';
 import { accessChannel } from '../modules/slack/slackIntegration';
 import {
   sendDevOnboardingMail, sendSOPOnboardingMail, sendITOffboardingMail, sendSOPOffboardingMail,
@@ -16,9 +16,7 @@ import { retryAutomations } from '../modules/automations';
 dotenv.config();
 const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = process.env;
 
-const {
-  SlackAutomation, FreckleAutomation,
-} = db;
+const { SlackAutomation, NokoAutomation } = db;
 
 const retryAccessChannels = async (slackAutomation, status, existingPlacement, automationId, channelId, context) => {
   if (slackAutomation.status === status && slackAutomation.type === context) {
@@ -28,46 +26,38 @@ const retryAccessChannels = async (slackAutomation, status, existingPlacement, a
 };
 
 /**
-   * @desc Gets freckle automation processes to be re-run for an on-boarding placement
-   *
-   * @param {array} freckleAutomations array of freckle processes
-   * @param {number} automationId Id of the automation process
-   * @returns {void}
-   */
-export const freckleAutomationsReruns = (freckleAutomations, automationId) => {
-  freckleAutomations.forEach((freckleAutomation) => {
+ * @desc Gets noko automation processes to be re-run for an on-boarding placement
+ *
+ * @param {array} nokoAutomations array of noko processes
+ * @param {number} automationId Id of the automation process
+ * @returns {void}
+ */
+export const nokoAutomationsReruns = (nokoAutomations, automationId) => {
+  nokoAutomations.forEach((nokoAutomation) => {
     const types = {
       projectCreation: (project) => {
-        retryAutomations(
-          FreckleAutomation,
-          { ...project, automationId },
-          freckleAutomation,
-        );
+        retryAutomations(NokoAutomation, { ...project, automationId }, nokoAutomation);
       },
       projectAssignment: (project) => {
-        assignProject(freckleAutomation.email, project.id).then((result) => {
-          retryAutomations(
-            FreckleAutomation,
-            { ...result, automationId },
-            freckleAutomation,
-          );
+        assignProject(nokoAutomation.email, project.id).then((result) => {
+          retryAutomations(NokoAutomation, { ...result, automationId }, nokoAutomation);
         });
       },
     };
-    if (freckleAutomation.status === 'failure') {
-      getOrCreateProject(freckleAutomation.partnerName).then(types[freckleAutomation.type]);
+    if (nokoAutomation.status === 'failure') {
+      getOrCreateProject(nokoAutomation.partnerName).then(types[nokoAutomation.type]);
     }
   });
 };
 
 /**
-   * @desc Gets email automation processes to be re-run for an on-boarding placement
-   *
-   * @param {Array} automationId Id of the automation process
-   * @param {Array} emailAutomations array of freckle processes
-   * @param {Object} existingPlacement object representing a placement
-   * @returns {void}
-   */
+ * @desc Gets email automation processes to be re-run for an on-boarding placement
+ *
+ * @param {Array} automationId Id of the automation process
+ * @param {Array} emailAutomations array of noko processes
+ * @param {Object} existingPlacement object representing a placement
+ * @returns {void}
+ */
 const emailAutomationReruns = ([recipent1, recipient2], emailAutomations, existingPlacement, automationId) => {
   if (!emailAutomations) {
     executeEmailAutomation([recipent1, recipient2], existingPlacement, automationId);
@@ -109,17 +99,23 @@ const offboardingSlackAutomationsReruns = (slackAutomations, existingPlacement, 
 };
 
 /**
-   * @desc Gets automation processes to be re-run for an off-boarding placement
-   *
-   * @param {Array} freckleAutomations array of freckle processes
-   * @param {Array} slackAutomations array of slack processes
-   * @param {Array} emailAutomations array of email processes
-   * @param {object} existingPlacement Details of the automation process
-   * @param {number} automationId Id of the automation process
-   * @returns {void}
-   */
-export const onboardingReRuns = (freckleAutomations, slackAutomations, emailAutomations, existingPlacement, automationId) => {
-  freckleAutomationsReruns(freckleAutomations, automationId);
+ * @desc Gets automation processes to be re-run for an off-boarding placement
+ *
+ * @param {Array} nokoAutomations array of noko processes
+ * @param {Array} slackAutomations array of slack processes
+ * @param {Array} emailAutomations array of email processes
+ * @param {object} existingPlacement Details of the automation process
+ * @param {number} automationId Id of the automation process
+ * @returns {void}
+ */
+export const onboardingReRuns = (
+  nokoAutomations,
+  slackAutomations,
+  emailAutomations,
+  existingPlacement,
+  automationId,
+) => {
+  nokoAutomationsReruns(nokoAutomations, automationId);
   onboardingSlackAutomationsReruns(slackAutomations, existingPlacement, automationId);
   emailAutomationReruns([sendDevOnboardingMail, sendSOPOnboardingMail], emailAutomations, existingPlacement, automationId);
 };

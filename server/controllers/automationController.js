@@ -22,8 +22,8 @@ export const include = [
     required: false,
   },
   {
-    model: models.FreckleAutomation,
-    as: 'freckleAutomations',
+    model: models.NokoAutomation,
+    as: 'nokoAutomations',
     required: false,
   },
 ];
@@ -111,12 +111,12 @@ const dateQueryFunc = (date = { to: new Date() }) => {
  * @param {string} dateQuery - date query string
  * @param {string} slackAutomation - slack query string
  * @param {string} emailAutomation - email query string
- * @param {string} freckleAutomation - freckle query string
- * @param {string} type - freckle query string
+ * @param {string} nokoAutomation - noko query string
+ * @param {string} type - noko query string
  * @param {string} search - search query string
  * @returns {object} queries
  */
-const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomation, type, search) => {
+const filterQuery = (dateQuery, slackAutomation, emailAutomation, nokoAutomation, type, search) => {
   let myQueryCounter = queryCounter + addSearchQuery(search);
   let automationRawQuery = sqlAutomationRawQuery + addSearchQuery(search);
   if (slackAutomation) {
@@ -127,7 +127,7 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, freckleAutomat
     automationRawQuery += 'AND "e"."status" = 0 ';
     myQueryCounter += 'AND "e"."status" = 0 ';
   }
-  if (freckleAutomation) {
+  if (nokoAutomation) {
     automationRawQuery += 'AND "f"."status" = 0 ';
     myQueryCounter += 'AND "f"."status" = 0 ';
   }
@@ -181,19 +181,19 @@ const paginationData = async (req, res) => {
   const orderBy = order.map(item => item.join(' ')).join();
   const limit = parseInt(req.query.limit, 10) || 10;
   const {
-    date, slackAutomation, emailAutomation, freckleAutomation, type = null, searchBy, searchTerm,
+    date, slackAutomation, emailAutomation, nokoAutomation, type = null, searchBy, searchTerm,
   } = req.query;
   const querySettings = {
     replacements: [
       slackAutomation || 'success',
       emailAutomation || 'success',
-      freckleAutomation || 'success',
+      nokoAutomation || 'success',
     ],
     type: models.sequelize.QueryTypes.SELECT,
   };
   const { dateQuery: myDateQuery } = dateQueryFunc(date);
   // eslint-disable-next-line prefer-const
-  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, freckleAutomation, type, { searchTerm, searchBy });
+  let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, nokoAutomation, type, { searchTerm, searchBy });
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
   const page = parseInt(req.query.page, 10) || 1;
@@ -239,11 +239,11 @@ export default class AutomationController {
 
       const existingPlacement = await automation.findByPk(automationId, { include });
       const {
-        freckleAutomations, slackAutomations, emailAutomations, type,
+        nokoAutomations, slackAutomations, emailAutomations, type,
       } = existingPlacement;
 
       if (type === 'onboarding') {
-        onboardingReRuns(freckleAutomations, slackAutomations,
+        onboardingReRuns(nokoAutomations, slackAutomations,
           emailAutomations, existingPlacement, automationId);
       }
       if (type === 'offboarding') {

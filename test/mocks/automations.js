@@ -82,13 +82,13 @@ export const automationsMockData = [{
       createdAt: '2019-01-14T19:16:37.523Z',
       updatedAt: '2019-01-14T19:16:37.523Z',
     }],
-  freckleAutomations:
+  nokoAutomations:
     [{
       id: 2,
       status: 'failure',
       statusMessage: 'Request failed with status code 403',
       automationId: 4,
-      freckleUserId: null,
+      nokoUserId: null,
       projectId: null,
       type: 'projectCreation',
       createdAt: '2019-01-14T19:16:36.492Z',
@@ -146,15 +146,15 @@ export const expectedReponseMockData = [{
         }],
     },
   emailAutomations: { status: 'failure', emailActivities: [] },
-  freckleAutomations:
+  nokoAutomations:
     {
       status: 'failure',
-      freckleActivities:
+      nokoActivities:
         [{
           status: 'failure',
           statusMessage: 'Request failed with status code 403',
           type: 'projectCreation',
-          freckleUserId: null,
+          nokoUserId: null,
           projectId: null,
         }],
     },

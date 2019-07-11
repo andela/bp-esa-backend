@@ -1,12 +1,12 @@
 import { onboardingReRuns, offboardingReRuns } from '../../server/jobs/reruns';
 import {
-  freckleAutomations, slackAutomations, emailAutomations, existingPlacement,
+  nokoAutomations, slackAutomations, emailAutomations, existingPlacement,
 } from '../mocks/retryautomations';
 
 
 describe('Jobs Execution Reruns', async () => {
   it('should execute the onboarding reruns successfully', async () => {
-    const result = onboardingReRuns(freckleAutomations, slackAutomations,
+    const result = onboardingReRuns(nokoAutomations, slackAutomations,
       emailAutomations, existingPlacement, existingPlacement.id);
     expect(result).to.equal(undefined);
   });
