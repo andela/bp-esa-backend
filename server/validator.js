@@ -1,6 +1,28 @@
-import { slackChannelSchema } from './models/partner';
+import { object, string, mixed } from 'yup';
 
-const validIdConditions = id => [id, id.trim().startsWith('-'), id.trim().length === 20];
+const channelDetails = channelType => object()
+  .noUnknown()
+  .shape({
+    channelId: string().required(`${channelType}.channelId is a required field`),
+    channelName: string().required(`${channelType}.channelName is a required field`),
+    channelProvision: mixed()
+      .oneOf(
+        ['retrieve'],
+        `${channelType}.channelProvision should be retrieve`,
+      )
+      .default('retrieve'),
+  })
+  .required(`${channelType} channel object is required`);
+
+const slackChannelSchema = object()
+  .noUnknown()
+  .shape({
+    general: channelDetails('general'),
+    internal: channelDetails('internal'),
+  })
+  .required('slackChannels object is required');
+
+const validIdConditions = id => [id.trim().startsWith('-'), id.trim().length === 20];
 export const validatePartner = (req, res, next) => {
   const { id } = req.params;
   const { body } = req;
@@ -13,7 +35,7 @@ export const validatePartner = (req, res, next) => {
       strict: true,
     })
     .then(() => next())
-    .catch(err => res.status(400).json({ errors: err.errors, status: err.name }));
+    .catch(err => res.status(400).json({ errors: err.errors, message: err.name }));
 };
 
 export const requiredEnvVariables = [
