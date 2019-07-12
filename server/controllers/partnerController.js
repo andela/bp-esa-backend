@@ -10,7 +10,10 @@ export default async function updatePartnerSlackDetails(req, res) {
   const { id: partnerId } = req.params;
   const { slackChannels } = req.body;
   try {
-    const partner = await db.Partner.findOne({ where: { partnerId } });
+    const partner = await db.Partner.findOne({
+      where: { partnerId },
+      attributes: { exclude: ['createdAt'] },
+    });
     if (!partner) return res.status(404).json({ message: 'Partner does not exist' });
     const data = await partner.update({ slackChannels });
     return res.status(200).json({ message: 'Partner update successful', data });

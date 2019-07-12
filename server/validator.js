@@ -1,39 +1,20 @@
-import ExpressValidator from 'express-validator/check';
 import { slackChannelSchema } from './models/partner';
 
-const { check, validationResult } = ExpressValidator;
-
-const getErrors = (req, next) => {
-  const errors = validationResult(req)
-    .array()
-    .map(error => error.msg);
-  if (!errors.length) {
-    return next();
+const validIdConditions = id => [id, id.trim().startsWith('-'), id.trim().length === 20];
+export const validatePartner = (req, res, next) => {
+  const { id } = req.params;
+  const { body } = req;
+  if (!validIdConditions(id).every(item => item)) {
+    return res.status(400).json({ message: 'Partner ID is invalid' });
   }
-  return errors;
-};
-
-export const handleValidation = async (req, res, next) => {
-  const result = getErrors(req, next);
-  return Array.isArray(result) ? res.status(400).json({ errors: result, status: 'error' }) : result;
-};
-
-export const validatePartner = [
-  check('id')
-    .trim()
-    .isString()
-    .withMessage('Partner ID is required')
-    .custom(id => id.startsWith('-') && id.length === 20)
-    .withMessage('Partner ID is invalid'),
-  check('slackChannels')
-    .isJSON()
-    .withMessage('slackChannels should be a JSON object')
-    .custom(slackChannels => slackChannelSchema.isValidSync(slackChannels, {
+  return slackChannelSchema
+    .validate(body.slackChannels, {
       abortEarly: false,
       strict: true,
-    }))
-    .withMessage('slackChannels object contain invalid field(s)'),
-];
+    })
+    .then(() => next())
+    .catch(err => res.status(400).json({ errors: err.errors, status: err.name }));
+};
 
 export const requiredEnvVariables = [
   'SLACK_TOKEN',

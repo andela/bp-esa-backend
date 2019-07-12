@@ -1,18 +1,26 @@
 import { object, string, mixed } from 'yup';
 
-const channelDetails = object()
+const channelDetails = channelType => object()
   .noUnknown()
   .shape({
-    channelId: string(),
-    channelName: string(),
-    channelProvision: mixed().oneOf(['create', 'retrieve']),
-  });
+    channelId: string().required(`${channelType}.channelId is a required field`),
+    channelName: string().required(`${channelType}.channelName is a required field`),
+    channelProvision: mixed()
+      .oneOf(
+        ['retrieve', 'create'],
+        `${channelType}.channelProvision should be create || retrieve`,
+      )
+      .default('retrieve'),
+  })
+  .required(`${channelType} channel object is required`);
+
 export const slackChannelSchema = object()
   .noUnknown()
   .shape({
-    general: channelDetails,
-    internal: channelDetails,
-  });
+    general: channelDetails('general'),
+    internal: channelDetails('internal'),
+  })
+  .required('slackChannels object is required');
 
 export default (sequelize, DataTypes) => {
   const Partner = sequelize.define(
