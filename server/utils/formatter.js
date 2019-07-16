@@ -66,10 +66,10 @@ export function formatPayload(automation) {
     'emailActivities',
     ['status', 'statusMessage', 'recipient', 'subject'],
   );
-  formattedAutomation.freckleAutomations = formatAutomations(
-    automation.freckleAutomations,
-    'freckleActivities',
-    ['status', 'statusMessage', 'type', 'freckleUserId', 'projectId'],
+  formattedAutomation.nokoAutomations = formatAutomations(
+    automation.nokoAutomations,
+    'nokoActivities',
+    ['status', 'statusMessage', 'type', 'nokoUserId', 'projectId'],
   );
 
   return formattedAutomation;

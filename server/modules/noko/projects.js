@@ -4,12 +4,12 @@ import dotenv from 'dotenv';
 // eslint-disable-next-line max-len
 
 dotenv.config();
-const freckleUrl = 'https://api.letsfreckle.com/v2';
-const freckleToken = process.env.FRECKLE_ADMIN_TOKEN;
+const nokoUrl = 'https://api.nokotime.com/v2';
+const nokoToken = process.env.NOKO_ADMIN_TOKEN;
 
 /**
- * @func saveFreckleProject
- * @desc Saves a freckle project to the DB
+ * @func saveNokoProject
+ * @desc Saves a noko project to the DB
  *
  * @param {Object} projectDetails Details of the project
  * @param {string} message A message to store in the DB
@@ -17,7 +17,7 @@ const freckleToken = process.env.FRECKLE_ADMIN_TOKEN;
  *
  * @returns {void}
  */
-const saveFreckleProject = async (projectDetails, message, status = 'success') => ({
+const saveNokoProject = async (projectDetails, message, status = 'success') => ({
   projectId: projectDetails.id,
   type: 'projectCreation',
   status,
@@ -25,7 +25,7 @@ const saveFreckleProject = async (projectDetails, message, status = 'success') =
 });
 
 /**
- * @desc Get existing project on freckle or create new if not exists(save it to the database)
+ * @desc Get existing project on noko or create new if not exists(save it to the database)
  *
  * @param {String} projectName The name of the project to be retrieved/created
  *
@@ -36,35 +36,35 @@ export const getOrCreateProject = async (projectName) => {
   try {
     const name = { name: projectName };
     let { data: projectDetails } = await axios.get(
-      `${freckleUrl}/projects?freckle_token=${freckleToken}&name=${projectName}`,
+      `${nokoUrl}/projects?noko_token=${nokoToken}&name=${projectName}`,
     );
     if (projectDetails.length) {
-      return saveFreckleProject(projectDetails, `${projectName} freckle project already exist`);
+      return saveNokoProject(projectDetails, `${projectName} noko project already exist`);
     }
     ({ data: projectDetails } = await axios.post(
-      `${freckleUrl}/projects?freckle_token=${freckleToken}`,
+      `${nokoUrl}/projects?noko_token=${nokoToken}`,
       name,
     ));
-    return saveFreckleProject(projectDetails, `${projectName} freckle project created`);
+    return saveNokoProject(projectDetails, `${projectName} noko project created`);
   } catch (error) {
-    return saveFreckleProject({}, `${error.message}`, 'failure');
+    return saveNokoProject({}, `${error.message}`, 'failure');
   }
 };
 /**
- * @desc Gets a user id on freckle
+ * @desc Gets a user id on noko
  *
  * @param {string} email User email address whose id is to be retrieved
  *
- * @returns {number} The freckle id of the user
+ * @returns {number} The noko id of the user
  */
 export const getUserIdByEmail = async (email) => {
-  const url = `${freckleUrl}/users?freckle_token=${freckleToken}&email=${email}`;
+  const url = `${nokoUrl}/users?noko_token=${nokoToken}&email=${email}`;
   const { data } = await axios.get(url);
   return data[0].id;
 };
 
 /**
- * @desc Assign a user to a project on freckle
+ * @desc Assign a user to a project on noko
  *
  * @param {string} email The email of the user to be assigned to a project
  * @param {number} projectId The ID of the project to be assigned to the user
@@ -75,17 +75,17 @@ export const getUserIdByEmail = async (email) => {
 export const assignProject = async (email, projectId) => {
   try {
     const userId = await getUserIdByEmail(email);
-    const url = `${freckleUrl}/users/${userId}/give_access_to_projects?freckle_token=${freckleToken}`;
+    const url = `${nokoUrl}/users/${userId}/give_access_to_projects?noko_token=${nokoToken}`;
     await axios.put(url, { project_ids: [projectId] });
     return {
-      freckleUserId: userId,
+      nokoUserId: userId,
       type: 'projectAssignment',
       status: 'success',
-      statusMessage: `Assigned a freckle project to ${email}`,
+      statusMessage: `Assigned a noko project to ${email}`,
     };
   } catch (error) {
     return {
-      freckleUserId: null,
+      nokoUserId: null,
       type: 'projectAssignment',
       status: 'failure',
       statusMessage: `${error.message}`,

@@ -3,7 +3,7 @@ import chai, { expect } from 'chai';
 import app from '../../server';
 import models from '../../server/models';
 import {
-  retryMockData, existingPlacement, slackAutomations, freckleAutomations, emailAutomations,
+  retryMockData, existingPlacement, slackAutomations, nokoAutomations, emailAutomations,
   offboardingMockData,
 } from '../mocks/retryautomations';
 
@@ -45,7 +45,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get(
-        `/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&freckleAutomation=failure&date[from]=${new Date(
+        `/api/v1/automations?page=1&limit=5&slackAutomation=success&emailAutomation=failure&nokoAutomation=failure&date[from]=${new Date(
           2019,
           1,
           1,
@@ -287,7 +287,7 @@ describe('Tests for automation endpoints\n', () => {
 
 describe(' Test for retrying automations', () => {
   beforeEach('create mock db', async () => {
-    await models.FreckleAutomation.destroy({ force: true, truncate: { cascade: true } });
+    await models.NokoAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.SlackAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.EmailAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.Automation.destroy({ force: true, truncate: { cascade: true } });
@@ -295,11 +295,11 @@ describe(' Test for retrying automations', () => {
     await models.Automation.bulkCreate(existingPlacement);
     await models.EmailAutomation.bulkCreate(emailAutomations);
     await models.SlackAutomation.bulkCreate(slackAutomations);
-    await models.FreckleAutomation.bulkCreate(freckleAutomations);
+    await models.NokoAutomation.bulkCreate(nokoAutomations);
   });
 
   afterEach(async () => {
-    await models.FreckleAutomation.destroy({ force: true, truncate: { cascade: true } });
+    await models.NokoAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.SlackAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.EmailAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.Automation.destroy({ force: true, truncate: { cascade: true } });

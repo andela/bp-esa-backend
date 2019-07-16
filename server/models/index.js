@@ -28,7 +28,7 @@ if (env !== 'development') {
 const db = {
   Partner: sequelize.import('./partner'),
   Automation: sequelize.import('./automation'),
-  FreckleAutomation: sequelize.import('./freckleAutomation'),
+  NokoAutomation: sequelize.import('./nokoAutomation'),
   SlackAutomation: sequelize.import('./slackAutomation'),
   EmailAutomation: sequelize.import('./emailAutomation'),
 };

@@ -59,12 +59,12 @@ export const retryMockData = {
     createdAt: '2019-01-14T19:16:37.522Z',
     updatedAt: '2019-01-14T19:16:37.522Z',
   }],
-  freckleAutomations: [{
+  nokoAutomations: [{
     id: 1,
     status: 'failure',
     statusMessage: 'Request failed with status code 403',
     automationId: 2,
-    freckleUserId: null,
+    nokoUserId: null,
     projectId: null,
     type: 'projectCreation',
     createdAt: '2019-01-14T19:16:36.492Z',
@@ -75,7 +75,7 @@ export const retryMockData = {
     status: 'failure',
     statusMessage: 'Request failed with status code 403',
     automationId: 2,
-    freckleUserId: null,
+    nokoUserId: null,
     projectId: null,
     type: 'projectAssignment',
     createdAt: '2019-01-14T19:16:36.492Z',
@@ -144,9 +144,9 @@ export const slackAutomations = [{
   updatedAt: '2019-06-20T13:00:20.187Z',
 }];
 
-export const freckleAutomations = [{
+export const nokoAutomations = [{
   id: 1,
-  freckleUserId: null,
+  nokoUserId: null,
   projectId: null,
   status: 'failure',
   statusMessage: 'Request failed with status code 403',
@@ -157,7 +157,7 @@ export const freckleAutomations = [{
 },
 {
   id: 2,
-  freckleUserId: null,
+  nokoUserId: null,
   projectId: null,
   status: 'failure',
   statusMessage: 'Request failed with status code 403',

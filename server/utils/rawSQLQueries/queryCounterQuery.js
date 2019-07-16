@@ -48,7 +48,7 @@ export default 'SELECT COUNT(a.id) as count FROM automation as a '
         )
         as status
         
-        from "freckleAutomation"
+        from "nokoAutomation"
         group by "automationId"
         ) as f
         on "f"."automationId"="a"."id"
