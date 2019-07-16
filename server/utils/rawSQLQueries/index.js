@@ -4,5 +4,5 @@ export { totalAutomationsQuery, totalSuccessAutomationQuery } from './automation
 export { totalOnboardingAutomationsQuery, successOnboardingAutomationsQuery } from './onboardingQueries';
 export { totalOffboardingAutomationsQuery, successOffboardingAutomationsQuery } from './offboardingQueries';
 export { totalSlackAutomationsQuery, successSlackAutomationsQuery } from './slackAutomationsQueries';
-export { totalFreckleAutomationsQuery, successFreckleAutomationsQuery } from './freckleAutomationsQueries';
+export { totalNokoAutomationsQuery, successNokoAutomationsQuery } from './nokoAutomationsQueries';
 export { totalEmailAutomationsQuery, successEmailAutomationsQuery } from './emailAutomationsQueries';

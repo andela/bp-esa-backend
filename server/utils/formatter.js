@@ -59,17 +59,17 @@ export function formatPayload(automation) {
   formattedAutomation.slackAutomations = formatAutomations(
     automation.slackAutomations,
     'slackActivities',
-    ['status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'],
+    ['id', 'status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'],
   );
   formattedAutomation.emailAutomations = formatAutomations(
     automation.emailAutomations,
     'emailActivities',
-    ['status', 'statusMessage', 'recipient', 'subject'],
+    ['id', 'status', 'statusMessage', 'recipient', 'subject'],
   );
-  formattedAutomation.freckleAutomations = formatAutomations(
-    automation.freckleAutomations,
-    'freckleActivities',
-    ['status', 'statusMessage', 'type', 'freckleUserId', 'projectId'],
+  formattedAutomation.nokoAutomations = formatAutomations(
+    automation.nokoAutomations,
+    'nokoActivities',
+    ['status', 'statusMessage', 'type', 'nokoUserId', 'projectId'],
   );
 
   return formattedAutomation;

@@ -1,9 +1,9 @@
-export const totalFreckleAutomationsQuery = `
+export const totalNokoAutomationsQuery = `
     SELECT COUNT(a.id) as count FROM automation as a 
     INNER join 
     (
         SELECT "automationId"
-        from "freckleAutomation"
+        from "nokoAutomation"
         group by "automationId"
     ) as f
     on "f"."automationId"="a"."id"
@@ -11,7 +11,7 @@ export const totalFreckleAutomationsQuery = `
 ;
 `;
 
-export const successFreckleAutomationsQuery = `
+export const successNokoAutomationsQuery = `
     SELECT COUNT(a.id) as count FROM automation as a 
     INNER join 
     (
@@ -26,7 +26,7 @@ export const successFreckleAutomationsQuery = `
             )
         ) as status
 
-        from "freckleAutomation"
+        from "nokoAutomation"
         group by "automationId"
     ) as f
     on "f"."automationId"="a"."id"
