@@ -5,7 +5,9 @@ export default (sequelize, DataTypes) => {
       nokoProjectId: DataTypes.STRING,
       name: DataTypes.STRING,
       partnerId: { type: DataTypes.STRING, allowNull: false, unique: true },
-      slackChannels: DataTypes.JSON,
+      slackChannels: {
+        type: DataTypes.JSON,
+      },
       location: DataTypes.STRING,
     },
     {

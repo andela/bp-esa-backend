@@ -20,7 +20,6 @@ const getPartnerfromAPI = async (partnerId) => {
   const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`, {
     httpsAgent: new https.Agent({ rejectUnauthorized: false }),
   });
-  redisdb.set(data.id, JSON.stringify(data));
   return data;
 };
 
@@ -83,7 +82,7 @@ export async function findPartnerById(partnerId, jobType) {
   if (!partner) {
     const newPartner = await retrievePartner(partnerId);
     if (newPartner.slackChannels) {
-      redisdb.set(newPartner.partnerId, newPartner);
+      redisdb.set(newPartner.partnerId, JSON.stringify(newPartner));
       return newPartner;
     }
     const [genChannel = {}, intChannel = {}] = await Promise.all([
