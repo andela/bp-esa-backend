@@ -23,8 +23,9 @@ describe('API Response Payload Formatter', () => {
     const formatedResponse = formatAutomations(
       automationsMockData[0].slackAutomations,
       'slackActivities',
-      ['status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'],
+      ['id', 'status', 'statusMessage', 'type', 'channelId', 'channelName', 'slackUserId'],
     );
+    expect('id' in formatedResponse.slackActivities[0]).to.equal(true);
     Object.is(formatedResponse, expectedReponseMockData[0].slackAutomations);
   });
 
