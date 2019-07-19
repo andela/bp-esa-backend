@@ -1,7 +1,6 @@
 import db from '../models';
 
-const {
-  SlackAutomation, EmailAutomation, FreckleAutomation } = db;
+const { SlackAutomation, EmailAutomation, NokoAutomation } = db;
 
 /**
  * @func createOrUpdateSlackAutomation
@@ -59,20 +58,20 @@ export const retryAutomations = async (database, automationDetails, automationEn
 export const createOrUpdateEmailAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
 
 /**
- * @func createOrUpdateFreckleAutomation
- * @desc create or update a freckleAutomation in the Database.
+ * @func createOrUpdateNokoAutomation
+ * @desc create or update a noko automation in the Database.
  *
- * @param {object} automationDetails Details about the freckle automation to be created
+ * @param {object} automationDetails Details about the noko automation to be created
  * @param {string} automationDetails.automationId ID of the connected automation
- * @param {string} automationDetails.freckleUserId ID of freckle user
- * @param {string} automationDetails.projectId ID of project on freckle
+ * @param {string} automationDetails.nokoUserId ID of noko user
+ * @param {string} automationDetails.projectId ID of project on noko
  * @param {string} automationDetails.type Automation type: projectCreation || projectAssignment
  * @param {string} automationDetails.status Automation status: success || failure
  * @param {string} automationDetails.statusMessage Status message
- * @param {string} [automationDetails.id] ID of existing freckleAutomation.
+ * @param {string} [automationDetails.id] ID of existing nokoAutomation.
  * For updating purpose alone.
  *
- * @returns {Promise} Promise to return the created/updated freckleAutomation.
+ * @returns {Promise} Promise to return the created/updated nokoAutomation.
  */
 // eslint-disable-next-line max-len
-export const createOrUpdateFreckleAutomation = automationDetails => FreckleAutomation.upsertById(automationDetails);
+export const createOrUpdateNokoAutomation = automationDetails => NokoAutomation.upsertById(automationDetails);

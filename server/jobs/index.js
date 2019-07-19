@@ -59,7 +59,7 @@ export const automationData = (placement, type) => {
 };
 
 /**
- * @desc Creates Automation model instances and executes automation (slack, email, freckle)
+ * @desc Creates Automation model instances and executes automation (slack, email, noko)
  * process for each automation
  *
  * @param {Object} placement A placement instance

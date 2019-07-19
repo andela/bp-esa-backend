@@ -2,10 +2,12 @@ export default (sequelize, DataTypes) => {
   const Partner = sequelize.define(
     'partners',
     {
-      freckleProjectId: DataTypes.STRING,
+      nokoProjectId: DataTypes.STRING,
       name: DataTypes.STRING,
       partnerId: { type: DataTypes.STRING, allowNull: false, unique: true },
-      slackChannels: DataTypes.JSON,
+      slackChannels: {
+        type: DataTypes.JSON,
+      },
       location: DataTypes.STRING,
     },
     {

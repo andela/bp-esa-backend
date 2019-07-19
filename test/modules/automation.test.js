@@ -14,7 +14,7 @@ const mockModels = {
   EmailAutomation: {
     upsertById: sinon.stub(),
   },
-  FreckleAutomation: {
+  NokoAutomation: {
     upsertById: sinon.stub(),
   },
   Automation: {
@@ -59,11 +59,11 @@ describe('Automation Database Operations', () => {
       'Email sent succesfully',
     );
   });
-  it('should upsert a freckleAutomation record in the DB', async () => {
+  it('should upsert a nokoAutomation record in the DB', async () => {
     const automationDetails = {
       projectId: '4444UFH',
     };
-    await automations.createOrUpdateFreckleAutomation(automationDetails);
-    expect(mockModels.FreckleAutomation.upsertById.calledWith(automationDetails)).to.be.true;
+    await automations.createOrUpdateNokoAutomation(automationDetails);
+    expect(mockModels.NokoAutomation.upsertById.calledWith(automationDetails)).to.be.true;
   });
 });

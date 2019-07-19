@@ -82,13 +82,13 @@ export const automationsMockData = [{
       createdAt: '2019-01-14T19:16:37.523Z',
       updatedAt: '2019-01-14T19:16:37.523Z',
     }],
-  freckleAutomations:
+  nokoAutomations:
     [{
       id: 2,
       status: 'failure',
       statusMessage: 'Request failed with status code 403',
       automationId: 4,
-      freckleUserId: null,
+      nokoUserId: null,
       projectId: null,
       type: 'projectCreation',
       createdAt: '2019-01-14T19:16:36.492Z',
@@ -110,6 +110,7 @@ export const expectedReponseMockData = [{
       status: 'failure',
       slackActivities:
         [{
+          id: 10,
           channelId: 'GBQQ3C3V0',
           type: 'invite',
           status: 'success',
@@ -117,6 +118,7 @@ export const expectedReponseMockData = [{
           statusMessage: 'kelvin.kariuki@andela.com invited to a channel',
         },
         {
+          id: 9,
           channelId: null,
           type: 'create',
           status: 'success',
@@ -124,6 +126,7 @@ export const expectedReponseMockData = [{
           statusMessage: 'channel already exist',
         },
         {
+          id: 8,
           channelId: null,
           type: 'create',
           status: 'success',
@@ -131,6 +134,7 @@ export const expectedReponseMockData = [{
           statusMessage: 'channel already exist',
         },
         {
+          id: 7,
           channelId: 'GBQQ3C3V0',
           type: 'kick',
           status: 'failure',
@@ -138,6 +142,7 @@ export const expectedReponseMockData = [{
           statusMessage: 'An API error occurred: not_in_group',
         },
         {
+          id: 6,
           channelId: 'GBRR4B5E3',
           type: 'invite',
           status: 'success',
@@ -146,15 +151,15 @@ export const expectedReponseMockData = [{
         }],
     },
   emailAutomations: { status: 'failure', emailActivities: [] },
-  freckleAutomations:
+  nokoAutomations:
     {
       status: 'failure',
-      freckleActivities:
+      nokoActivities:
         [{
           status: 'failure',
           statusMessage: 'Request failed with status code 403',
           type: 'projectCreation',
-          freckleUserId: null,
+          nokoUserId: null,
           projectId: null,
         }],
     },

@@ -2,6 +2,8 @@ import { WebClient } from '@slack/client';
 import dotenv from 'dotenv';
 import makeChannelNames from '../../helpers/slackHelpers';
 import { redisdb } from '../../helpers/redis';
+import responseObject from "../utils";
+
 
 dotenv.config();
 const { SCAN_RANGE, REJECT_RATE_LIMIT, SLACK_TOKEN } = process.env;
@@ -209,13 +211,9 @@ export const accessChannel = async (email, channelId, context) => {
       statusMessage: `${email} ${contextObject[context].message} channel`,
     };
   } catch (error) {
-    return {
-      slackUserId: null,
-      channelId,
-      channelName: channelInfo && channelInfo.channel.name,
-      type: context,
-      status: 'failure',
-      statusMessage: `${error.message}`,
-    };
+    if (`${error.message}` === 'An API error occurred: not_in_channel' || 'An API error occurred: already_in_channel' || 'An API error occurred: not_in_group') {
+      return responseObject(channelId, channelInfo, error, 'success');
+    }
+    return responseObject(channelId, channelInfo, error, 'failure');
   }
 };

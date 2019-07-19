@@ -36,9 +36,9 @@ export default (sequelize, DataTypes) => {
       foreignKey: 'automationId',
       as: 'slackAutomations',
     });
-    Automation.hasMany(models.FreckleAutomation, {
+    Automation.hasMany(models.NokoAutomation, {
       foreignKey: 'automationId',
-      as: 'freckleAutomations',
+      as: 'nokoAutomations',
     });
     Automation.hasMany(models.EmailAutomation, {
       foreignKey: 'automationId',

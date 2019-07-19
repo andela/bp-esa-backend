@@ -10,8 +10,8 @@ import {
   successOffboardingAutomationsQuery,
   totalSlackAutomationsQuery,
   successSlackAutomationsQuery,
-  totalFreckleAutomationsQuery,
-  successFreckleAutomationsQuery,
+  totalNokoAutomationsQuery,
+  successNokoAutomationsQuery,
   totalEmailAutomationsQuery,
   successEmailAutomationsQuery,
 } from '../utils/rawSQLQueries';
@@ -82,11 +82,11 @@ export default async (req, res) => {
     const successSlackAutomations = queryCountResolver(
       await models.sequelize.query(successSlackAutomationsQuery, querySettings),
     );
-    const totalFreckleAutomations = queryCountResolver(
-      await models.sequelize.query(totalFreckleAutomationsQuery, querySettings),
+    const totalNokoAutomations = queryCountResolver(
+      await models.sequelize.query(totalNokoAutomationsQuery, querySettings),
     );
-    const successFreckleAutomations = queryCountResolver(
-      await models.sequelize.query(successFreckleAutomationsQuery, querySettings),
+    const successNokoAutomations = queryCountResolver(
+      await models.sequelize.query(successNokoAutomationsQuery, querySettings),
     );
     const totalEmailAutomations = queryCountResolver(
       await models.sequelize.query(totalEmailAutomationsQuery, querySettings),
@@ -112,9 +112,9 @@ export default async (req, res) => {
         total: totalSlackAutomations,
         success: successSlackAutomations,
       },
-      freckle: {
-        total: totalFreckleAutomations,
-        success: successFreckleAutomations,
+      noko: {
+        total: totalNokoAutomations,
+        success: successNokoAutomations,
       },
       email: {
         total: totalEmailAutomations,
