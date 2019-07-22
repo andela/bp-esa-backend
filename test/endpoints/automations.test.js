@@ -4,7 +4,7 @@ import app from '../../server';
 import models from '../../server/models';
 import {
   retryMockData, existingPlacement, slackAutomations, nokoAutomations, emailAutomations,
-  offboardingMockData,
+  offboardingMockData, partnerData,
 } from '../mocks/retryautomations';
 
 
@@ -290,9 +290,11 @@ describe(' Test for retrying automations', () => {
     await models.NokoAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.SlackAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.EmailAutomation.destroy({ force: true, truncate: { cascade: true } });
+    await models.Partner.destroy({ force: true, truncate: { cascade: true } });
     await models.Automation.destroy({ force: true, truncate: { cascade: true } });
 
     await models.Automation.bulkCreate(existingPlacement);
+    await models.Partner.create(partnerData);
     await models.EmailAutomation.bulkCreate(emailAutomations);
     await models.SlackAutomation.bulkCreate(slackAutomations);
     await models.NokoAutomation.bulkCreate(nokoAutomations);
@@ -302,6 +304,7 @@ describe(' Test for retrying automations', () => {
     await models.NokoAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.SlackAutomation.destroy({ force: true, truncate: { cascade: true } });
     await models.EmailAutomation.destroy({ force: true, truncate: { cascade: true } });
+    await models.Partner.destroy({ force: true, truncate: { cascade: true } });
     await models.Automation.destroy({ force: true, truncate: { cascade: true } });
   });
   it('should return the onboarding updated automation results', (done) => {

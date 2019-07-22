@@ -74,8 +74,10 @@ const emailAutomationReruns = ([recipent1, recipient2], emailAutomations, existi
    */
 const onboardingSlackAutomationsReruns = (slackAutomations, existingPlacement, automationId) => {
   slackAutomations.forEach(async (slackAutomation) => {
-    retryAccessChannels(slackAutomation, 'failure', existingPlacement, automationId, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'kick');
-    retryAccessChannels(slackAutomation, 'failure', existingPlacement, automationId, SLACK_RACK_CITY_CHANNEL_ID, 'invite');
+    retryAccessChannels(slackAutomation, 'failure', existingPlacement,
+      automationId, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'kick');
+    retryAccessChannels(slackAutomation, 'failure',
+      existingPlacement, automationId, SLACK_RACK_CITY_CHANNEL_ID, 'invite');
   });
 };
 
@@ -94,7 +96,8 @@ const offboardingSlackAutomationsReruns = (slackAutomations, existingPlacement, 
       const response = await accessChannel(existingPlacement.email, slackChannels.general.channelId, 'kick');
       retryAutomations(SlackAutomation, { ...response, automationId }, slackAutomation);
     }
-    retryAccessChannels(slackAutomation, 'failure', existingPlacement, automationId, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'invite');
+    retryAccessChannels(slackAutomation, 'failure', existingPlacement,
+      automationId, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'invite');
   });
 };
 
@@ -117,7 +120,8 @@ export const onboardingReRuns = (
 ) => {
   nokoAutomationsReruns(nokoAutomations, automationId);
   onboardingSlackAutomationsReruns(slackAutomations, existingPlacement, automationId);
-  emailAutomationReruns([sendDevOnboardingMail, sendSOPOnboardingMail], emailAutomations, existingPlacement, automationId);
+  emailAutomationReruns([sendDevOnboardingMail,
+    sendSOPOnboardingMail], emailAutomations, existingPlacement, automationId);
 };
 
 /**
@@ -131,5 +135,6 @@ export const onboardingReRuns = (
    */
 export const offboardingReRuns = (slackAutomations, emailAutomations, existingPlacement, automationId) => {
   offboardingSlackAutomationsReruns(slackAutomations, existingPlacement, automationId);
-  emailAutomationReruns([sendSOPOffboardingMail, sendITOffboardingMail], emailAutomations, existingPlacement, automationId);
+  emailAutomationReruns([sendSOPOffboardingMail,
+    sendITOffboardingMail], emailAutomations, existingPlacement, automationId);
 };

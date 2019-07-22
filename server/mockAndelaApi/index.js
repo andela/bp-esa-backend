@@ -23,7 +23,7 @@ async function generatePlacements(status) {
     (result, { deleted, profile: { email } }) => (email && !deleted && email !== process.env.SLACK_ADMIN ? [...result, email] : result),
     [],
   );
-  // max: 1, min: 1
+    // max: 1, min: 1
   for (let index = 0; index < Math.floor(Math.random() * 1) + 1; index++) {
     placements.push(await mockPlacement(status, emails[faker.random.number(emails.length - 1)]));
   }
