@@ -1,5 +1,5 @@
-#!/bin/ash
-yarn delete-partners
+#!/bin/sh
+
 printf "\n\n======================================\n"
 printf "Run database migrations"
 printf "\n======================================\n\n"
