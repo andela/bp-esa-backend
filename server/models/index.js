@@ -17,6 +17,7 @@ if (env !== 'development') {
   sequelize = new Sequelize(config.database, config.username, config.password, {
     host: config.host,
     port: config.port,
+    operatorsAliases: false,
     dialect: config.dialect,
     logging: () => {},
     define: {
