@@ -14,8 +14,7 @@
     "lint": "eslint .",
     "migrations": "sequelize db:migrate",
     "reset-database": "npx redis-cli FLUSHALL && sequelize db:drop && sequelize db:create",
-    "docs": "./node_modules/.bin/jsdoc -c jsdoc.json",
-    "delete-partners": "babel-node ./server/deletePartners.js"
+    "docs": "./node_modules/.bin/jsdoc -c jsdoc.json"
   },
   "repository": {
     "type": "git",
