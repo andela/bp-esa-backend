@@ -6,9 +6,13 @@ import {
   retryMockData, existingPlacement, slackAutomations, nokoAutomations, emailAutomations,
   offboardingMockData, partnerData,
 } from '../mocks/retryautomations';
+import { generateToken } from '../../server/helpers/authHelpers';
+import { userPayload } from '../mockData/userPayload';
 
 
 chai.use(chaiHttp);
+
+const userToken = generateToken(userPayload);
 
 describe('Tests for automation endpoints\n', () => {
   beforeEach('create mock db', async () => {
@@ -18,10 +22,40 @@ describe('Tests for automation endpoints\n', () => {
   afterEach(async () => {
     await models.Automation.destroy({ force: true, truncate: { cascade: true } });
   });
+
+  it('should return a 401 error if user does not supply token', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations')
+      .set('authorization', '')
+      .end((err, res) => {
+        if (err) done(err);
+        expect(res).to.have.status(401);
+        expect(res.body)
+          .to.have.property('error')
+          .to.equal('No token provided');
+        done();
+      });
+  });
+  it('should return a 401 error if user supplies an invalid token', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations')
+      .set('authorization', 'invalidToken')
+      .end((err, res) => {
+        if (err) done(err);
+        expect(res).to.have.status(401);
+        expect(res.body)
+          .to.have.property('error')
+          .to.equal('Token is not valid');
+        done();
+      });
+  });
   it('Should return all data with a 200 response code', (done) => {
     chai
       .request(app)
       .get('/api/v1/automations')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -37,6 +71,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations?page=1&limit=1')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -58,6 +93,7 @@ describe('Tests for automation endpoints\n', () => {
           1,
         ).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`,
       )
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -75,6 +111,7 @@ describe('Tests for automation endpoints\n', () => {
       .get(
         `/api/v1/automations?page=1&limit=5&slackAutomation=success&date[to]=${new Date().toJSON()}`,
       )
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -96,6 +133,7 @@ describe('Tests for automation endpoints\n', () => {
           10,
         ).toISOString()}`,
       )
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -117,6 +155,7 @@ describe('Tests for automation endpoints\n', () => {
           1,
         ).toISOString()}&date[to]=${new Date(2019, 2, 10).toISOString()}`,
       )
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(400);
         expect(res.body)
@@ -129,6 +168,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations?page=1&limit=5&type=onboarding')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -144,6 +184,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations?page=1&limit=5&type=offboarding')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -159,6 +200,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations?searchTerm=conroy')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -174,6 +216,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations?searchTerm=val&searchBy=fellow')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -189,6 +232,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations?searchTerm=conroy&searchBy=partner')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -204,6 +248,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations/stats?duration=days')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -217,6 +262,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get(`/api/v1/automations/stats?duration=days&date=${new Date(2018, 4, 1).toISOString()}`)
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -230,6 +276,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get(`/api/v1/automations/stats?duration=weeks&date=${new Date(2018, 4, 1).toISOString()}`)
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -243,6 +290,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get(`/api/v1/automations/stats?duration=months&date=${new Date(2018, 4, 1).toISOString()}`)
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -256,6 +304,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get(`/api/v1/automations/stats?duration=years&date=${new Date(2018, 4, 1).toISOString()}`)
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -269,6 +318,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get(`/api/v1/automations/stats?duration=invalid&date=${new Date(2018, 4, 1).toISOString()}`)
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(400);
         expect(res.body)
@@ -281,6 +331,7 @@ describe('Tests for automation endpoints\n', () => {
     chai
       .request(app)
       .get('/api/v1/automations/stats?duration=days')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -318,6 +369,7 @@ describe(' Test for retrying automations', () => {
     chai
       .request(app)
       .get(`/api/v1/automations/${retryMockData.id}`)
+      .set('authorization', userToken)
       .end((err, res) => {
         if (err) done(err);
         expect(res).to.have.status(200);
@@ -331,6 +383,7 @@ describe(' Test for retrying automations', () => {
     chai
       .request(app)
       .get(`/api/v1/automations/${offboardingMockData.id}`)
+      .set('authorization', userToken)
       .end((err, res) => {
         if (err) done(err);
         expect(res).to.have.status(200);
