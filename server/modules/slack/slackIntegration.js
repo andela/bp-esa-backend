@@ -2,8 +2,7 @@ import { WebClient } from '@slack/client';
 import dotenv from 'dotenv';
 import makeChannelNames from '../../helpers/slackHelpers';
 import { redisdb } from '../../helpers/redis';
-import responseObject from "../utils";
-
+import responseObject from '../utils';
 
 dotenv.config();
 const { SCAN_RANGE, REJECT_RATE_LIMIT, SLACK_TOKEN } = process.env;
@@ -185,6 +184,12 @@ const contextObject = {
   kick: { message: 'kicked from', target: 'user' },
 };
 
+const skippedErrors = [
+  'An API error occurred: not_in_channel',
+  'An API error occurred: already_in_channel',
+  'An API error occurred: not_in_group',
+];
+
 /**
  * @desc Add or remove a fellow from a channel after being placed or rolled-off
  *
@@ -194,7 +199,6 @@ const contextObject = {
  *
  * @returns {Promise} Promise to return the result of the operation performed
  */
-
 export const accessChannel = async (email, channelId, context) => {
   let channelInfo;
   try {
@@ -211,9 +215,7 @@ export const accessChannel = async (email, channelId, context) => {
       statusMessage: `${email} ${contextObject[context].message} channel`,
     };
   } catch (error) {
-    if (`${error.message}` === 'An API error occurred: not_in_channel' || 'An API error occurred: already_in_channel' || 'An API error occurred: not_in_group') {
-      return responseObject(channelId, channelInfo, error, 'success');
-    }
-    return responseObject(channelId, channelInfo, error, 'failure');
+    if (skippedErrors.includes(error.message)) return responseObject(channelId, channelInfo, error, 'success', context);
+    return responseObject(channelId, channelInfo, error, 'failure', context);
   }
 };
