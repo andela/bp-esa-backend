@@ -10,7 +10,8 @@ let rejectRateLimit = false;
 if (typeof REJECT_RATE_LIMIT !== 'undefined') {
   rejectRateLimit = REJECT_RATE_LIMIT;
 }
-export const slackClient = new WebClient(SLACK_TOKEN, {
+
+const slackClient = new WebClient(SLACK_TOKEN, {
   rejectRateLimitCalls: rejectRateLimit,
   retryConfig: {
     retries: 1,
@@ -18,6 +19,16 @@ export const slackClient = new WebClient(SLACK_TOKEN, {
     maxTimeout: 10 * 1000,
   },
 });
+
+export const slack = {
+  channelInfo: slackClient.conversations.info,
+  kick: slackClient.conversations.kick,
+  invite: slackClient.conversations.invite,
+  createChannel: slackClient.groups.create,
+  listChannels: slackClient.conversations.list,
+  lookupByEmail: slackClient.users.lookupByEmail,
+  listUsers: slackClient.users.list,
+};
 
 /**
  * @func createChannel
@@ -29,7 +40,7 @@ export const slackClient = new WebClient(SLACK_TOKEN, {
 const createChannel = async (channelDetails) => {
   const data = { ...channelDetails };
   try {
-    const { group } = await slackClient.groups.create({ name: data.channelName });
+    const { group } = await slack.createChannel({ name: data.channelName });
     redisdb.set(group.name, JSON.stringify(group));
     data.channelId = group.id;
     return data;
@@ -69,7 +80,7 @@ const searchChannels = async (options, channelName, apiResponse) => {
   if (metaData && metaData.next_cursor && metaData.next_cursor.length) {
     // Make a copy of options
     const pageOptions = { ...options, cursor: metaData.next_cursor };
-    return searchChannels(options, channelName, await slackClient.conversations.list(pageOptions));
+    return searchChannels(options, channelName, await slack.listChannels(pageOptions));
   }
   // Otherwise, we're done, no channel found
   return [];
@@ -87,7 +98,7 @@ const getMatchingChannels = async (channelName, actual = null) => {
   const [, result] = await redisdb.scan(0, 'match', `*${name}*`, 'count', SCAN_RANGE);
   if (!result.length) {
     const options = { limit: 999, exclude_archived: true, types: 'public_channel,private_channel' };
-    return searchChannels(options, name, await slackClient.conversations.list(options));
+    return searchChannels(options, name, await slack.listChannels(options));
   }
   return result;
 };
@@ -174,8 +185,7 @@ export const findOrCreatePartnerChannel = async (partnerData, channelType, jobTy
  * @returns {String} The slack user's id
  */
 export const getSlackUserId = async (email) => {
-  const { lookupByEmail } = slackClient.users;
-  const { user } = await lookupByEmail({ email });
+  const { user } = await slack.lookupByEmail({ email });
   return user.id;
 };
 
@@ -202,8 +212,8 @@ const skippedErrors = [
 export const accessChannel = async (email, channelId, context) => {
   let channelInfo;
   try {
-    channelInfo = await slackClient.conversations.info({ channel: channelId });
-    const slackAction = slackClient.conversations[context];
+    channelInfo = await slack.channelInfo({ channel: channelId });
+    const slackAction = slack[context];
     const userId = await getSlackUserId(email);
     await slackAction({ [contextObject[context].target]: userId, channel: channelId });
     return {

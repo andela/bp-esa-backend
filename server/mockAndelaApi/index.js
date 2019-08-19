@@ -1,13 +1,11 @@
 import express from 'express';
 import faker from 'faker';
 import mockPlacement from './mockPlacement';
-import { slackClient } from '../modules/slack/slackIntegration';
+import { slack } from '../modules/slack/slackIntegration';
 
 require('dotenv').config();
 
 const router = express.Router();
-
-const { list } = slackClient.users;
 
 /**
  * Generates random number of placements
@@ -18,7 +16,7 @@ const { list } = slackClient.users;
  */
 async function generatePlacements(status) {
   const placements = [];
-  const { members } = await list();
+  const { members } = await slack.listUsers();
   const emails = members.reduce(
     (result, { deleted, profile: { email } }) => (email && !deleted && email !== process.env.SLACK_ADMIN ? [...result, email] : result),
     [],

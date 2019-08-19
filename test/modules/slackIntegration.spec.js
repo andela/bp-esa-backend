@@ -13,12 +13,12 @@ const slack = proxyquire('../../server/modules/slack/slackIntegration', {
 
 const fakeSlackClient = {
   lookupByEmail: sinon
-    .stub(slack.slackClient.users, 'lookupByEmail')
+    .stub(slack.slack, 'lookupByEmail')
     .callsFake(() => slackMocks.slackUser),
-  invite: sinon.stub(slack.slackClient.conversations, 'invite').callsFake(() => slackMocks.inviteUser),
-  kick: sinon.stub(slack.slackClient.conversations, 'kick').callsFake(() => slackMocks.removeUser),
-  create: sinon.stub(slack.slackClient.groups, 'create').callsFake(() => slackMocks.createGroups),
-  info: sinon.stub(slack.slackClient.conversations, 'info').callsFake(() => slackMocks.groupInfo),
+  invite: sinon.stub(slack.slack, 'invite').callsFake(() => slackMocks.inviteUser),
+  kick: sinon.stub(slack.slack, 'kick').callsFake(() => slackMocks.removeUser),
+  create: sinon.stub(slack.slack, 'createChannel').callsFake(() => slackMocks.createGroups),
+  info: sinon.stub(slack.slack, 'channelInfo').callsFake(() => slackMocks.groupInfo),
 };
 
 /* eslint-disable no-unused-expressions */
