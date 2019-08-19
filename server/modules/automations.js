@@ -34,7 +34,9 @@ export const retryAutomations = async (database, automationDetails, automationEn
       type: automationEntity.type,
     },
   });
-  return database.update(automationDetails, { where: { id: existingRecord.id } });
+  try {
+    return database.update(automationDetails, { where: { id: existingRecord.id } });
+  } catch (err) { return err; }
 };
 
 /**

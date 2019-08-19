@@ -233,3 +233,14 @@ export const offboardingMockData = {
     },
   ],
 };
+
+export const partnerData = {
+  location: 'Lagos , Nigeria',
+  id: 2,
+  partnerId: 'ABCDEFZYXWVU',
+  nokoProjectId: '-KABCDE',
+  createdAt: '2019-07-25 19:21:55.812+01',
+  updatedAt: '2019-07-25 19:21:55.812+01',
+  name: 'Sample Partner',
+  slackChannels: JSON.parse('{"general":{"channelId":"GJ6AKSWBC","channelName":"p-accessmobile","channelProvision":"kick"},"internal":{"channelId":"GJE5MCS1X","channelName":"p-accessbank-int","channelProvision":"kick"}}'),
+};
