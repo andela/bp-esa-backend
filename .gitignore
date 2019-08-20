@@ -6,6 +6,7 @@ test.js
 .vscode/
 coverage
 .nyc_output
+package-lock.json
 
 # Webstorm
 .idea/

@@ -47,13 +47,12 @@ async function getAutomationDataFromIds(automationRawQuery, querySettings = {}, 
   const allData = await automation.findAll({
     ...options,
     where: {
-      id: {
-        $in: automationIds.map($da => $da.id),
-      },
+      id: automationIds.map($da => $da.id),
     },
   });
   return allData;
 }
+
 /**
  * Get search query
  *

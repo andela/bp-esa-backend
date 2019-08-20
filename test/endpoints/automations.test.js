@@ -11,6 +11,13 @@ import {
 chai.use(chaiHttp);
 
 describe('Tests for automation endpoints\n', () => {
+  beforeEach('create mock db', async () => {
+    await models.Automation.bulkCreate(existingPlacement);
+  });
+
+  afterEach(async () => {
+    await models.Automation.destroy({ force: true, truncate: { cascade: true } });
+  });
   it('Should return all data with a 200 response code', (done) => {
     chai
       .request(app)
