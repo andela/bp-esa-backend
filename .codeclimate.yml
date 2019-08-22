@@ -1,4 +1,4 @@
 exclude_patterns:
-- "server/models/"
+- "server/models"
 - "db/migrations"
 - "test"

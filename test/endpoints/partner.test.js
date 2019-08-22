@@ -222,7 +222,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
           done();
         });
     });
-    it('should return 200 status code, when request data is valid', (done) => {
+    it('should return 200 status code, when request data is valid', async () => {
       const partnerData = {
         freckleProjectId: null,
         name: 'Access.Mobile, Inc.',
@@ -245,32 +245,31 @@ describe('Tests for PUT /partners/:id endpoint', () => {
         },
       };
 
-      db.Partner.create({ ...partnerData, ...channelData }).then((newPartner) => {
-        const channelUpdate = { ...channelData };
-        channelUpdate.slackChannels.general.channelName = 'p-accessbank';
-        channelUpdate.slackChannels.internal.channelId = 'GJH7JABCD';
-        chai
-          .request(app)
-          .put(`/partners/${partnerData.partnerId}`)
-          .type('json')
-          .send(channelUpdate)
-          .end((err, res) => {
-            expect(res).to.have.status(200);
-            expect(res.body)
-              .to.have.property('message')
-              .to.equal('Partner update successful');
-            expect(res.body.data)
-              .to.have.property('partnerId')
-              .to.equal(newPartner.partnerId);
-            expect(res.body.data.slackChannels.general)
-              .to.have.property('channelName')
-              .to.equal('p-accessbank');
-            expect(res.body.data.slackChannels.internal)
-              .to.have.property('channelId')
-              .to.equal('GJH7JABCD');
-            done();
-          });
-      });
+      await db.Partner.destroy({ force: true, truncate: { cascade: true } });
+      const newPartner = await db.Partner.create({ ...partnerData, ...channelData });
+      const channelUpdate = { ...channelData };
+      channelUpdate.slackChannels.general.channelName = 'p-accessbank';
+      channelUpdate.slackChannels.internal.channelId = 'GJH7JABCD';
+      chai
+        .request(app)
+        .put(`/partners/${partnerData.partnerId}`)
+        .type('json')
+        .send(channelUpdate)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body)
+            .to.have.property('message')
+            .to.equal('Partner update successful');
+          expect(res.body.data)
+            .to.have.property('partnerId')
+            .to.equal(newPartner.partnerId);
+          expect(res.body.data.slackChannels.general)
+            .to.have.property('channelName')
+            .to.equal('p-accessbank');
+          expect(res.body.data.slackChannels.internal)
+            .to.have.property('channelId')
+            .to.equal('GJH7JABCD');
+        });
     });
   });
 });

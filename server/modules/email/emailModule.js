@@ -153,7 +153,8 @@ const sendSOPEMail = async (mailInfo, template) => {
  * @returns {object} The result of sending the mail.
  * @throws Will throw an error if sending email fails.
  */
-export const sendSOPOnboardingMail = mailInfo => sendSOPEMail(mailInfo, successOnboardingTemplatePath);
+export const sendSOPOnboardingMail = mailInfo => (
+  sendSOPEMail(mailInfo, successOnboardingTemplatePath));
 
 /**
  * @function sendSOPOnboardingMail
@@ -164,7 +165,8 @@ export const sendSOPOnboardingMail = mailInfo => sendSOPEMail(mailInfo, successO
  * @returns {object} The result of sending the mail.
  * @throws Will throw an error if sending email fails.
  */
-export const sendSOPOffboardingMail = mailInfo => sendSOPEMail(mailInfo, successOffboardingTemplatePath);
+export const sendSOPOffboardingMail = mailInfo => (
+  sendSOPEMail(mailInfo, successOffboardingTemplatePath));
 
 /**
  * @function sendPlacementFetchAlertEmail

@@ -5,9 +5,11 @@ import { promisify } from 'util';
 const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
 
 client.on('connect', () => {
+  // eslint-disable-next-line no-console
   console.log('Redis client connected');
 });
 client.on('error', (err) => {
+  // eslint-disable-next-line no-console
   console.log(`Something went wrong ${err}`);
 });
 export const redisdb = {

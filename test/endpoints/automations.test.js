@@ -6,6 +6,7 @@ import {
   retryMockData, existingPlacement, slackAutomations, nokoAutomations, emailAutomations,
   offboardingMockData, partnerData,
 } from '../mocks/retryautomations';
+import mockAndelaAPIRequests from '../modules/moxios.axios.mocker';
 
 
 chai.use(chaiHttp);
@@ -315,6 +316,7 @@ describe(' Test for retrying automations', () => {
     await models.Automation.destroy({ force: true, truncate: { cascade: true } });
   });
   it('should return the onboarding updated automation results', (done) => {
+    mockAndelaAPIRequests(retryMockData.partnerId);
     chai
       .request(app)
       .get(`/api/v1/automations/${retryMockData.id}`)
@@ -328,6 +330,7 @@ describe(' Test for retrying automations', () => {
       });
   });
   it('should return the offboarding updated automation results', (done) => {
+    mockAndelaAPIRequests(offboardingMockData.partnerId);
     chai
       .request(app)
       .get(`/api/v1/automations/${offboardingMockData.id}`)

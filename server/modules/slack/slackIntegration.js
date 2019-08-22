@@ -118,6 +118,7 @@ const findOne = async (result, channelType) => {
       return found.name ? found : JSON.parse(await redisdb.get(found));
     }
   }
+  return undefined;
 };
 
 /**
@@ -129,8 +130,8 @@ const findOne = async (result, channelType) => {
  */
 const matchedChannels = (channelData, partnerData) => ({
   true: () => {
-    channelData.channelName = partnerData.channel_name.slice(0, -4);
-    return getMatchingChannels(channelData.channelName, true);
+    const channelName = partnerData.channel_name.slice(0, -4);
+    return getMatchingChannels(channelName, true);
   },
   false: () => getMatchingChannels(channelData.channelName),
 });

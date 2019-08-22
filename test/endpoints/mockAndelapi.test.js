@@ -4,6 +4,7 @@ import chai, { expect } from 'chai';
 import app from '../../server';
 import slackMocks from '../mocks/slack';
 import { slackClient } from '../../server/modules/slack/slackIntegration';
+import mockAndelaAPIRequests from '../modules/moxios.axios.mocker';
 
 chai.use(chaiHttp);
 describe('Tests for mockAndelaApi endpoint\n', () => {
@@ -12,6 +13,7 @@ describe('Tests for mockAndelaApi endpoint\n', () => {
     const fakeUserList = sinon
       .stub(slackClient.users, 'list')
       .callsFake(() => new Promise(r => r(slackMocks.userList)));
+    mockAndelaAPIRequests('ABCDEFZYXWVU');
     chai
       .request(app)
       .get(`/mock-api/placements?status=${status}`)

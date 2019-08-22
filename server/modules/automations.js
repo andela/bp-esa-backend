@@ -18,10 +18,15 @@ const { SlackAutomation, EmailAutomation, NokoAutomation } = db;
  *
  * @return {Promise} Promise to return the created/updated slackAutomation.
  */
-// eslint-disable-next-line max-len
-export const createOrUpdateSlackAutomation = automationDetails => SlackAutomation.upsertById(automationDetails);
 
-export const retryAutomations = async (database, automationDetails, automationEntity) => {
+export const createOrUpdateSlackAutomation = automationDetails => (
+  SlackAutomation.upsertById(automationDetails));
+
+export const retryAutomations = async (
+  database,
+  automationDetails,
+  automationEntity,
+) => {
   const { automationId } = automationDetails;
   const automationValues = Object.values(automationDetails);
   if (automationValues.includes(null)) {
@@ -34,9 +39,9 @@ export const retryAutomations = async (database, automationDetails, automationEn
       type: automationEntity.type,
     },
   });
-  try {
-    return database.update(automationDetails, { where: { id: existingRecord.id } });
-  } catch (err) { return err; }
+  return existingRecord && database.update(automationDetails, {
+    where: { id: existingRecord.id },
+  });
 };
 
 /**
@@ -56,8 +61,9 @@ export const retryAutomations = async (database, automationDetails, automationEn
  *
  * @return {Promise} Promise to return the created/updated emailAutomation.
  */
-// eslint-disable-next-line max-len
-export const createOrUpdateEmailAutomation = automationDetails => EmailAutomation.upsertById(automationDetails);
+
+export const createOrUpdateEmailAutomation = automationDetails => (
+  EmailAutomation.upsertById(automationDetails));
 
 /**
  * @func createOrUpdateNokoAutomation
@@ -75,5 +81,5 @@ export const createOrUpdateEmailAutomation = automationDetails => EmailAutomatio
  *
  * @returns {Promise} Promise to return the created/updated nokoAutomation.
  */
-// eslint-disable-next-line max-len
-export const createOrUpdateNokoAutomation = automationDetails => NokoAutomation.upsertById(automationDetails);
+export const createOrUpdateNokoAutomation = automationDetails => (
+  NokoAutomation.upsertById(automationDetails));

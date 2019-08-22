@@ -20,7 +20,8 @@ async function generatePlacements(status) {
   const placements = [];
   const { members } = await list();
   const emails = members.reduce(
-    (result, { deleted, profile: { email } }) => (email && !deleted && email !== process.env.SLACK_ADMIN ? [...result, email] : result),
+    (result, { deleted, profile: { email } }) => (
+      email && !deleted && email !== process.env.SLACK_ADMIN ? [...result, email] : result),
     [],
   );
     // max: 1, min: 1

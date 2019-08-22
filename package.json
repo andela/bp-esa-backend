@@ -6,11 +6,11 @@
   "scripts": {
     "start": "NODE_ENV=production npm run build && node ./build/index.js",
     "debug": "NODE_ENV=production npm run build && node --inspect-brk=0.0.0.0:9229 ./build/index.js",
-    "start:dev": "NODE_ENV=development nodemon ./server/index --exec babel-node --watch ./server",
+    "start:dev": "NODE_ENV=development DEBUG=log nodemon ./server/index --exec babel-node --watch ./server",
     "start:debug": "NODE_ENV=development nodemon ./server/index --exec babel-node  --inspect-brk=0.0.0.0:9229 --watch ./server",
     "build": "babel ./server -d ./build",
-    "pretest": "NODE_ENV=test npm run reset-database && NODE_ENV=test npm run migrations",
-    "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:@babel/register --require @babel/polyfill --timeout 150000 --exit",
+    "pretest": "NODE_ENV=test npm run reset-database && NODE_ENV=test npm run migrations && yarn lint",
+    "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --require @babel/register --require @babel/polyfill --timeout 150000 --exit --no-cache",
     "lint": "eslint .",
     "migrations": "sequelize db:migrate",
     "reset-database": "npx redis-cli FLUSHALL && sequelize db:drop && sequelize db:create",
@@ -38,6 +38,7 @@
     "axios": "^0.19.0",
     "body-parser": "^1.18.3",
     "chai-http": "^4.2.1",
+    "debug": "^4.1.1",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "faker": "^4.1.0",
@@ -67,11 +68,24 @@
     "eslint-plugin-import": "^2.13.0",
     "expect": "^23.5.0",
     "mocha": "^5.2.0",
+    "moxios": "^0.4.0",
     "nodemon": "^1.17.5",
     "nyc": "^13.1.0",
     "prettier-eslint": "^8.8.2",
     "sequelize-test-helpers": "^1.0.3",
     "sinon": "^6.3.5",
     "sinon-chai": "^3.2.0"
+  },
+  "nyc": {
+    "include": [
+      "server/**/*.js"
+    ],
+    "exclude": [
+      "server/models/index.js",
+      "server/index.js",
+      "server/deletePartner.js"
+    ],
+    "instrument": false,
+    "sourceMap": false
   }
 }

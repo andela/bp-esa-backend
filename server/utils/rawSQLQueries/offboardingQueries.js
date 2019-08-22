@@ -65,29 +65,12 @@ export const successOffboardingAutomationsQuery = `
     group by "automationId"
     ) as e
     on "e"."automationId"="a"."id"
-    left join 
-    (SELECT 
-    "automationId", 
-    SUM(
-        (
-            CASE 
-                WHEN status='success' THEN 0
-                ELSE 1
-            END
-        )
-    )
-    as status
 
-    from "nokoAutomation"
-    group by "automationId"
-    ) as f
-    on "f"."automationId"="a"."id"
     where 1=1
 
     and "a"."type"='offboarding'
     and s.status = 0
     and e.status = 0
-    and f.status = 0
     and a."createdAt" BETWEEN ? and ?
     ;
 `;

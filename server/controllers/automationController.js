@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
-/* eslint-disable no-console */
 import moment from 'moment';
 
 import * as util from 'util';
@@ -86,7 +85,6 @@ function addSearchQuery({ searchTerm, searchBy }) {
  * @returns {object} dateQuery
  */
 const dateQueryFunc = (date = { to: new Date() }) => {
-  // eslint-disable-next-line no-unused-vars
   const todaysDate = moment().format('YYYY-MM-DD');
   const dateTo = moment(date.to).format('YYYY-MM-DD');
   const dateFrom = date.from ? moment(date.from).format('YYYY-MM-DD') : null;

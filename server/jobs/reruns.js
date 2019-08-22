@@ -4,7 +4,7 @@
 import dotenv from 'dotenv';
 import db from '../models';
 
-import { getOrCreateProject, assignProject } from '../modules/noko/projects';
+import Noko from '../modules/noko/projects';
 import { accessChannel } from '../modules/slack/slackIntegration';
 import {
   sendDevOnboardingMail, sendSOPOnboardingMail, sendITOffboardingMail, sendSOPOffboardingMail,
@@ -39,13 +39,13 @@ export const nokoAutomationsReruns = (nokoAutomations, automationId) => {
         retryAutomations(NokoAutomation, { ...project, automationId }, nokoAutomation);
       },
       projectAssignment: (project) => {
-        assignProject(nokoAutomation.email, project.id).then((result) => {
+        Noko.assignProject(nokoAutomation.email, project.id).then((result) => {
           retryAutomations(NokoAutomation, { ...result, automationId }, nokoAutomation);
         });
       },
     };
     if (nokoAutomation.status === 'failure') {
-      getOrCreateProject(nokoAutomation.partnerName).then(types[nokoAutomation.type]);
+      Noko.getOrCreateProject(nokoAutomation.partnerName).then(types[nokoAutomation.type]);
     }
   });
 };

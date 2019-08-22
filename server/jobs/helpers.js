@@ -11,7 +11,11 @@ export const count = { FAILED_COUNT_NUMBER: 0 };
  */
 export const getMailInfo = (placement, partnerLocation) => {
   const {
-    fellow: { name: developerName, email: developerEmail, location: developerLocation },
+    fellow: {
+      name: developerName,
+      email: developerEmail,
+      location: developerLocation,
+    },
     client_name: partnerName,
     end_date: rollOffDate,
     start_date: dateStart,
@@ -50,10 +54,19 @@ export const checkFailureCount = async (failCount) => {
  *
  * @returns {void}
  */
-export async function executeEmailAutomation(emailFunctions, placement, location, automationId) {
+export async function executeEmailAutomation(
+  emailFunctions,
+  placement,
+  location,
+  automationId,
+) {
   const mailInfo = await getMailInfo(placement, location);
-  const emailAutomations = await Promise.all(emailFunctions.map(func => func(mailInfo)));
+  const emailAutomations = await Promise.all(
+    emailFunctions.map(func => func(mailInfo)),
+  );
   await Promise.all(
-    emailAutomations.map(automationData => createOrUpdateEmailAutomation({ ...automationData, automationId })),
+    emailAutomations.map(automationData => createOrUpdateEmailAutomation(
+      { ...automationData, automationId },
+    )),
   );
 }

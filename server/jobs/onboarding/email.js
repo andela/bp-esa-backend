@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { sendDevOnboardingMail, sendSOPOnboardingMail } from '../../modules/email/emailModule';
 import { executeEmailAutomation } from '../helpers';
 
