@@ -45,6 +45,7 @@
     "http": "0.0.0",
     "http-proxy": "^1.17.0",
     "jsdoc": "^3.6.2",
+    "json2csv": "^4.5.2",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
     "moment": "^2.24.0",
