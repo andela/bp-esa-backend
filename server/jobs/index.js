@@ -99,16 +99,24 @@ const automationList = (partnerList, newPlacements, type, jobList) => {
 export default function executeJobs(type) {
   Helper.checkFailureCount(Helper.count.FAILED_COUNT_NUMBER);
   const { jobList, placementStatus } = jobs[type];
+  // // console.log('-%%%%%%%%%%%%%%%%%---placementStatus--->', placementStatus);
   return fetchNewPlacements(placementStatus)
-    .catch(() => {
+    .catch((error) => {
+      // console.log('-%%%%%%%%%%-error-->', error);
       setTimeout(() => executeJobs(type), ms('5m'));
       Helper.count.FAILED_COUNT_NUMBER += 1;
     })
     .then(async (newPlacements) => {
       Helper.count.FAILED_COUNT_NUMBER = 0;
-      const partnerList = await Promise.all(
-        newPlacements.map(({ client_id: partnerId }) => findPartnerById(partnerId, type)),
-      );
-      await Promise.all(automationList(partnerList, newPlacements, type, jobList));
+      // console.log('-%%%%%%%%%%%%-newPlacements-->', newPlacements);
+      if (newPlacements) {
+        // console.log('@@@@@@@@@@@@@@@@ there');
+
+        const partnerList = await Promise.all(
+          newPlacements.map(({ client_id: partnerId }) => findPartnerById(partnerId, type)),
+        );
+        await Promise.all(automationList(partnerList, newPlacements, type, jobList));
+      }
+      // console.log('@@@@@@@@@@@@@@@@ placement is undefined');
     });
 }

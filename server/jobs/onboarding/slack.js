@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { accessChannel } from '../../modules/slack/slackIntegration';
+import Slack from '../../modules/slack/slackIntegration';
 import { createOrUpdateSlackAutomation } from '../../modules/automations';
 
 dotenv.config();
@@ -23,11 +23,27 @@ const automationData = channel => ({
  * channels(internal and general) used in automation
  */
 const partnerChannelAutomations = ({ slackChannels }, fellow, automationId) => {
-  const internalAutomationData = automationData(slackChannels.internal);
-  const generalAutomationData = automationData(slackChannels.general);
-  createOrUpdateSlackAutomation({ ...internalAutomationData, automationId });
-  createOrUpdateSlackAutomation({ ...generalAutomationData, automationId });
-  accessChannel(fellow.email, slackChannels.general.channelId, 'invite').then(result => createOrUpdateSlackAutomation({ ...result, automationId }));
+  const { general, internal } = slackChannels;
+  // console.log('.......g..........', general.channelProvision);
+  // console.log('........i.........', internal.channelProvision);
+  const genal = general && general.channelName && general.channelName.length > 0;
+  const intenal = internal && internal.channelName && internal.channelName.length > 0;
+  // console.log('genal', genal);
+  // console.log('intenal', intenal);
+  if (intenal && genal) {
+    const internalAutomationData = automationData(slackChannels.internal);
+    const generalAutomationData = automationData(slackChannels.general);
+    createOrUpdateSlackAutomation({ ...internalAutomationData, automationId });
+    createOrUpdateSlackAutomation({ ...generalAutomationData, automationId });
+    Slack.accessChannel(
+      fellow.email,
+      slackChannels.general.channelId,
+      'invite',
+    ).then((result) => {
+      // console.log('--reseult', { ...result });
+      createOrUpdateSlackAutomation({ ...result, automationId });
+    });
+  }
 };
 
 /**
@@ -41,8 +57,22 @@ const partnerChannelAutomations = ({ slackChannels }, fellow, automationId) => {
  */
 const slackOnBoarding = async (placement, partner, automationId) => {
   const { fellow } = placement;
-  accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'kick').then(response => createOrUpdateSlackAutomation({ ...response, automationId }));
-  accessChannel(fellow.email, SLACK_RACK_CITY_CHANNEL_ID, 'invite').then(response => createOrUpdateSlackAutomation({ ...response, automationId }));
+  Slack.accessChannel(
+    fellow.email,
+    SLACK_AVAILABLE_DEVS_CHANNEL_ID,
+    'kick',
+  ).then((response) => {
+    // // console.log('respnse 1', { ...response });
+    createOrUpdateSlackAutomation({ ...response, automationId });
+  });
+  Slack.accessChannel(fellow.email, SLACK_RACK_CITY_CHANNEL_ID, 'invite')
+    .then((response) => {
+      // console.log('respnse 2', { ...response });
+      createOrUpdateSlackAutomation({ ...response, automationId });
+    });
+  // console.log('@@@@@@@@partner', partner);
+  // // console.log('@@@@@@@@fellow', fellow);
+  // console.log('@@@@@@@@automationId', automationId);
   partnerChannelAutomations(partner, fellow, automationId);
 };
 

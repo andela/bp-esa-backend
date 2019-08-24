@@ -1,6 +1,5 @@
-/* eslint-disable no-param-reassign */
 import dotenv from 'dotenv';
-import { accessChannel } from '../../modules/slack/slackIntegration';
+import Slack from '../../modules/slack/slackIntegration';
 import { createOrUpdateSlackAutomation } from '../../modules/automations';
 
 dotenv.config();
@@ -16,9 +15,17 @@ const { SLACK_AVAILABLE_DEVS_CHANNEL_ID } = process.env;
  */
 export default async function slackOffboarding(placement, { slackChannels }, automationId) {
   const { fellow } = placement;
-  accessChannel(fellow.email, SLACK_AVAILABLE_DEVS_CHANNEL_ID, 'invite').then(response => createOrUpdateSlackAutomation({ ...response, automationId }));
+  Slack.accessChannel(
+    fellow.email,
+    SLACK_AVAILABLE_DEVS_CHANNEL_ID,
+    'invite',
+  ).then(response => createOrUpdateSlackAutomation({ ...response, automationId }));
   try {
-    const response = await accessChannel(fellow.email, slackChannels.general.channelId, 'kick');
+    const response = await Slack.accessChannel(
+      fellow.email,
+      slackChannels.general.channelId,
+      'kick',
+    );
     return createOrUpdateSlackAutomation({ ...response, automationId });
   } catch (error) {
     return createOrUpdateSlackAutomation({

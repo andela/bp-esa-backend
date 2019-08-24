@@ -53,4 +53,11 @@ export const mockNockAssignProject = (userId, statusCode, responseData) => {
     },
   );
 };
+export const mockSlackApi = () => {
+  moxios.stubRequest('https://slack.com/api/', {
+    status: 200,
+    response: 'data',
+  });
+};
+
 export default mockAndelaAPIRequests;

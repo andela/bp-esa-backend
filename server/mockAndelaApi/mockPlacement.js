@@ -23,6 +23,7 @@ export async function getAndelaPartners() {
 
 const mockPlacement = async (status, email) => {
   const mockPartners = await getAndelaPartners();
+  // console.log('--->mockPartners--->', mockPartners);
   const partner = mockPartners[faker.random.number(mockPartners.length - 1)];
   return {
     id: faker.random.uuid(),

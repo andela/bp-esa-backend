@@ -3,7 +3,7 @@ import ms from 'ms';
 import https from 'https';
 import { redisdb } from '../helpers/redis';
 import db from '../models';
-import { findOrCreatePartnerChannel } from './slack/slackIntegration';
+import Slack from './slack/slackIntegration';
 
 require('dotenv').config();
 
@@ -45,7 +45,7 @@ export const retrievePartner = async (partnerId) => {
  */
 const generateInternalChannel = (newPartner, jobType) => {
   if (!newPartner.channel_id.length) {
-    return findOrCreatePartnerChannel(newPartner, 'internal', jobType);
+    return Slack.findOrCreatePartnerChannel(newPartner, 'internal', jobType);
   }
   return {};
 };
@@ -86,7 +86,7 @@ export async function findPartnerById(partnerId, jobType) {
       return newPartner;
     }
     const [genChannel = {}, intChannel = {}] = await Promise.all([
-      findOrCreatePartnerChannel(newPartner, 'general', jobType),
+      Slack.findOrCreatePartnerChannel(newPartner, 'general', jobType),
       generateInternalChannel(newPartner, jobType),
     ]);
     newPartner.slackChannels = channelData(genChannel, intChannel, newPartner);

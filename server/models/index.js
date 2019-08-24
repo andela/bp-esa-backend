@@ -8,7 +8,7 @@ let sequelize;
 
 if (env !== 'development') {
   sequelize = new Sequelize(config.url, {
-    logging: true,
+    logging: false,
     define: {
       freezeTableName: true,
     },
@@ -19,7 +19,7 @@ if (env !== 'development') {
     port: config.port,
     operatorsAliases: false,
     dialect: config.dialect,
-    logging: true,
+    logging: false,
     define: {
       freezeTableName: true,
     },

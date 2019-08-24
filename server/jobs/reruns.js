@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import db from '../models';
 
 import Noko from '../modules/noko/projects';
-import { accessChannel } from '../modules/slack/slackIntegration';
+import Slack from '../modules/slack/slackIntegration';
 import {
   sendDevOnboardingMail, sendSOPOnboardingMail, sendITOffboardingMail, sendSOPOffboardingMail,
 } from '../modules/email/emailModule';
@@ -20,7 +20,11 @@ const { SlackAutomation, NokoAutomation } = db;
 
 const retryAccessChannels = async (slackAutomation, status, existingPlacement, automationId, channelId, context) => {
   if (slackAutomation.status === status && slackAutomation.type === context) {
-    const response = await accessChannel(existingPlacement.email, channelId, context);
+    const response = await Slack.accessChannel(
+      existingPlacement.email,
+      channelId,
+      context,
+    );
     retryAutomations(SlackAutomation, { ...response, automationId }, slackAutomation);
   }
 };
@@ -93,7 +97,11 @@ const offboardingSlackAutomationsReruns = (slackAutomations, existingPlacement, 
   slackAutomations.forEach(async (slackAutomation) => {
     if (slackAutomation.status === 'failure' && slackAutomation.type === 'kick') {
       const { slackChannels } = await findPartnerById(existingPlacement.partnerId, 'offboarding');
-      const response = await accessChannel(existingPlacement.email, slackChannels.general.channelId, 'kick');
+      const response = await Slack.accessChannel(
+        existingPlacement.email,
+        slackChannels.general.channelId,
+        'kick',
+      );
       retryAutomations(SlackAutomation, { ...response, automationId }, slackAutomation);
     }
     retryAccessChannels(slackAutomation, 'failure', existingPlacement,
