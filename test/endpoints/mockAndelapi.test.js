@@ -6,12 +6,11 @@ import slackMocks from '../mocks/slack';
 import { slack } from '../../server/modules/slack/slackIntegration';
 
 chai.use(chaiHttp);
+
 describe('Tests for mockAndelaApi endpoint\n', () => {
   it('Should return list of mock placements with a 200 status code', (done) => {
+    const fakeUserList = sinon.stub(slack, 'listUsers').resolves(slackMocks.userList);
     const status = 'External Engagements - Rolling Off';
-    const fakeUserList = sinon
-      .stub(slack, 'listUsers')
-      .callsFake(() => new Promise(r => r(slackMocks.userList)));
     chai
       .request(app)
       .get(`/mock-api/placements?status=${status}`)
