@@ -15,6 +15,7 @@ export const redisdb = {
   get: promisify(client.get).bind(client),
   scan: promisify(client.scan).bind(client),
   delete: promisify(client.del).bind(client),
+  clear: promisify(client.flushdb).bind(client),
 };
 
 export default client;

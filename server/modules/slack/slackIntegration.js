@@ -158,8 +158,8 @@ const matchedChannels = (channelData, partnerData) => ({
  */
 export const findOrCreatePartnerChannel = async (partnerData, channelType, jobType) => {
   const channelData = { channelName: makeChannelNames(partnerData.name, channelType) };
-  const partnerChannelGiven = Boolean(partnerData.channel_name && partnerData.channel_name.length);
-  const result = await matchedChannels(channelData, partnerData)[partnerChannelGiven]();
+  const isChannelProvided = Boolean(partnerData.channel_name && partnerData.channel_name.length);
+  const result = await matchedChannels(channelData, partnerData)[isChannelProvided]();
   const existingChannel = await findOne(result, channelType);
   if (existingChannel) {
     return {
