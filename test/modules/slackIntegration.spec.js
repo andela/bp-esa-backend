@@ -2,6 +2,7 @@ import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import onboardingAllocations from '../mocks/allocations';
 import slackMocks from '../mocks/slack';
+import { redisdb } from '../../server/helpers/redis';
 
 const createOrUpdateSlackAutomation = sinon.stub();
 
@@ -12,13 +13,12 @@ const slack = proxyquire('../../server/modules/slack/slackIntegration', {
 });
 
 const fakeSlackClient = {
-  lookupByEmail: sinon
-    .stub(slack.slackClient.users, 'lookupByEmail')
-    .callsFake(() => slackMocks.slackUser),
-  invite: sinon.stub(slack.slackClient.conversations, 'invite').callsFake(() => slackMocks.inviteUser),
-  kick: sinon.stub(slack.slackClient.conversations, 'kick').callsFake(() => slackMocks.removeUser),
-  create: sinon.stub(slack.slackClient.groups, 'create').callsFake(() => slackMocks.createGroups),
-  info: sinon.stub(slack.slackClient.conversations, 'info').callsFake(() => slackMocks.groupInfo),
+  lookupByEmail: sinon.stub(slack.slack, 'lookupByEmail').callsFake(() => slackMocks.slackUser),
+  invite: sinon.stub(slack.slack, 'invite').callsFake(() => slackMocks.inviteUser),
+  kick: sinon.stub(slack.slack, 'kick').callsFake(() => slackMocks.removeUser),
+  create: sinon.stub(slack.slack, 'createChannel').callsFake(() => slackMocks.createGroups),
+  info: sinon.stub(slack.slack, 'channelInfo').callsFake(() => slackMocks.groupInfo),
+  listChannels: sinon.stub(slack.slack, 'listChannels').resolves(slackMocks.channelList),
 };
 
 /* eslint-disable no-unused-expressions */
@@ -32,6 +32,7 @@ describe('Slack Integration Test Suite', async () => {
   it('Should create internal slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
+    await redisdb.clear();
     const createResult = await slack.findOrCreatePartnerChannel(
       { name: partnerName },
       'internal',
@@ -44,8 +45,9 @@ describe('Slack Integration Test Suite', async () => {
     expect(fakeSlackClient.create.calledOnce).to.be.true;
     expect(createResult.channelId).to.equal(expectedResult.id);
     expect(createResult.channelName).to.equal(`${expectedResult.name}-int`);
+    expect(createResult.type).to.equal('create');
   });
-  it('Should retrieve general slack channels', async () => {
+  it('Should retrieve general slack channel', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
     const createResult = await slack.findOrCreatePartnerChannel(

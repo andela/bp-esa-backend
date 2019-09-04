@@ -18,14 +18,14 @@ describe('Test that helper functions work as expected', () => {
   it('Should return expected information about the partner', async () => {
     const placement = placements.data.values[0];
     const partnerLocation = 'San Francisco California, United States';
-    const mailInfo = getMailInfo(placement, partnerLocation);
+    const mailInfo = await getMailInfo(placement, partnerLocation);
     expect(mailInfo).to.be.an('object');
     expect(mailInfo.developerName).to.equal(placement.fellow.name);
     expect(mailInfo.partnerName).to.equal(placement.client_name);
     expect(mailInfo.partnerLocation).to.equal(partnerLocation);
     expect(mailInfo.startDate).to.equal(placement.start_date);
   });
-  it('Should return expected automation data from placement details', async () => {
+  it('Should return expected automation data from placement details', () => {
     const placement = placements.data.values[0];
     const data = automationData(placement, 'onboarding');
     expect(data).to.be.an('object');
