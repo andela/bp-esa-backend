@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import redis from 'redis';
 import { promisify } from 'util';
 

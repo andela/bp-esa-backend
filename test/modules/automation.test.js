@@ -1,5 +1,4 @@
 import sinon from 'sinon';
-import { Op } from 'sequelize';
 import { makeMockModels } from 'sequelize-test-helpers';
 import proxyquire from 'proxyquire';
 
