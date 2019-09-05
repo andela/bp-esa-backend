@@ -153,6 +153,7 @@ const sendSOPEMail = async (mailInfo, template) => {
  * @returns {object} The result of sending the mail.
  * @throws Will throw an error if sending email fails.
  */
+// eslint-disable-next-line max-len
 export const sendSOPOnboardingMail = mailInfo => sendSOPEMail(mailInfo, successOnboardingTemplatePath);
 
 /**
@@ -164,6 +165,7 @@ export const sendSOPOnboardingMail = mailInfo => sendSOPEMail(mailInfo, successO
  * @returns {object} The result of sending the mail.
  * @throws Will throw an error if sending email fails.
  */
+// eslint-disable-next-line max-len
 export const sendSOPOffboardingMail = mailInfo => sendSOPEMail(mailInfo, successOffboardingTemplatePath);
 
 /**

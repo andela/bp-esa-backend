@@ -15,7 +15,8 @@ const nokoOnboarding = async (placement, partner, automationId) => {
   const { fellow, client_id: partnerId } = placement;
   getOrCreateProject(placement.client_name).then(async (project) => {
     createOrUpdateNokoAutomation({ ...project, automationId });
-    assignProject(fellow.email, project.id).then(result => createOrUpdateNokoAutomation({ ...result, automationId }));
+    assignProject(fellow.email, project.id)
+      .then(result => createOrUpdateNokoAutomation({ ...result, automationId }));
     return db.Partner.findOne({ where: { partnerId } }).then(foundPartner => (foundPartner
       ? foundPartner.update({
         nokoProjectId: project.id,
