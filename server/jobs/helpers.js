@@ -54,6 +54,7 @@ export async function executeEmailAutomation(emailFunctions, placement, location
   const mailInfo = await getMailInfo(placement, location);
   const emailAutomations = await Promise.all(emailFunctions.map(func => func(mailInfo)));
   await Promise.all(
-    emailAutomations.map(automationData => createOrUpdateEmailAutomation({ ...automationData, automationId })),
+    emailAutomations
+      .map(automationData => createOrUpdateEmailAutomation({ ...automationData, automationId })),
   );
 }
