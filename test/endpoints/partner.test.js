@@ -2,8 +2,12 @@ import chaiHttp from 'chai-http';
 import chai, { expect } from 'chai';
 import app from '../../server';
 import db from '../../server/models';
+import { generateToken } from '../../server/helpers/authHelpers';
+import { userPayload } from '../mockData/userPayload';
 
 chai.use(chaiHttp);
+
+const userToken = generateToken(userPayload);
 
 describe('Tests for PUT /partners/:id endpoint', () => {
   describe('Tests for request param.id in /partners/:id endpoint', () => {
@@ -11,6 +15,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/invalid-id')
+        .set('authorization', userToken)
         .type('json')
         .send({})
         .end((err, res) => {
@@ -25,6 +30,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/123456789123456789     ')
+        .set('authorization', userToken)
         .type('json')
         .send({})
         .end((err, res) => {
@@ -41,6 +47,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/-KXGyJcC1oimjQgFj17U')
+        .set('authorization', userToken)
         .type('json')
         .send({
           invalidProperty: {},
@@ -61,6 +68,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/-KXGyJcC1oimjQgFj17U')
+        .set('authorization', userToken)
         .type('json')
         .send({
           slackChannels: [],
@@ -83,6 +91,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/-KXGyJcC1oimjQgFj17U')
+        .set('authorization', userToken)
         .type('json')
         .send({
           slackChannels: {},
@@ -104,6 +113,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/-KXGyJcC1oimjQgFj17U')
+        .set('authorization', userToken)
         .type('json')
         .send({
           slackChannels: {
@@ -132,6 +142,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/-KXGyJcC1oimjQgFj17U')
+        .set('authorization', userToken)
         .type('json')
         .send({
           slackChannels: {
@@ -163,6 +174,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/-KXGyJcC1oimjQgFj17U')
+        .set('authorization', userToken)
         .type('json')
         .send({
           slackChannels: {
@@ -199,6 +211,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
       chai
         .request(app)
         .put('/partners/-KXGyJcC1oimjQgFj18t')
+        .set('authorization', userToken)
         .type('json')
         .send({
           slackChannels: {
@@ -252,6 +265,7 @@ describe('Tests for PUT /partners/:id endpoint', () => {
         chai
           .request(app)
           .put(`/partners/${partnerData.partnerId}`)
+          .set('authorization', userToken)
           .type('json')
           .send(channelUpdate)
           .end((err, res) => {

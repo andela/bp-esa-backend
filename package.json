@@ -46,6 +46,7 @@
     "http-proxy": "^1.17.0",
     "jsdoc": "^3.6.2",
     "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^2.2.0",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "ms": "^2.1.1",

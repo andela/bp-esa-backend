@@ -3,9 +3,14 @@ import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import app from '../../server';
 import client from '../../server/helpers/redis';
+import { generateToken } from '../../server/helpers/authHelpers';
+import { userPayload } from '../mockData/userPayload';
 
 chai.use(chaiHttp);
+
+const userToken = generateToken(userPayload);
 const fakeStatus = ['"2019-01-09T09:59:53.045Z"', 'Successfull', '2'];
+
 describe('Tests for worker status endpoints\n', () => {
   it('Should return worker status with a 200 status code', (done) => {
     const fakeClient = sinon
@@ -15,6 +20,7 @@ describe('Tests for worker status endpoints\n', () => {
     chai
       .request(app)
       .get('/worker-status')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(200);
         expect(res.body)
@@ -37,6 +43,7 @@ describe('Tests for worker status endpoints\n', () => {
     chai
       .request(app)
       .get('/worker-status')
+      .set('authorization', userToken)
       .end((err, res) => {
         expect(res).to.have.status(500);
         expect(res.body)
