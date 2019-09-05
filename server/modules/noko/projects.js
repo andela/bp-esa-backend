@@ -1,11 +1,12 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import env from '../../validator';
 
 // eslint-disable-next-line max-len
 
 dotenv.config();
 const nokoUrl = 'https://api.nokotime.com/v2';
-const nokoToken = process.env.NOKO_ADMIN_TOKEN;
+const nokoToken = env.NOKO_ADMIN_TOKEN;
 
 /**
  * @func saveNokoProject

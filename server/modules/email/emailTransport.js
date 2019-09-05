@@ -1,14 +1,15 @@
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import env from '../../validator';
 
 dotenv.config();
 
-const clientId = process.env.GMAIL_CLIENT_ID;
-const clientSecret = process.env.GMAIL_CLIENT_SECRET;
-const redirectUrl = process.env.GMAIL_REDIRECT_URL;
-const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
-const user = process.env.EMAIL_USER;
+const clientId = env.GMAIL_CLIENT_ID;
+const clientSecret = env.GMAIL_CLIENT_SECRET;
+const redirectUrl = env.GMAIL_REDIRECT_URL;
+const refreshToken = env.GMAIL_REFRESH_TOKEN;
+const user = env.EMAIL_USER;
 
 const { OAuth2 } = google.auth;
 

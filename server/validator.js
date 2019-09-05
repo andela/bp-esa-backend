@@ -1,5 +1,7 @@
 import { object, string, mixed } from 'yup';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const channelDetails = channelType => object()
   .noUnknown()
   .shape({
@@ -38,32 +40,91 @@ export const validatePartner = (req, res, next) => {
     .catch(err => res.status(400).json({ errors: err.errors, message: err.name }));
 };
 
-export const requiredEnvVariables = [
-  'SLACK_TOKEN',
-  'GMAIL_CLIENT_ID',
-  'GMAIL_CLIENT_SECRET',
-  'GMAIL_REFRESH_TOKEN',
-  'GMAIL_REDIRECT_URL',
-  'EMAIL_USER',
-  'OPS_EMAIL',
-  'IT_EMAIL',
-  'ANDELA_ALLOCATIONS_API_TOKEN',
-  'NOKO_ADMIN_TOKEN',
-  'SLACK_AVAILABLE_DEVS_CHANNEL_ID',
-  'SLACK_RACK_CITY_CHANNEL_ID',
-  'ANDELA_PARTNERS',
-  'ALLOCATION_PLACEMENTS',
-];
+const {
+  SLACK_TOKEN,
+  SLACK_ADMIN,
+  SLACK_AVAILABLE_DEVS_CHANNEL_ID,
+  SLACK_RACK_CITY_CHANNEL_ID,
+  GMAIL_CLIENT_ID,
+  GMAIL_CLIENT_SECRET,
+  GMAIL_REFRESH_TOKEN,
+  GMAIL_REDIRECT_URL,
+  EMAIL_USER,
+  OPS_EMAIL,
+  IT_EMAIL,
+  SUPPORT_EMAIL,
+  ANDELA_ALLOCATIONS_API_TOKEN,
+  NOKO_ADMIN_TOKEN,
+  ANDELA_PARTNERS,
+  ALLOCATION_PLACEMENTS,
+  DB_TEST_URL,
+  DB_STAGING_URL,
+  DB_PROD_URL,
+  DB_USER_NAME,
+  DB_PASSWORD,
+  DB_DEV_NAME,
+  DB_HOST,
+  DB_PORT,
+  REACT_APP_ACTIVITY_FEED_NUMBER,
+  JWT_KEY,
+  TIMER_INTERVAL,
+  FETCH_FAIL_AUTOMATION_COUNT,
+  UPDATE_PARTNER_INTERVAL,
+  NODE_ENV,
+  PORT,
+  SCAN_RANGE,
+  REDIS_HOST,
+  REDIS_PORT,
+} = process.env;
 
-const validateEnvironmentVars = () => {
-  const missingVariable = [];
-  requiredEnvVariables.forEach((variable) => {
-    if (!process.env[variable]) missingVariable.push(variable);
-  });
-  if (missingVariable.length) {
-    const error = `${missingVariable.length} environment variables are missing: ${missingVariable}`;
-    throw Error(error);
-  }
+const envVariables = {
+  SLACK_TOKEN,
+  SLACK_ADMIN,
+  SLACK_AVAILABLE_DEVS_CHANNEL_ID,
+  SLACK_RACK_CITY_CHANNEL_ID,
+  GMAIL_CLIENT_ID,
+  GMAIL_CLIENT_SECRET,
+  GMAIL_REFRESH_TOKEN,
+  GMAIL_REDIRECT_URL,
+  EMAIL_USER,
+  OPS_EMAIL,
+  IT_EMAIL,
+  SUPPORT_EMAIL,
+  ANDELA_ALLOCATIONS_API_TOKEN,
+  NOKO_ADMIN_TOKEN,
+  ANDELA_PARTNERS,
+  ALLOCATION_PLACEMENTS,
+  DB_TEST_URL,
+  DB_STAGING_URL,
+  DB_PROD_URL,
+  DB_USER_NAME,
+  DB_PASSWORD,
+  DB_DEV_NAME,
+  DB_HOST,
+  DB_PORT,
+  REACT_APP_ACTIVITY_FEED_NUMBER,
+  JWT_KEY,
+  TIMER_INTERVAL,
+  FETCH_FAIL_AUTOMATION_COUNT,
+  UPDATE_PARTNER_INTERVAL,
+  NODE_ENV,
+  PORT,
+  SCAN_RANGE,
+  REDIS_HOST,
+  REDIS_PORT,
 };
 
-export default validateEnvironmentVars;
+export const validateEnvironmentVars = (envObject) => {
+  const missingVariable = Object.keys(envObject).filter(
+    variable => envObject[variable] === undefined,
+  );
+
+  if (!missingVariable.length) return envObject;
+
+  throw new Error(
+    `There are ${missingVariable.length} environment variables missing:
+    \n\n${missingVariable.join('\n')}\n`,
+  );
+};
+
+export default validateEnvironmentVars(envVariables);

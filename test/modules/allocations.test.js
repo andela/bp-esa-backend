@@ -5,6 +5,7 @@ import { redisdb } from '../../server/helpers/redis';
 import * as resource from '../../server/modules/allocations';
 import onboardingAllocations from '../mocks/allocations';
 import { stringifiedPartner } from '../mocks/partners';
+import env from '../../server/validator';
 
 class Axios404Error extends Error {
   constructor(message, response) {
@@ -15,7 +16,7 @@ class Axios404Error extends Error {
 
 describe('Partner and Allocations Test Suite', async () => {
   beforeEach(() => {
-    process.env.TIMER_INTERVAL = '3d';
+    env.TIMER_INTERVAL = '3d';
   });
   it('Should fetch new placements by status in last TIMER_INTERVAL', async () => {
     // Mock successful request
@@ -30,7 +31,7 @@ describe('Partner and Allocations Test Suite', async () => {
     // being called within the function
     const fakeCurrentDate = sinon.stub(Date, 'now').callsFake(() => 1542376484108);
     const result = await resource.fetchNewPlacements('Placed - Awaiting Onboarding');
-    const lastInterval = new Date(1542376484108 - ms(process.env.TIMER_INTERVAL));
+    const lastInterval = new Date(1542376484108 - ms(env.TIMER_INTERVAL));
     expect(result.every(item => Date.parse(item.created_at) > lastInterval)).to.equal(true);
     expect(result.length).to.equal(6);
     // Total onboarding.data.values objects in mock response is 10

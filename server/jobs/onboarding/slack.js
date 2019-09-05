@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import { accessChannel } from '../../modules/slack/slackIntegration';
 import { createOrUpdateSlackAutomation } from '../../modules/automations';
+import env from '../../validator';
 
 dotenv.config();
-const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = process.env;
+const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = env;
 
 const automationData = channel => ({
   status: 'success',
