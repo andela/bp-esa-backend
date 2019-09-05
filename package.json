@@ -9,7 +9,7 @@
     "start:dev": "NODE_ENV=development nodemon ./server/index --exec babel-node --watch ./server",
     "start:debug": "NODE_ENV=development nodemon ./server/index --exec babel-node  --inspect-brk=0.0.0.0:9229 --watch ./server",
     "build": "babel ./server -d ./build",
-    "pretest": "NODE_ENV=test npm run reset-database && NODE_ENV=test npm run migrations",
+    "pretest": "NODE_ENV=test npm run reset-database && NODE_ENV=test npm run migrations && yarn lint",
     "test": "NODE_ENV=test nyc --reporter=lcov --reporter=html --reporter=text mocha --recursive test/* --compilers js:@babel/register --require @babel/polyfill --timeout 150000 --exit",
     "lint": "eslint .",
     "migrations": "sequelize db:migrate",
