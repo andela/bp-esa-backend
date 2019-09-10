@@ -2,7 +2,14 @@ import chaiHttp from 'chai-http';
 import chai, { expect } from 'chai';
 import app from '../../server';
 import models from '../../server/models';
+<<<<<<< HEAD
 import { existingPlacement } from '../mocks/retryautomations';
+=======
+import {
+  retryMockData, existingPlacement, slackAutomations, nokoAutomations, emailAutomations,
+  offboardingMockData, partnerData,
+} from '../mocks/retryautomations';
+>>>>>>> feat(dashboard):  upselling partner
 
 
 chai.use(chaiHttp);
