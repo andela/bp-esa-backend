@@ -60,7 +60,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body)
           .to.have.property('data')
           .to.be.an('array');
@@ -76,7 +76,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body)
           .to.have.property('data')
           .to.be.an('array');
@@ -98,7 +98,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
@@ -116,7 +116,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
@@ -138,7 +138,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
@@ -173,7 +173,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
@@ -189,7 +189,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
@@ -205,7 +205,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
@@ -221,7 +221,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);
@@ -237,7 +237,7 @@ describe('Tests for automation endpoints\n', () => {
         expect(res).to.have.status(200);
         expect(res.body)
           .to.have.property('message')
-          .to.equal('Successfully fetched automations');
+          .to.equal('Successfully fetched data');
         expect(res.body.pagination)
           .to.have.property('currentPage')
           .to.be.equal(1);

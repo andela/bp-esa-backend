@@ -82,7 +82,10 @@ export function formatPayload(automation) {
  * @returns {Array} Formated automation to be returned by the API
  */
 export function formatAutomationResponse(payload) {
-  return payload.map(automation => formatPayload(automation));
+  if(!payload) {
+    return payload.map(automation => formatPayload(automation));
+  }
+  return payload;
 }
 
 
@@ -104,9 +107,10 @@ export const paginationResponse = (res,
   numberOfPages,
   data,
   nextPage,
-  prevPage) => res.status(200).json({
+  prevPage) =>
+ res.status(200).json({
   status: 'success',
-  message: 'Successfully fetched automations',
+  message: `Successfully fetched data`,
   data: formatAutomationResponse(allData),
   pagination: {
     currentPage: page,
@@ -115,4 +119,6 @@ export const paginationResponse = (res,
     nextPage,
     prevPage,
   },
-});
+})
+;
+

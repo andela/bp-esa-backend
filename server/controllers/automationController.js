@@ -8,6 +8,8 @@ import models from '../models';
 import { paginationResponse, formatAutomationResponse } from '../utils/formatter';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
 import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
+import {isValidDateFormat} from '../helpers/dateHelpers';
+
 
 const automation = models.Automation;
 export const include = [
@@ -201,7 +203,7 @@ const paginationData = async (req, res) => {
   } = getPaginationMeta(page, data.count, limit);
   automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
   const allData = await getAutomationDataFromIds(automationRawQuery, { ...querySettings }, { include, order });
-  return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
+  return paginationResponse(res,allData, page, numberOfPages, data, nextPage, prevPage);
 };
 
 export default class AutomationController {
@@ -216,9 +218,11 @@ export default class AutomationController {
   static async getAutomations(req, res) {
     try {
       const { date = {} } = req.query;
-      if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
-        throw new Error('Invalid date format provided please provide date in iso 8601 string');
+      
+      if(!isValidDateFormat(date.to, date.from)){
+        throw new Error("Invalid date format provided please provide date in iso 8601 string");
       }
+      
       return await paginationData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
