@@ -5,12 +5,30 @@ import { redisdb } from '../../server/helpers/redis';
 import slackMocks from '../mocks/slack';
 import { slack } from '../../server/modules/slack/slackIntegration';
 import email from '../../server/modules/email/emailTransport';
+import db from '../../server/models';
+import { include } from '../../server/controllers/automationController';
 
 const ioDotEmit = sinon.spy(io, 'emit');
 const sendMail = sinon.spy(email, 'sendMail');
 
 describe('Jobs Execution Test Suite', async () => {
   it('should execute onboarding jobs successfully', async () => {
+    const data = {
+      id: 762,
+      placementId: '0b2f4b24-6529-48f5-9377-58749ba34234',
+      fellowName: 'Porter, Cronin',
+      fellowId: '928bee94-114f-4e41-b477-98d6bf2ffb91',
+      email: 'esther.namusisi@andela.com',
+      partnerName: 'ACCION MICROFINANCE BANK',
+      partnerId: '-KhbZT8yDdech1RNDi14',
+      type: 'onboarding',
+      createdAt: '2019-09-10T17:46:26.590Z',
+      updatedAt: '2019-09-10T17:46:26.590Z',
+      emailAutomations: [],
+      slackAutomations: [],
+      nokoAutomations: [],
+    };
+
     // get automations from db and assert that parent data matches the newPlacements
     const lookupByEmail = sinon.stub(slack, 'lookupByEmail').resolves(slackMocks.slackUser);
     const invite = sinon.stub(slack, 'invite').resolves(slackMocks.inviteUser);
@@ -19,10 +37,11 @@ describe('Jobs Execution Test Suite', async () => {
     const info = sinon.stub(slack, 'channelInfo').resolves(slackMocks.groupInfo);
     const listChannels = sinon.stub(slack, 'listChannels').resolves(slackMocks.channelList);
     const listUsers = sinon.stub(slack, 'listUsers').resolves(slackMocks.userList);
+    sinon.stub(db.Automation, 'findByPk').resolves(data, { include });
 
     await redisdb.delete('andela-partners');
     await executejobs('onboarding');
-    sinon.assert.called(ioDotEmit);
+    sinon.assert.calledWith(ioDotEmit, 'newAutomation');
     sinon.assert.called(sendMail);
 
     ioDotEmit.restore();
