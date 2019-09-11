@@ -17,7 +17,7 @@ const nokoToken = process.env.NOKO_ADMIN_TOKEN;
  * @returns {void}
  */
 export const saveNokoProject = (projectDetails, message, status = 'success') => ({
-  projectId: (projectDetails && projectDetails.id) || null,
+  projectId: (projectDetails && projectDetails.id),
   type: 'projectCreation',
   status,
   statusMessage: message,
@@ -74,11 +74,9 @@ export const getUserIdByEmail = async (email) => {
     where: { email },
     order: [['createdAt', 'DESC']],
   });
-  const userData = {
-    email,
-    first_name: fellowName.split(',')[0],
-    last_name: fellowName.split(',')[1],
-  };
+  // eslint-disable-next-line camelcase
+  const [first_name, last_name] = fellowName.split(',');
+  const userData = { email, first_name, last_name };
   const newData = await axios.post(url, userData);
   return newData.data.id;
 };
