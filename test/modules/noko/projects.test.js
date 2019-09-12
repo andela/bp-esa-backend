@@ -70,7 +70,7 @@ describe('Noko Project', () => {
     });
     it('should know when project name is not defined', async () => {
       const projectDetails = await Noko.getOrCreateProject(undefined);
-      expect(projectDetails.projectId).to.equal(null);
+      expect(projectDetails.projectId).to.equal(undefined);
       expect(projectDetails.status).to.equal('failure');
       expect(projectDetails.statusMessage).to.equal(
         'Project name cannot be null undefined',
