@@ -6,8 +6,11 @@ import moment from 'moment';
 import * as util from 'util';
 import models from '../models';
 import { paginationResponse, formatAutomationResponse } from '../utils/formatter';
+import paginationMeta from '../helpers/paginationHelper';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
 import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
+import { isValidDateFormat } from '../helpers/dateHelpers';
+
 
 const automation = models.Automation;
 export const include = [
@@ -143,33 +146,6 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, nokoAutomation
 };
 
 /**
- * Get pagination meta
- *
- * @param   {number}  page current page
- * @param   {number}  count total data count
- * @param   {number}  limit total per page
- *
- * @return  {object} an object containing offset nextPage and prevPage properties
- */
-function getPaginationMeta(page, count, limit) {
-  let prevPage;
-  let nextPage;
-  const numberOfPages = Math.ceil(count / limit); // all pages count
-  const offset = limit * (page - 1);
-  // check if number of pages is less than the current page number to show next page number
-  if (page < numberOfPages) {
-    nextPage = page + 1;
-  }
-  // show previous page number if page is greater than 1
-  if (page > 1) {
-    prevPage = page - 1;
-  }
-  return {
-    numberOfPages, offset, nextPage, prevPage,
-  };
-}
-
-/**
  * Returns pagination in JSON format
  *
  * @param {Object} req request object
@@ -196,9 +172,9 @@ const paginationData = async (req, res) => {
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
   const page = parseInt(req.query.page, 10) || 1;
-  const {
-    numberOfPages, offset, nextPage, prevPage,
-  } = getPaginationMeta(page, data.count, limit);
+  const offset = limit * (page - 1);
+
+  const { numberOfPages, nextPage, prevPage } = paginationMeta(page, data.count, limit);
   automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
   const allData = await getAutomationDataFromIds(automationRawQuery, { ...querySettings }, { include, order });
   return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
@@ -216,9 +192,11 @@ export default class AutomationController {
   static async getAutomations(req, res) {
     try {
       const { date = {} } = req.query;
-      if ((date.to && !moment(date.to).isValid()) || (date.from && !moment(date.from).isValid())) {
+
+      if (!isValidDateFormat(date.to, date.from)) {
         throw new Error('Invalid date format provided please provide date in iso 8601 string');
       }
+
       return await paginationData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });

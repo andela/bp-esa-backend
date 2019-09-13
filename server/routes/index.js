@@ -1,5 +1,6 @@
 import mockAndelAPI from '../mockAndelaApi';
 import automationsAPI from './automationRouter';
+import dashboardApi from './dashboardRouter';
 import workerStatus from '../controllers/workerStatus';
 import authApi from '../controllers/authController';
 import updatePartnerSlackChannels from '../controllers/partnerController';
@@ -12,4 +13,6 @@ export default (app) => {
   app.use('/mock-api', mockAndelAPI);
   app.use('/api/v1/automations', automationsAPI);
   app.use('/api/v1/auth', authApi);
+  app.use('/api/v1/dashboard', dashboardApi);
+
 };
