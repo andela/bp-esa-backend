@@ -16,7 +16,6 @@ COPY server /usr/src/app/server/
 COPY .sequelizerc /usr/src/app/
 COPY .babelrc /usr/src/app/
 COPY templates /usr/src/app/templates/
-COPY scripts/entrypoint.sh /usr/src/app/scripts/entrypoint.sh
 
 RUN yarn install
 
