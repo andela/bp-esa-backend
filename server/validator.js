@@ -75,6 +75,7 @@ const {
   SCAN_RANGE,
   REDIS_HOST,
   REDIS_PORT,
+  USER_ROLE,
 } = process.env;
 
 const envVariables = {
@@ -112,6 +113,7 @@ const envVariables = {
   SCAN_RANGE,
   REDIS_HOST,
   REDIS_PORT,
+  USER_ROLE,
 };
 
 export const validateEnvironmentVars = (envObject) => {
