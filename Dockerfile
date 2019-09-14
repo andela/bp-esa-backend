@@ -33,6 +33,8 @@ ENV PORT=6050
 # instruction to have it mapped by the docker daemon:
 EXPOSE 6050
 
-# Use entrypoint shell script to run the migrations the start the application
-RUN chmod +x /usr/src/app/scripts/entrypoint.sh
-ENTRYPOINT ["/usr/src/app/scripts/entrypoint.sh"]
+
+# define the command to run your app using
+# CMD which defines your runtime
+
+CMD [ "node", "./build/index.js" ]
