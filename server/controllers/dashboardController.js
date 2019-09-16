@@ -6,8 +6,9 @@ import { Op } from 'sequelize';
 import models from '../models';
 import paginationMeta from '../helpers/paginationHelper';
 import { paginationResponse } from '../utils/formatter';
-import { isValidDateFormat, isValidStartDate } from '../helpers/dateHelpers';
-
+import {
+  isValidDateFormat, isValidStartDate, validateDate, checkDuration,
+} from '../helpers/dateHelpers';
 
 const automation = models.Automation;
 
@@ -82,6 +83,41 @@ export default class DashboardController {
       return !isValidDateFormat(date.endDate, date.startDate) ? new Error(errorMessage) : await paginationData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
+    }
+  }
+
+
+  /**
+ * controller for the 'api/v1/dashboard/trends' endpoint that displays the trend
+ *
+ * @param {object} req - REST request object
+ * @param {object} res - REST response object
+ *
+ * @returns {object} response reporting the trend
+ */
+  static async getEngagementTends(req, res) {
+    const { duration, date } = req.query;
+    const durationQueryError = checkDuration(duration);
+    if (durationQueryError) {
+      return res.status(400).json({ error: durationQueryError });
+    }
+    const dateDurations = validateDate(date, true, duration);
+    try {
+      const response = await automation.findAll({
+        attributes: ['type', [models.sequelize.literal('DATE("createdAt")'), 'date'],
+          [models.sequelize.fn('count', models.sequelize.col('*')), 'number'],
+        ],
+        where: {
+          createdAt: {
+            [Op.between]: [`${dateDurations.dateStart} 00:00:00.00`, `${dateDurations.dateEnd} 23:59:59.99`],
+          },
+        },
+        order: [[models.sequelize.literal('DATE("createdAt")'), 'DESC']],
+        group: ['automation.type', 'date'],
+      });
+      return res.status(200).json({ data: response });
+    } catch (err) {
+      return res.status(400).json({ err });
     }
   }
 }
