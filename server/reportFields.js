@@ -1,4 +1,4 @@
-export const fields = [
+const fields = [
   'email',
   'fellowName',
   'partnerName',
@@ -60,3 +60,5 @@ export const fields = [
   'nokoAutomations[1].createdAt',
   'nokoAutomations[1].updatedAt',
 ];
+
+export default fields;

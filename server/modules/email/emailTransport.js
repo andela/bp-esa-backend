@@ -1,7 +1,6 @@
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import env from '../../validator';
 
 dotenv.config();
 
