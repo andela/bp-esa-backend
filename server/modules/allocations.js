@@ -4,11 +4,12 @@ import https from 'https';
 import { redisdb } from '../helpers/redis';
 import db from '../models';
 import { findOrCreatePartnerChannel } from './slack/slackIntegration';
+import env from '../validator';
 
 require('dotenv').config();
 
 // Axios authorization header setup
-axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
+axios.defaults.headers.common = { 'api-token': env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 /**
  *@desc Fetch a partner's profile from andela API and save to redisDB
@@ -17,7 +18,7 @@ axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_AP
  * @returns {Promise} Promise to return the partner data retrieved
  */
 const getPartnerfromAPI = async (partnerId) => {
-  const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}/${partnerId}`, {
+  const { data } = await axios.get(`${env.ANDELA_PARTNERS}/${partnerId}`, {
     httpsAgent: new https.Agent({ rejectUnauthorized: false }),
   });
   return data;
@@ -104,7 +105,7 @@ export async function findPartnerById(partnerId, jobType) {
  * @returns {Promise} Promise to return list of placements
  */
 export const fetchNewPlacements = async (status) => {
-  const { data } = await axios.get(`${process.env.ALLOCATION_PLACEMENTS}?status=${status}`);
-  const fromDate = new Date(Date.now() - ms(process.env.TIMER_INTERVAL));
+  const { data } = await axios.get(`${env.ALLOCATION_PLACEMENTS}?status=${status}`);
+  const fromDate = new Date(Date.now() - ms(env.TIMER_INTERVAL));
   return data.values.filter(placement => Date.parse(placement.created_at) > fromDate);
 };

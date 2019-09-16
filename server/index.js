@@ -8,10 +8,11 @@ import bodyParser from 'body-parser';
 import ms from 'ms';
 import path from 'path';
 import { setAppRoot } from './utils/helpers';
-import validateEnvironmentVars from './validator';
+import env from './validator';
 import routes from './routes';
 import worker from './jobs/worker';
 
+// const { envVariables, validateEnvironmentVars } = validator;
 dotenv.config();
 setAppRoot(path.join(__dirname, '../'));
 // Set up the express app
@@ -33,13 +34,13 @@ app.use((req, res, next) => {
 
 routes(app);
 
-validateEnvironmentVars();
+// validateEnvironmentVars(envVariables);
 // Setup a default catch-all route that sends back a welcome message in JSON format.
 app.get('*', (req, res) => res.status(200).send({
   message: 'Welcome to the beginning of nothingness.',
 }));
 
-const port = parseInt(process.env.PORT, 10) || 8000;
+const port = parseInt(env.PORT, 10) || 8000;
 app.set('port', port);
 
 // Start worker
@@ -47,8 +48,8 @@ worker.init();
 
 http.listen(port, () => {
   console.log(`App listening on port ${app.get('port')}`);
-  console.log(`Timer Interval is set to ${process.env.TIMER_INTERVAL}`);
-  setInterval(() => worker.exec(), ms(process.env.TIMER_INTERVAL || '1d'));
+  console.log(`Timer Interval is set to ${env.TIMER_INTERVAL}`);
+  setInterval(() => worker.exec(), ms(env.TIMER_INTERVAL || '1d'));
 });
 
 export default app;

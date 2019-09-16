@@ -1,11 +1,12 @@
 import faker from 'faker';
 import axios from 'axios';
 import { redisdb } from '../helpers/redis';
+import env from '../validator';
 
 require('dotenv').config();
 
 // Axios authorization header setup
-axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_API_TOKEN };
+axios.defaults.headers.common = { 'api-token': env.ANDELA_ALLOCATIONS_API_TOKEN };
 
 /**
  * @desc Retrieves list of partners from andela-staging
@@ -14,7 +15,7 @@ axios.defaults.headers.common = { 'api-token': process.env.ANDELA_ALLOCATIONS_AP
 export async function getAndelaPartners() {
   const partners = await redisdb.get('andela-partners');
   if (!partners) {
-    const { data } = await axios.get(`${process.env.ANDELA_PARTNERS}?limit=10`);
+    const { data } = await axios.get(`${env.ANDELA_PARTNERS}?limit=10`);
     await redisdb.set('andela-partners', JSON.stringify(data.values));
     return data.values;
   }

@@ -1,5 +1,6 @@
 import { createOrUpdateEmailAutomation } from '../modules/automations';
 import { sendPlacementFetchAlertEmail } from '../modules/email/emailModule';
+import env from '../validator';
 
 export const count = { FAILED_COUNT_NUMBER: 0 };
 
@@ -33,7 +34,7 @@ export const getMailInfo = (placement, partnerLocation) => {
  * @returns {Promise} Promise to return an email sent message object
  */
 export const checkFailureCount = async (failCount) => {
-  if (failCount >= parseInt(process.env.FETCH_FAIL_AUTOMATION_COUNT, 10)) {
+  if (failCount >= parseInt(env.FETCH_FAIL_AUTOMATION_COUNT, 10)) {
     await sendPlacementFetchAlertEmail();
     return { message: 'Email sent successfully' };
   }
