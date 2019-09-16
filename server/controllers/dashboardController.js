@@ -11,12 +11,7 @@ import {
 } from '../helpers/dateHelpers';
 
 const automation = models.Automation;
-/**
- * Checks if date format is valid
- *
- * @param {Object} req request object
- * @returns {object} Error object
- */
+
 const checkDateFormat = (req) => {
   const { date = {} } = req.query;
   if (!isValidDateFormat(date.startDate, date.endDate)) {
@@ -96,7 +91,11 @@ export default class DashboardController {
 
   static async getPartnerStats(req, res) {
     try {
-      checkDateFormat(req);
+      const { date = {} } = req.query;
+
+      if (!isValidDateFormat(date.startDate, date.endDate)) {
+        throw new Error('Invalid date format provided please provide date in iso 8601 string');
+      }
       return await PartnerStats(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });

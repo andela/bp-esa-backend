@@ -7,7 +7,6 @@ const router = express.Router();
 router.get('/upselling-partners', dashboardController.getUpsellingPartners);
 router.get('/partner-stats', dashboardController.getPartnerStats);
 router.get('/trends', authenticateUser, dashboardController.getEngagementTends);
-router.get('/partner-stats', dashboardController.getPartnerStats);
 
 <<<<<<< HEAD
 =======
