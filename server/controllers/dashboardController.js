@@ -91,11 +91,7 @@ export default class DashboardController {
 
   static async getPartnerStats(req, res) {
     try {
-      const { date = {} } = req.query;
-
-      if (!isValidDateFormat(date.startDate, date.endDate)) {
-        throw new Error('Invalid date format provided please provide date in iso 8601 string');
-      }
+      checkDateFormat(req);
       return await PartnerStats(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
