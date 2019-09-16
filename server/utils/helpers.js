@@ -17,6 +17,6 @@ export const setAppRoot = (basePath) => {
  *
  * @return  {void}
  */
-export const getAppRoot = (defaultPath = '') => (global.appRoot ? global.appRoot : defaultPath);
+export const getAppRoot = () => global.appRoot;
 
 export const getTemplatesPath = () => path.join(__dirname, '../../templates');
