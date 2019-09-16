@@ -1808,6 +1808,28 @@ const slackMocks = {
       next_cursor: '',
     },
   },
+  channelList: {
+    ok: true,
+    channels: [],
+    response_metadata:
+     {
+       next_cursor: '',
+       scopes:
+        ['admin',
+          'identify',
+          'channels:history',
+          'groups:history',
+          'channels:read',
+          'groups:read',
+          'team:read',
+          'users:read',
+          'users:read.email',
+          'channels:write',
+          'groups:write'],
+       acceptedScopes:
+        ['channels:read', 'groups:read', 'mpim:read', 'im:read', 'read'],
+     },
+  },
 };
 
 export default slackMocks;

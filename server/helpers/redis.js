@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 import redis from 'redis';
 import { promisify } from 'util';
+import env from '../validator';
 
 // redis setup
-const client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
+const client = redis.createClient(env.REDIS_PORT, env.REDIS_HOST);
 
 client.on('connect', () => {
   console.log('Redis client connected');

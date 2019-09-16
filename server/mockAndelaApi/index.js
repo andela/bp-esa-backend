@@ -2,6 +2,7 @@ import express from 'express';
 import faker from 'faker';
 import mockPlacement from './mockPlacement';
 import { slack } from '../modules/slack/slackIntegration';
+import env from '../validator';
 
 require('dotenv').config();
 

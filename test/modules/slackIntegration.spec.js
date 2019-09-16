@@ -64,6 +64,21 @@ describe('Slack Integration Test Suite', async () => {
     expect(createResult.channelName).to.equal(expectedResult.name);
     expect(createResult.type).to.equal('retrieve');
   });
+  it('Should create internal slack channels and save the automation to DB from redis', async () => {
+    const { data } = onboardingAllocations;
+    const { client_name: partnerName } = data.values[0];
+    const createResult = await slack.findOrCreatePartnerChannel(
+      { name: partnerName },
+      'internal',
+      'onboarding',
+    );
+    const expectedResult = {
+      id: slackMocks.createGroups.group.id,
+      name: slackMocks.createGroups.group.name,
+    };
+    expect(createResult.channelId).to.equal(expectedResult.id);
+    expect(createResult.channelName).to.equal(`${expectedResult.name}-int`);
+  });
   it('Should add developers to respective channels and save the automation to DB', async () => {
     const email = 'ebelensoffor@gmail.com';
     const channel = 'CJFG3JWCX';

@@ -3,9 +3,10 @@ import dotenv from 'dotenv';
 import makeChannelNames from '../../helpers/slackHelpers';
 import { redisdb } from '../../helpers/redis';
 import responseObject from '../utils';
+import env from '../../validator';
 
 dotenv.config();
-const { SCAN_RANGE, REJECT_RATE_LIMIT, SLACK_TOKEN } = process.env;
+const { SCAN_RANGE, REJECT_RATE_LIMIT, SLACK_TOKEN } = env;
 let rejectRateLimit = false;
 if (typeof REJECT_RATE_LIMIT !== 'undefined') {
   rejectRateLimit = REJECT_RATE_LIMIT;

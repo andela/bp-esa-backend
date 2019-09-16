@@ -1,7 +1,8 @@
 import Sequelize from 'sequelize';
 import configObject from '../config/config';
+import envVariable from '../validator';
 
-const env = process.env.NODE_ENV || 'development';
+const env = envVariable.NODE_ENV || 'development';
 const config = configObject[env];
 
 let sequelize;

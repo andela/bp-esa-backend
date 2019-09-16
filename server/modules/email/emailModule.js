@@ -5,13 +5,14 @@ import path from 'path';
 import dotenv from 'dotenv';
 import emailTransport from './emailTransport';
 import { getAppRoot, getTemplatesPath } from '../../utils/helpers';
+import env from '../../validator';
 
 dotenv.config();
 
-const user = process.env.EMAIL_USER;
-const opsEmail = process.env.OPS_EMAIL;
-const itEmail = process.env.IT_EMAIL;
-const supportEmail = process.env.SUPPORT_EMAIL;
+const user = env.EMAIL_USER;
+const opsEmail = env.OPS_EMAIL;
+const itEmail = env.IT_EMAIL;
+const supportEmail = env.SUPPORT_EMAIL;
 
 const getEmailTemplatePath = emailTemplate => path.join(getTemplatesPath(), `email/${emailTemplate}`);
 const developerOnboardingTemplatePath = getEmailTemplatePath('developer-onboarding-email.html');
