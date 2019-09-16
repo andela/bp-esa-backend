@@ -9,7 +9,7 @@ import models from '../models';
 import { paginationResponse, formatAutomationResponse } from '../utils/formatter';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
 import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
-import { fields } from '../reportFields';
+import fields from '../reportFields';
 
 const automation = models.Automation;
 export const include = [
@@ -262,6 +262,7 @@ export default class AutomationController {
       return res.status(500).json({ error: err.message });
     }
   }
+
   /**
    * @desc Returns JSON data from the frontend and converts it to a csv
    *
@@ -269,7 +270,7 @@ export default class AutomationController {
    * @param {object} res REST Response object
    * @returns {object} Response containing status message and generated report
    */
-
+  // eslint-disable-next-line consistent-return
   static async postReport(req, res) {
     try {
       const opts = { fields };

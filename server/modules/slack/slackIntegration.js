@@ -120,6 +120,7 @@ const searchKey = channel => (channel.name ? channel.name.slice(-4) : channel.sl
  * @param {String} channelType The type of channel to find: internal || general
  * @returns {Object} The details of the channel found
  */
+// eslint-disable-next-line consistent-return
 const findOne = async (result, channelType) => {
   if (result.length) {
     const found = result.find((channel) => {
@@ -141,6 +142,7 @@ const findOne = async (result, channelType) => {
  */
 const matchedChannels = (channelData, partnerData) => ({
   true: () => {
+    // eslint-disable-next-line no-param-reassign
     channelData.channelName = partnerData.channel_name.slice(0, -4);
     return getMatchingChannels(channelData.channelName, true);
   },

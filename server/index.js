@@ -10,6 +10,7 @@ import path from 'path';
 import { setAppRoot } from './utils/helpers';
 import env from './validator';
 import routes from './routes';
+// eslint-disable-next-line import/no-cycle
 import worker from './jobs/worker';
 
 // const { envVariables, validateEnvironmentVars } = validator;
@@ -23,7 +24,7 @@ export const io = socket(http);
 // Log requests to the console.
 app.use(logger('dev'));
 
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
@@ -47,7 +48,9 @@ app.set('port', port);
 worker.init();
 
 http.listen(port, () => {
+  // eslint-disable-next-line no-console
   console.log(`App listening on port ${app.get('port')}`);
+  // eslint-disable-next-line no-console
   console.log(`Timer Interval is set to ${env.TIMER_INTERVAL}`);
   setInterval(() => worker.exec(), ms(env.TIMER_INTERVAL || '1d'));
 });

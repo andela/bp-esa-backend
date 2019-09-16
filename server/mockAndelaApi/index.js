@@ -2,7 +2,6 @@ import express from 'express';
 import faker from 'faker';
 import mockPlacement from './mockPlacement';
 import { slack } from '../modules/slack/slackIntegration';
-import env from '../validator';
 
 require('dotenv').config();
 
@@ -19,7 +18,8 @@ async function generatePlacements(status) {
   const placements = [];
   const { members } = await slack.listUsers();
   const emails = members.reduce(
-    (result, { deleted, profile: { email } }) => (email && !deleted && email !== env.SLACK_ADMIN ? [...result, email] : result),
+    // eslint-disable-next-line max-len
+    (result, { deleted, profile: { email } }) => (email && !deleted && email !== process.env.SLACK_ADMIN ? [...result, email] : result),
     [],
   );
     // max: 1, min: 1
