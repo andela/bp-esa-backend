@@ -16,7 +16,6 @@ COPY server /usr/src/app/server/
 COPY .sequelizerc /usr/src/app/
 COPY .babelrc /usr/src/app/
 COPY templates /usr/src/app/templates/
-COPY scripts/entrypoint.sh /usr/src/app/scripts/entrypoint.sh
 
 RUN yarn install
 
@@ -33,6 +32,8 @@ ENV PORT=6050
 # instruction to have it mapped by the docker daemon:
 EXPOSE 6050
 
-# Use entrypoint shell script to run the migrations the start the application
-RUN chmod +x /usr/src/app/scripts/entrypoint.sh
-ENTRYPOINT ["/usr/src/app/scripts/entrypoint.sh"]
+
+# define the command to run your app using
+# CMD which defines your runtime
+
+CMD [ "node", "./build/index.js" ]
