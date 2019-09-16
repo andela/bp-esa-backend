@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import db from '../../models';
 import { getOrCreateProject, assignProject } from '../../modules/noko/projects';
 import { createOrUpdateNokoAutomation } from '../../modules/automations';
@@ -15,10 +14,11 @@ const nokoOnboarding = async (placement, partner, automationId) => {
   const { fellow, client_id: partnerId } = placement;
   getOrCreateProject(placement.client_name).then(async (project) => {
     createOrUpdateNokoAutomation({ ...project, automationId });
-    assignProject(fellow.email, project.id).then(result => createOrUpdateNokoAutomation({ ...result, automationId }));
+    assignProject(fellow.email, project.projectId)
+      .then(result => createOrUpdateNokoAutomation({ ...result, automationId }));
     return db.Partner.findOne({ where: { partnerId } }).then(foundPartner => (foundPartner
       ? foundPartner.update({
-        nokoProjectId: project.id,
+        nokoProjectId: project.projectId,
       })
       : null));
   });
