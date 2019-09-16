@@ -9,4 +9,9 @@ router.get('/partner-stats', dashboardController.getPartnerStats);
 router.get('/trends', authenticateUser, dashboardController.getEngagementTends);
 router.get('/partner-stats', dashboardController.getPartnerStats);
 
+<<<<<<< HEAD
+=======
+router.get('/trends', authenticateUser, dashboardController.getEngagementTends);
+
+>>>>>>> feat(dashboard): create an endpoint for engagement trends
 export default router;
