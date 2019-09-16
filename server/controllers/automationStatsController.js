@@ -1,5 +1,3 @@
-import moment from 'moment';
-
 import models from '../models';
 import {
   totalAutomationsQuery,
@@ -16,6 +14,7 @@ import {
   successEmailAutomationsQuery,
 } from '../utils/rawSQLQueries';
 
+import { validateDate, checkDuration } from '../helpers/dateHelpers';
 /**
  * resolve the query counters
  *
@@ -34,27 +33,16 @@ const queryCountResolver = queryCount => Number(queryCount[0].count);
  * @returns {object} response reporting automation stats
  */
 
-const dateSubtractor = (duration) => {
-  const date = duration === 'days'
-    ? 0
-    : 1;
-  return date;
-};
-
 export default async (req, res) => {
-  const { duration } = req.query;
-  if (duration !== 'days' && duration !== 'weeks' && duration !== 'months' && duration !== 'years') {
-    return res.status(400).json({ error: 'invalid duration input' });
+  const { duration, date } = req.query;
+  const durationQueryError = checkDuration(duration);
+  if (durationQueryError) {
+    return res.status(400).json({ error: durationQueryError });
   }
-  const dateEnd = req.query.date
-    ? moment(req.query.date).format('YYYY-MM-DD')
-    : moment().format('YYYY-MM-DD');
-  const dateStart = req.query.date
-    ? moment(req.query.date).subtract(dateSubtractor(duration), duration).format('YYYY-MM-DD')
-    : moment().subtract(dateSubtractor(duration), duration).format('YYYY-MM-DD');
+  const dateDurations = validateDate(date, false, duration);
 
   const querySettings = {
-    replacements: [`${dateStart} 00:00:00.00`, `${dateEnd} 23:59:59.99`],
+    replacements: [`${dateDurations.dateStart} 00:00:00.00`, `${dateDurations.dateEnd} 23:59:59.99`],
     type: models.sequelize.QueryTypes.SELECT,
   };
   try {
