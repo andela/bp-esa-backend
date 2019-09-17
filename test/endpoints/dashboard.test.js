@@ -62,7 +62,7 @@ describe('Tests for upselling partners endpoints\n', () => {
         done();
       });
   });
-  it('Should filter automation data with date[endDate] missing', (done) => {
+  it('Should filter upselling partner data with date[endDate] missing', (done) => {
     chai
       .request(app)
       .get(

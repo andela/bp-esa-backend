@@ -12,7 +12,6 @@ import {
 
 const automation = models.Automation;
 
-
 /**
  * Returns pagination in JSON format
  *
