@@ -1,48 +1,10 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 /* eslint-disable no-console */
-import moment from "moment";
-import models from "../models";
-import { Op } from "sequelize";
-import paginationMeta from "../helpers/paginationHelper";
-import {paginationResponse} from "../utils/formatter";
-import {isValidDateFormat, isValidStartDate} from '../helpers/dateHelpers';
-
-
-const automation = models.Automation;
-
-/**
- * Returns dateFunction
- * @param {string} type - boarding type
- * @param {number} offset - start value
- * @param {number} limit - number of records to pick
- * @param {string} dateFrom - start date
- * @param {string} dateTo - end date
- * @returns {object} - upselling partner record
- */
- const UpsellingPartnerQuery = async (type, offset, limit, dateFrom, dateTo) => {
-  const val = await automation
-  .findAndCountAll({
-    attributes: [
-      [models.sequelize.fn("count", models.sequelize.col("*")), "count"],
-      "type",
-      "partnerName"
-    ],
-    where: {
-      createdAt: {
-        [Op.gte]: moment(dateFrom).startOf('day'),
-        [Op.lte]: moment(dateTo).endOf('day'),
-      },
-      type: type
-    },
-    offset,
-    limit,
-    order: models.sequelize.literal("count DESC"),
-    group: ["automation.type", "automation.partnerName"],
-    raw: true
-  });
-  return val;
-}
+import paginationMeta from '../helpers/paginationHelper';
+import { paginationResponse, response } from '../utils/formatter';
+import { isValidDateFormat, isValidStartDate } from '../helpers/dateHelpers';
+import { upsellingPartnerQuery, partnerStatsQuery } from '../utils/sequelizeFunctions/dashboardQuery';
 
 /**
  * Returns pagination in JSON format
@@ -51,24 +13,46 @@ const automation = models.Automation;
  * @param {Object} res response object
  * @returns {object} JSON object
  */
-const paginationData = async (req, res) => {
+const upselllingPartnerPaginatedData = async (req, res) => {
   const limit = parseInt(req.query.limit, 10) || 10;
   const page = parseInt(req.query.page, 10) || 1;
   const offset = limit * (page - 1);
 
   const { date = {} } = req.query;
 
-  const { dateFrom, dateTo} = isValidStartDate(date);
+  const { dateFrom, dateTo } = isValidStartDate(date);
 
-  const allData = await UpsellingPartnerQuery('onboarding', offset, limit, dateFrom, dateTo);
-  const data = {count: allData.count.length};
+  const allData = await upsellingPartnerQuery('onboarding', offset, limit, dateFrom, dateTo);
+  const data = { count: allData.count.length };
   const { numberOfPages, nextPage, prevPage } = paginationMeta(page, data.count, limit);
   return paginationResponse(res, allData.rows, page, numberOfPages, data, nextPage, prevPage);
 };
 
+/**
+ * @desc Returns count and value in JSON format
+ *
+ * @param {Object} req request object
+ * @param {Object} res response object
+ * @returns {object} JSON object
+ */
+const PartnerStats = async (req, res) => {
+  const { date = {} } = req.query;
+  const { dateFrom, dateTo } = isValidStartDate(date);
+
+  const allData = await partnerStatsQuery(dateFrom, dateTo);
+  return response(res, allData);
+};
+
+const responseData = async (req, res, val) => {
+  const obj = { upSelling: upselllingPartnerPaginatedData, partnerStats: PartnerStats };
+  const { date = {} } = req.query;
+
+  throw !isValidDateFormat(date.startDate, date.endDate) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await obj[val](req, res);
+};
+
 export default class DashboardController {
   /**
-   * @desc Gets automation results and returns to user
+   * @desc Gets onboarding partner results and returns to user
    *
    * @param {object} req Get request object from client
    * @param {object} res REST Response object
@@ -77,11 +61,25 @@ export default class DashboardController {
 
   static async getUpsellingPartners(req, res) {
     try {
-      const { date = {} } = req.query;
-      const errorMessage = "Invalid date format provided please provide date in iso 8601 string";
-      return !isValidDateFormat(date.endDate, date.startDate)? new Error(errorMessage): await paginationData(req, res);     
-    } 
-    catch (err) {
+      return await responseData(req, res, 'upSelling');
+    } catch (err) {
+      console.log('err', err);
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
+  /**
+   * @desc Gets partner statistics results and returns to user
+   *
+   * @param {object} req Get request object from client
+   * @param {object} res REST Response object
+   * @returns {object} Response containing status message and dashboard data
+   */
+
+  static async getPartnerStats(req, res) {
+    try {
+      return await responseData(req, res, 'partnerStats');
+    } catch (err) {
       return res.status(400).json({ error: err.message });
     }
   }

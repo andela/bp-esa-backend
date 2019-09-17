@@ -1,3 +1,5 @@
+/* eslint-disable import/no-cycle */
+/* eslint-disable no-console */
 import express from 'express';
 import HTTP from 'http';
 import socket from 'socket.io';

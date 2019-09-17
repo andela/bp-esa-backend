@@ -18,6 +18,11 @@ export function daysBetween(date1, date2) {
   return ms(timeDifference, { long: true });
 }
 
+/**
+ *@description validate is the date is a valid moment date
+ * @param {Date} date - date object
+ * @returns {boolean} - true/false
+ */
 export function isValidDateFormat(date1, date2) {
   if ((date1 && !moment(date1).isValid()) || (date2 && !moment(date2).isValid())) 
   {
