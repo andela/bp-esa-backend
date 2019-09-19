@@ -1,8 +1,5 @@
 import sinon from 'sinon';
-<<<<<<< HEAD
 import nodemailer from 'nodemailer';
-=======
->>>>>>> feat(dashboard):  partner stats
 import { makeMockModels } from 'sequelize-test-helpers';
 import proxyquire from 'proxyquire';
 import emailTransport from '../../server/modules/email/emailTransport';
