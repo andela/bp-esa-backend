@@ -8,6 +8,7 @@ import { getAndelaPartners } from '../../server/mockAndelaApi/mockPlacement';
 
 import { samplePartner } from '../mocks/partners';
 import placements from '../mocks/allocations';
+import env from '../../server/validator';
 
 describe('Test that helper functions work as expected', () => {
   it('Ensures that response object contains data field', () => {
@@ -35,12 +36,12 @@ describe('Test that helper functions work as expected', () => {
   });
 
   it('should return email sent message', async () => {
-    const allocationsFetchFailCount = process.env.FETCH_FAIL_AUTOMATION_COUNT + 20;
+    const allocationsFetchFailCount = env.FETCH_FAIL_AUTOMATION_COUNT + 20;
     const sendResponse = await checkFailureCount(allocationsFetchFailCount);
     expect(sendResponse.message).to.equal('Email sent successfully');
   });
   it('should return Max failures not reached yet if fail count has', async () => {
-    const allocationsFetchFailCount = process.env.FETCH_FAIL_AUTOMATION_COUNT - 5;
+    const allocationsFetchFailCount = env.FETCH_FAIL_AUTOMATION_COUNT - 5;
     const sendResponse = await checkFailureCount(allocationsFetchFailCount);
     expect(sendResponse.message).to.equal('Max failures not reached yet');
   });

@@ -14,5 +14,4 @@ export default (app) => {
   app.use('/api/v1/automations', automationsAPI);
   app.use('/api/v1/auth', authApi);
   app.use('/api/v1/dashboard', dashboardApi);
-
 };

@@ -1,5 +1,5 @@
-import ms from "ms";
-import moment from "moment";
+import ms from 'ms';
+import moment from 'moment';
 
 /**
  * @description calculate the uptime for the worker
@@ -18,9 +18,14 @@ export function daysBetween(date1, date2) {
   return ms(timeDifference, { long: true });
 }
 
+/**
+ *@description validate is the date is a valid moment date
+ * @param {Date} date1 - date object
+ * @param {Date} date2 - date object
+ * @returns {boolean} - true/false
+ */
 export function isValidDateFormat(date1, date2) {
-  if ((date1 && !moment(date1).isValid()) || (date2 && !moment(date2).isValid())) 
-  {
+  if ((date1 && !moment(date1).isValid()) || (date2 && !moment(date2).isValid())) {
     return false;
   }
   return true;
@@ -31,16 +36,13 @@ export function isValidDateFormat(date1, date2) {
  * @param {Date} date - date object
  * @returns {Date} - date object
  */
-export function isValidStartDate ({ endDate =  moment(), startDate = moment().subtract(30, 'days')}){  
-  // eslint-disable-next-line no-unused-vars2
-  const dateFrom = moment(startDate).format("YYYY-MM-DD");
-  const dateTo = moment(endDate).format("YYYY-MM-DD");
+export function isValidStartDate({ endDate = moment(), startDate = moment().subtract(30, 'days') }) {
+  const dateFrom = moment(startDate).format('YYYY-MM-DD');
+  const dateTo = moment(endDate).format('YYYY-MM-DD');
   // check if date.from is greater than date.to or today, return an error
   if (dateFrom > dateTo) {
-    throw new Error("startDate cannot be greater than endDate");
+    throw new Error('startDate cannot be greater than endDate');
   }
   // check if both date from and to are provided
-  if (dateFrom && dateTo) {
-    return { dateFrom, dateTo };
-  }
-};
+  return { dateFrom, dateTo };
+}

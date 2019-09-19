@@ -3,9 +3,10 @@ import dotenv from 'dotenv';
 import makeChannelNames from '../../helpers/slackHelpers';
 import { redisdb } from '../../helpers/redis';
 import responseObject from '../utils';
+import env from '../../validator';
 
 dotenv.config();
-const { SCAN_RANGE, REJECT_RATE_LIMIT, SLACK_TOKEN } = process.env;
+const { SCAN_RANGE, REJECT_RATE_LIMIT, SLACK_TOKEN } = env;
 let rejectRateLimit = false;
 if (typeof REJECT_RATE_LIMIT !== 'undefined') {
   rejectRateLimit = REJECT_RATE_LIMIT;
@@ -119,6 +120,7 @@ const searchKey = channel => (channel.name ? channel.name.slice(-4) : channel.sl
  * @param {String} channelType The type of channel to find: internal || general
  * @returns {Object} The details of the channel found
  */
+// eslint-disable-next-line consistent-return
 const findOne = async (result, channelType) => {
   if (result.length) {
     const found = result.find((channel) => {
@@ -140,6 +142,7 @@ const findOne = async (result, channelType) => {
  */
 const matchedChannels = (channelData, partnerData) => ({
   true: () => {
+    // eslint-disable-next-line no-param-reassign
     channelData.channelName = partnerData.channel_name.slice(0, -4);
     return getMatchingChannels(channelData.channelName, true);
   },

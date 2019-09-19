@@ -1,6 +1,8 @@
 import sinon from 'sinon';
+import nodemailer from 'nodemailer';
 import { makeMockModels } from 'sequelize-test-helpers';
 import proxyquire from 'proxyquire';
+import emailTransport from '../../server/modules/email/emailTransport';
 
 /* eslint-disable no-unused-expressions */
 
@@ -32,7 +34,13 @@ const automations = proxyquire('../../server/modules/automations', {
   '../models': fakeModels,
 });
 
+const sandbox = sinon.createSandbox();
+
 describe('Automation Database Operations', () => {
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   it('should upsert a slackAutomation record in the DB', async () => {
     const automationDetails = {
       channelId: '555',
@@ -57,6 +65,36 @@ describe('Automation Database Operations', () => {
     expect(mockModels.EmailAutomation.upsertById.firstCall.args[0].statusMessage).to.equal(
       'Email sent succesfully',
     );
+  });
+  it('should test that an email has been sent successfully', async () => {
+    sandbox.stub(nodemailer, 'createTransport').returns({
+      sendMail: (data, callback) => {
+        const err = new Error('some error');
+        callback(err, null);
+      },
+    });
+    const options = {
+      from: 'from@email.com',
+      to: 'to@email.com',
+      statusMessage: 'Email sent succesfully',
+    };
+    await emailTransport.sendMail(options, (err, response) => {
+      const { statusMessage } = response;
+      expect(statusMessage).to.equal('Email sent successfully');
+    });
+  });
+  it('should test that an email has failed to be sent', async () => {
+    sandbox.stub(nodemailer, 'createTransport').returns({
+      sendMail: (data, callback) => {
+        const err = new Error('some error');
+        callback(err, null);
+      },
+    });
+    const options = null;
+    await emailTransport.sendMail(options, (err, response) => {
+      const { status } = response;
+      expect(status).to.equal('failure');
+    });
   });
   it('should upsert a nokoAutomation record in the DB', async () => {
     const automationDetails = {

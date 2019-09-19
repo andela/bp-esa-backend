@@ -164,3 +164,12 @@ export const expectedReponseMockData = [{
         }],
     },
 }];
+
+export const automationCreateData = [
+  {
+    ...automationsMockData[0],
+    fellowName: automationsMockData[0].fellowName.split(' ').join(),
+    placementId: automationsMockData[0].id,
+    email: automationsMockData[0].emailAutomations[0].emailTo,
+  },
+];

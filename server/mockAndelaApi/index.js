@@ -18,6 +18,7 @@ async function generatePlacements(status) {
   const placements = [];
   const { members } = await slack.listUsers();
   const emails = members.reduce(
+    // eslint-disable-next-line max-len
     (result, { deleted, profile: { email } }) => (email && !deleted && email !== process.env.SLACK_ADMIN ? [...result, email] : result),
     [],
   );
