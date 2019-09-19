@@ -1,12 +1,13 @@
-import { Op } from "sequelize";
-import moment from "moment";
-import models from "../../models";
+import { Op } from 'sequelize';
+import moment from 'moment';
+import models from '../../models';
+
 const automation = models.Automation;
 const createdAt = (dateFrom, dateTo) => ({
-    [Op.gte]: moment(dateFrom).startOf("day"),
-    [Op.lte]: moment(dateTo).endOf("day")
+  [Op.gte]: moment(dateFrom).startOf('day'),
+  [Op.lte]: moment(dateTo).endOf('day'),
 });
-const order = models.sequelize.literal("count DESC");
+const order = models.sequelize.literal('count DESC');
 /**
  * Returns dateFunction
  * @param {string} type - boarding type
@@ -21,38 +22,36 @@ export const upsellingPartnerQuery = async (
   offset,
   limit,
   dateFrom,
-  dateTo
+  dateTo,
 ) => {
   const val = await automation.findAndCountAll({
     attributes: [
-      [models.sequelize.fn("count", models.sequelize.col("*")), "count"],
-      "type",
-      "partnerName"
+      [models.sequelize.fn('count', models.sequelize.col('*')), 'count'],
+      'type',
+      'partnerName',
     ],
     where: {
       createdAt: createdAt(dateFrom, dateTo),
-      type
+      type,
     },
     offset,
     limit,
     order,
-    group: ["automation.type", "automation.partnerName"],
-    raw: true
+    group: ['automation.type', 'automation.partnerName'],
+    raw: true,
   });
   return val;
 };
 
-export const partnerStatsQuery = async (dateFrom, dateTo) => {
-  return await automation.findAll({
-    attributes: [
-      [models.sequelize.fn("count", models.sequelize.col("*")), "count"],
-      "type"
-    ],
-    where: {
-      createdAt: createdAt(dateFrom, dateTo)
-    },
-    order,
-    group: ["automation.type"],
-    raw: true
-  });
-};
+export const partnerStatsQuery = (dateFrom, dateTo) => automation.findAll({
+  attributes: [
+    [models.sequelize.fn('count', models.sequelize.col('*')), 'count'],
+    'type',
+  ],
+  where: {
+    createdAt: createdAt(dateFrom, dateTo),
+  },
+  order,
+  group: ['automation.type'],
+  raw: true,
+});

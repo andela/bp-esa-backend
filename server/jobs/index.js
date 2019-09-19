@@ -5,6 +5,7 @@ import fs from 'fs';
 import ms from 'ms';
 import * as Helper from './helpers';
 import { fetchNewPlacements, findPartnerById } from '../modules/allocations';
+// eslint-disable-next-line import/no-cycle
 import { io } from '..';
 import { formatPayload } from '../utils/formatter';
 import { include } from '../controllers/automationController';
@@ -84,7 +85,8 @@ const automations = async (placement, partner, type, jobList) => {
 
 const automationList = (partnerList, newPlacements, type, jobList) => {
   const partner = clientId => partnerList.find(({ partnerId }) => partnerId === clientId);
-  return newPlacements.map(placement => automations(placement, partner(placement.client_id), type, jobList));
+  return newPlacements
+    .map(placement => automations(placement, partner(placement.client_id), type, jobList));
 };
 
 /**

@@ -2,15 +2,16 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 import moment from 'moment';
-
+import { Parser } from 'json2csv';
 import * as util from 'util';
+import * as fs from 'fs';
 import models from '../models';
 import { paginationResponse, formatAutomationResponse } from '../utils/formatter';
 import paginationMeta from '../helpers/paginationHelper';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
 import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
+import fields from '../reportFields';
 import { isValidDateFormat } from '../helpers/dateHelpers';
-
 
 const automation = models.Automation;
 export const include = [
@@ -34,6 +35,8 @@ export const include = [
 const order = [
   ['id', 'DESC'],
 ];
+
+let newData = [];
 
 
 /**
@@ -141,7 +144,6 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, nokoAutomation
     automationRawQuery += `AND "a"."type"='${type}'`;
     myQueryCounter += `AND "a"."type"='${util.format('%s', type)}'`;
   }
-
   return { myQueryCounter, automationRawQuery };
 };
 
@@ -154,15 +156,13 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, nokoAutomation
  */
 const paginationData = async (req, res) => {
   const orderBy = order.map(item => item.join(' ')).join();
-  const limit = parseInt(req.query.limit, 10) || 10;
+  let limit = parseInt(req.query.limit, 10) || 10;
   const {
     date, slackAutomation, emailAutomation, nokoAutomation, type = null, searchBy, searchTerm,
   } = req.query;
   const querySettings = {
     replacements: [
-      slackAutomation || 'success',
-      emailAutomation || 'success',
-      nokoAutomation || 'success',
+      slackAutomation || 'success', emailAutomation || 'success', nokoAutomation || 'success',
     ],
     type: models.sequelize.QueryTypes.SELECT,
   };
@@ -171,13 +171,16 @@ const paginationData = async (req, res) => {
   let { automationRawQuery, myQueryCounter } = filterQuery(myDateQuery, slackAutomation, emailAutomation, nokoAutomation, type, { searchTerm, searchBy });
   const countData = await models.sequelize.query(myQueryCounter, { ...querySettings });
   const data = countData.shift();
+  if (limit === -1) {
+    limit = data.count;
+  }
   const page = parseInt(req.query.page, 10) || 1;
   const offset = limit * (page - 1);
 
   const { numberOfPages, nextPage, prevPage } = paginationMeta(page, data.count, limit);
   automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
-  const allData = await getAutomationDataFromIds(automationRawQuery, { ...querySettings }, { include, order });
-  return paginationResponse(res, allData, page, numberOfPages, data, nextPage, prevPage);
+  newData = await getAutomationDataFromIds(automationRawQuery, { ...querySettings }, { include, order });
+  return paginationResponse(res, newData, page, numberOfPages, data, nextPage, prevPage);
 };
 
 export default class AutomationController {
@@ -227,6 +230,49 @@ export default class AutomationController {
         status: 'success',
         message: 'Successfully fetched individual automation',
         data: formatAutomationResponse([existingPlacement]),
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  /**
+   * @desc Returns JSON data from the frontend and converts it to a csv
+   *
+   * @param {object} req Get request object from client
+   * @param {object} res REST Response object
+   * @returns {object} Response containing status message and generated report
+   */
+  // eslint-disable-next-line consistent-return
+  static async postReport(req, res) {
+    try {
+      const opts = { fields };
+      await AutomationController.getAutomations(req, res);
+      const json2csvParser = new Parser(opts);
+      const csv = json2csvParser.parse(newData);
+      const path = `${__dirname}/Reports.csv`;
+      fs.writeFile(path, csv, () => res.download(path));
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
+  /**
+   * @desc Sends the csv file to the frontend and deletes the local copy of the csv
+   *
+   * @param {object} req Get request object from client
+   * @param {object} res REST Response object
+   * @returns {object} Response containing status message and served report
+   */
+
+  static async getReport(req, res) {
+    try {
+      return res.status(200).sendFile(`${__dirname}/Reports.csv`, () => {
+        fs.unlink(`${__dirname}/Reports.csv`, (err) => {
+          if (err) {
+            res.status(404).json({ error: 'The file was not found' });
+          }
+        });
       });
     } catch (err) {
       return res.status(500).json({ error: err.message });

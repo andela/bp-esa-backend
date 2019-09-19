@@ -83,6 +83,23 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('Should show previous page number if page > 1', (done) => {
+    chai
+      .request(app)
+      .get(
+        '/api/v1/automations?page=2&limit=5',
+      )
+      .set('authorization', userToken)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body)
+          .to.have.property('message')
+          .to.equal('Successfully fetched data');
+        expect(res.body.pagination.prevPage)
+          .to.be.equal(1);
+        done();
+      });
+  });
   it('Should filter automation data', (done) => {
     chai
       .request(app)
@@ -341,6 +358,16 @@ describe('Tests for automation endpoints\n', () => {
         done();
       });
   });
+  it('should return all the automations', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations/?limit=-1')
+      .set('authorization', userToken)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        done();
+      });
+  });
 });
 
 describe(' Test for retrying automations', () => {
@@ -390,6 +417,30 @@ describe(' Test for retrying automations', () => {
         expect(res.body)
           .to.have.property('message')
           .to.equal('Successfully fetched individual automation');
+        done();
+      });
+  });
+});
+
+describe('Tests for creating a report', () => {
+  it('should create a report', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations/downloadReport')
+      .set('authorization', userToken)
+      .end((err, res) => {
+        if (err) done(err);
+        expect(res).to.have.status(200);
+        done();
+      });
+  });
+  it('should fetch a created report', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations/fetchReport')
+      .set('authorization', userToken)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
         done();
       });
   });

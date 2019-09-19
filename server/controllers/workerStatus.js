@@ -1,5 +1,5 @@
 import client from '../helpers/redis';
-import {daysBetween} from '../helpers/dateHelpers';
+import { daysBetween } from '../helpers/dateHelpers';
 
 /**
  * @desc Gets worker status and returns to user

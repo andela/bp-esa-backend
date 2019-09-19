@@ -3,6 +3,7 @@
 /* eslint-disable no-console */
 import dotenv from 'dotenv';
 import db from '../models';
+import env from '../validator';
 
 import { getOrCreateProject, assignProject } from '../modules/noko/projects';
 import { accessChannel } from '../modules/slack/slackIntegration';
@@ -14,7 +15,7 @@ import { findPartnerById } from '../modules/allocations';
 import { retryAutomations } from '../modules/automations';
 
 dotenv.config();
-const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = process.env;
+const { SLACK_AVAILABLE_DEVS_CHANNEL_ID, SLACK_RACK_CITY_CHANNEL_ID } = env;
 
 const { SlackAutomation, NokoAutomation } = db;
 
