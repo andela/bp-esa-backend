@@ -78,14 +78,11 @@ export function formatPayload(automation) {
 /**
  * @description Formats automation payload received from database.
  * @param {Array} payload Automations data returned from database
- *
+* @param {boolean} isFormat formmattting isn't needed
  * @returns {Array} Formated automation to be returned by the API
  */
-export function formatAutomationResponse(payload) {
-  if (!payload) {
-    return payload.map(automation => formatPayload(automation));
-  }
-  return payload;
+export function formatAutomationResponse(payload, isFormat) {
+  return isFormat ? payload : payload.map(automation => formatPayload(automation));
 }
 
 
@@ -99,6 +96,7 @@ export function formatAutomationResponse(payload) {
  * @param {object} data data object
  * @param {integer} nextPage next page number
  * @param {integer} prevPage previous page number
+ * @param {boolean} isFormat formmattting isn't needed
  * @returns {object} Response containing paginated object
  */
 export const paginationResponse = (res,
@@ -107,10 +105,10 @@ export const paginationResponse = (res,
   numberOfPages,
   data,
   nextPage,
-  prevPage) => res.status(200).json({
+  prevPage, isFormat) => res.status(200).json({
   status: 'success',
   message: 'Successfully fetched data',
-  data: formatAutomationResponse(allData),
+  data: formatAutomationResponse(allData, isFormat),
   pagination: {
     currentPage: page,
     numberOfPages,

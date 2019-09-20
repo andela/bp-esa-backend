@@ -6,7 +6,7 @@
  * @param   {number}  count total data count
  * @param   {number}  limit total per page
  *
- * @return  {object} an object containing offset numberOfPages nextPage and prevPage properties
+ * @return  {object} an object containing numberOfPages nextPage and prevPage properties
  */
 export default function paginationMeta(page, count, limit) {
   const numberOfPages = Math.ceil(count / limit); // all pages count

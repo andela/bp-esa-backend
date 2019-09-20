@@ -10,8 +10,9 @@ import { paginationResponse, formatAutomationResponse } from '../utils/formatter
 import paginationMeta from '../helpers/paginationHelper';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
 import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
-import fields from '../reportFields';
 import { isValidDateFormat } from '../helpers/dateHelpers';
+import fields from '../reportFields';
+
 
 const automation = models.Automation;
 export const include = [
@@ -196,7 +197,11 @@ export default class AutomationController {
     try {
       const { date = {} } = req.query;
 
-      return !isValidDateFormat(date.to, date.from) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await paginationData(req, res);
+      if (!isValidDateFormat(date.to, date.from)) {
+        throw new Error('Invalid date format provided please provide date in iso 8601 string');
+      }
+
+      return await paginationData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }

@@ -25,7 +25,7 @@ const upselllingPartnerPaginatedData = async (req, res) => {
   const allData = await upsellingPartnerQuery('onboarding', offset, limit, dateFrom, dateTo);
   const data = { count: allData.count.length };
   const { numberOfPages, nextPage, prevPage } = paginationMeta(page, data.count, limit);
-  return paginationResponse(res, allData.rows, page, numberOfPages, data, nextPage, prevPage);
+  return paginationResponse(res, allData.rows, page, numberOfPages, data, nextPage, prevPage, true);
 };
 
 /**
