@@ -1,8 +1,9 @@
 build
 node_modules/
+server/middleware/validator.js
 test.js
 .env
-
+.DS_Store
 .vscode/
 coverage
 .nyc_output
