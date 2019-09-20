@@ -105,10 +105,10 @@ export const paginationResponse = (res,
   numberOfPages,
   data,
   nextPage,
-  prevPage) => res.status(200).json({
+  prevPage, isFormat) => res.status(200).json({
   status: 'success',
   message: 'Successfully fetched data',
-  data: formatAutomationResponse(allData),
+  data: formatAutomationResponse(allData, isFormat),
   pagination: {
     currentPage: page,
     numberOfPages,

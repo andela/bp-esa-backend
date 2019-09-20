@@ -10,8 +10,9 @@ import { paginationResponse, formatAutomationResponse } from '../utils/formatter
 import paginationMeta from '../helpers/paginationHelper';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
 import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
-import fields from '../reportFields';
 import { isValidDateFormat } from '../helpers/dateHelpers';
+import fields from '../reportFields';
+
 
 const automation = models.Automation;
 export const include = [
