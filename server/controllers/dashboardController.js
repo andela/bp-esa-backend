@@ -13,7 +13,8 @@ import { upsellingPartnerQuery, partnerStatsQuery } from '../utils/sequelizeFunc
  * @param {Object} res response object
  * @returns {object} JSON object
  */
-const upselllingPartnerPaginatedData = async (req, res) => {
+const upsellingPartnerPaginatedData = async (req, res) => {
+  const type = 'onboarding';
   const limit = parseInt(req.query.limit, 10) || 10;
   const page = parseInt(req.query.page, 10) || 1;
   const offset = limit * (page - 1);
@@ -22,7 +23,7 @@ const upselllingPartnerPaginatedData = async (req, res) => {
 
   const { dateFrom, dateTo } = isValidStartDate(date);
 
-  const allData = await upsellingPartnerQuery('onboarding', offset, limit, dateFrom, dateTo);
+  const allData = await upsellingPartnerQuery(type, offset, limit, dateFrom, dateTo);
   const data = { count: allData.count.length };
   const { numberOfPages, nextPage, prevPage } = paginationMeta(page, data.count, limit);
   return paginationResponse(res, allData.rows, page, numberOfPages, data, nextPage, prevPage, true);
@@ -44,7 +45,7 @@ const PartnerStats = async (req, res) => {
 };
 
 const responseData = async (req, res, val) => {
-  const obj = { upSelling: upselllingPartnerPaginatedData, partnerStats: PartnerStats };
+  const obj = { upSelling: upsellingPartnerPaginatedData, partnerStats: PartnerStats };
   const { date = {} } = req.query;
 
   throw !isValidDateFormat(date.startDate, date.endDate) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await obj[val](req, res);
@@ -63,7 +64,6 @@ export default class DashboardController {
     try {
       return await responseData(req, res, 'upSelling');
     } catch (err) {
-      console.log('err', err);
       return res.status(400).json({ error: err.message });
     }
   }

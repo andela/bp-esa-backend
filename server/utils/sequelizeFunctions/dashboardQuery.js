@@ -27,7 +27,6 @@ export const upsellingPartnerQuery = async (
   const val = await automation.findAndCountAll({
     attributes: [
       [models.sequelize.fn('count', models.sequelize.col('*')), 'count'],
-      'type',
       'partnerName',
     ],
     where: {
@@ -37,7 +36,7 @@ export const upsellingPartnerQuery = async (
     offset,
     limit,
     order,
-    group: ['automation.type', 'automation.partnerName'],
+    group: ['automation.partnerName'],
     raw: true,
   });
   return val;
