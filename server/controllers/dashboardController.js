@@ -12,6 +12,18 @@ import {
 
 const automation = models.Automation;
 /**
+ * Checks if date format is valid
+ *
+ * @param {Object} req request object
+ * @returns {object} Error object
+ */
+const checkDateFormat = (req) => {
+  const { date = {} } = req.query;
+  if (!isValidDateFormat(date.startDate, date.endDate)) {
+    throw new Error('Invalid date format provided please provide date in iso 8601 string');
+  }
+};
+/**
  * Returns pagination in JSON format
  *
  * @param {Object} req request object
@@ -67,10 +79,7 @@ export default class DashboardController {
 
   static async getUpsellingPartners(req, res) {
     try {
-      const { date = {} } = req.query;
-      if (!isValidDateFormat(date.startDate, date.endDate)) {
-        throw new Error('Invalid date format provided please provide date in iso 8601 string');
-      }
+      checkDateFormat(req);
       return await upsellingPartnerPaginatedData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
@@ -87,11 +96,7 @@ export default class DashboardController {
 
   static async getPartnerStats(req, res) {
     try {
-      const { date = {} } = req.query;
-
-      if (!isValidDateFormat(date.startDate, date.endDate)) {
-        throw new Error('Invalid date format provided please provide date in iso 8601 string');
-      }
+      checkDateFormat(req);
       return await PartnerStats(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
