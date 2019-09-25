@@ -28,7 +28,6 @@ describe('Slack Integration Test Suite', async () => {
     Object.keys(fakeSlackClient).forEach(fake => fakeSlackClient[fake].resetHistory());
     createOrUpdateSlackAutomation.resetHistory();
   });
-
   it('Should create internal slack channels and save the automation to DB', async () => {
     const { data } = onboardingAllocations;
     const { client_name: partnerName } = data.values[0];
