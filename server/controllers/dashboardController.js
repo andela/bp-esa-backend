@@ -44,12 +44,12 @@ const PartnerStats = async (req, res) => {
   return response(res, allData);
 };
 
-const responseData = async (req, res, val) => {
-  const obj = { upSelling: upsellingPartnerPaginatedData, partnerStats: PartnerStats };
-  const { date = {} } = req.query;
+// const responseData = async (req, res, val) => {
+//   const obj = { upSelling: upsellingPartnerPaginatedData, partnerStats: PartnerStats };
+//   const { date = {} } = req.query;
 
-  throw !isValidDateFormat(date.startDate, date.endDate) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await obj[val](req, res);
-};
+//   throw !isValidDateFormat(date.startDate, date.endDate) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await obj[val](req, res);
+// };
 
 export default class DashboardController {
   /**
@@ -62,7 +62,9 @@ export default class DashboardController {
 
   static async getUpsellingPartners(req, res) {
     try {
-      return await responseData(req, res, 'upSelling');
+      const { date = {} } = req.query;
+
+      throw !isValidDateFormat(date.startDate, date.endDate) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await upsellingPartnerPaginatedData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -78,7 +80,9 @@ export default class DashboardController {
 
   static async getPartnerStats(req, res) {
     try {
-      return await responseData(req, res, 'partnerStats');
+      const { date = {} } = req.query;
+
+      throw !isValidDateFormat(date.startDate, date.endDate) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await PartnerStats(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
