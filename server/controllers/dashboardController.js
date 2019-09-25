@@ -26,7 +26,6 @@ const upsellingPartnerPaginatedData = async (req, res) => {
   const offset = limit * (page - 1);
 
   const { date = {} } = req.query;
-
   if (!isValidDateFormat(date.startDate, date.endDate)) {
     throw new Error('Invalid date format provided please provide date in iso 8601 string');
   } else {
