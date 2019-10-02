@@ -13,7 +13,6 @@ import { userPayload } from '../mockData/userPayload';
 chai.use(chaiHttp);
 
 const userToken = generateToken(userPayload);
-
 describe('Tests for automation endpoints\n', () => {
   beforeEach('create mock db', async () => {
     await models.Automation.bulkCreate(existingPlacement);
@@ -64,6 +63,20 @@ describe('Tests for automation endpoints\n', () => {
         expect(res.body)
           .to.have.property('data')
           .to.be.an('array');
+        done();
+      });
+  });
+  it('should return a valid response format', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations')
+      .set('authorization', userToken)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        res.body.data.forEach((data) => {
+          expect(data)
+            .to.have.all.keys('id', 'fellowId', 'email', 'fellowName', 'partnerId', 'partnerName', 'type', 'createdAt', 'updatedAt', 'slackAutomations', 'emailAutomations', 'nokoAutomations');
+        });
         done();
       });
   });
