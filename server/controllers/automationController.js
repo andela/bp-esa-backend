@@ -200,7 +200,6 @@ export default class AutomationController {
       if (!isValidDateFormat(date.to, date.from)) {
         throw new Error('Invalid date format provided please provide date in iso 8601 string');
       }
-
       return await paginationData(req, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });

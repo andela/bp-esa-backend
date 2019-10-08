@@ -117,3 +117,9 @@ export const paginationResponse = (res,
     prevPage,
   },
 });
+
+export const response = (res, allData) => res.status(200).json({
+  status: 'success',
+  message: 'Successfully fetched data',
+  data: allData,
+});

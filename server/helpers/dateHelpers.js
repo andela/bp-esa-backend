@@ -22,6 +22,8 @@ export function daysBetween(date1, date2) {
  *@description validate is the date is a valid moment date
  * @param {Date} date1 - date object
  * @param {Date} date2 - date object
+=======
+ * @param {Date} date - date object
  * @returns {boolean} - true/false
  */
 export function isValidDateFormat(date1, date2) {

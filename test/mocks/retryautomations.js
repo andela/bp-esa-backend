@@ -176,8 +176,8 @@ export const existingPlacement = [{
   partnerName: 'Sample Partner',
   partnerId: 'ABCDEFZYXWVU',
   type: 'offboarding',
-  createdAt: '2019-06-20T06:54:29.210Z',
-  updatedAt: '2019-06-20T06:54:29.210Z',
+  createdAt: '2019-09-11T06:54:29.210Z',
+  updatedAt: '2019-09-11T06:54:29.210Z',
 },
 {
   id: 2,
