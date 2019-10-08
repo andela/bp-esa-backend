@@ -12,26 +12,24 @@ import {
 
 const automation = models.Automation;
 
-const checkDateFormat = (req) => {
-  const { date = {} } = req.query;
-  if (!isValidDateFormat(date.startDate, date.endDate)) {
+const checkDateFormat = (date) => {
+  if (!date || !isValidDateFormat(date.startDate, date.endDate)) {
     throw new Error('Invalid date format provided please provide date in iso 8601 string');
   }
 };
+
 /**
- * Returns pagination in JSON format
+ * @desc Returns upselling parter data in paginated format
  *
- * @param {Object} req request object
- * @param {Object} res response object
+ * @param {*} date Date range to query
+ * @param {*} offset Page offset for data to return
+ * @param {*} limit Number of records to return
+ * @param {*} page Current page
+ * @param {*} res HTTP response object
  * @returns {object} JSON object
  */
-const upsellingPartnerPaginatedData = async (req, res) => {
+const upsellingPartnerPaginatedData = async (date, offset, limit, page, res) => {
   const type = 'onboarding';
-  const limit = parseInt(req.query.limit, 10) || 10;
-  const page = parseInt(req.query.page, 10) || 1;
-  const offset = limit * (page - 1);
-
-  const { date = {} } = req.query;
 
   const { dateFrom, dateTo } = isValidStartDate(date);
 
@@ -44,24 +42,15 @@ const upsellingPartnerPaginatedData = async (req, res) => {
 /**
  * @desc Returns count and value in JSON format
  *
- * @param {Object} req request object
+ * @param {Object} date request object
  * @param {Object} res response object
  * @returns {object} JSON object
  */
-const PartnerStats = async (req, res) => {
-  const { date = {} } = req.query;
-
+const PartnerStats = async (date, res) => {
   const { dateFrom, dateTo } = isValidStartDate(date);
   const allData = await partnerStatsQuery(dateFrom, dateTo);
   return response(res, allData);
 };
-
-// const responseData = async (req, res, val) => {
-//   const obj = { upSelling: upsellingPartnerPaginatedData, partnerStats: PartnerStats };
-//   const { date = {} } = req.query;
-
-//   throw !isValidDateFormat(date.startDate, date.endDate) ? new Error('Invalid date format provided please provide date in iso 8601 string') : await obj[val](req, res);
-// };
 
 export default class DashboardController {
   /**
@@ -73,9 +62,14 @@ export default class DashboardController {
    */
 
   static async getUpsellingPartners(req, res) {
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const page = parseInt(req.query.page, 10) || 1;
+    const offset = limit * (page - 1);
+
+    const { date = {} } = req.query;
     try {
-      checkDateFormat(req);
-      return await upsellingPartnerPaginatedData(req, res);
+      checkDateFormat(date);
+      return await upsellingPartnerPaginatedData(date, offset, limit, page, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -90,14 +84,14 @@ export default class DashboardController {
    */
 
   static async getPartnerStats(req, res) {
+    const { date = {} } = req.query;
     try {
-      checkDateFormat(req);
-      return await PartnerStats(req, res);
+      checkDateFormat(date);
+      return await PartnerStats(date, res);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
   }
-
 
   /**
  * controller for the 'api/v1/dashboard/trends' endpoint that displays the trend
