@@ -2,17 +2,14 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 import moment from 'moment';
-import { Parser } from 'json2csv';
 import * as util from 'util';
-import * as fs from 'fs';
+import stringify from 'csv-stringify';
 import models from '../models';
 import { paginationResponse, formatAutomationResponse } from '../utils/formatter';
 import paginationMeta from '../helpers/paginationHelper';
 import { sqlAutomationRawQuery, queryCounter } from '../utils/rawSQLQueries';
 import { onboardingReRuns, offboardingReRuns } from '../jobs/reruns';
 import { isValidDateFormat } from '../helpers/dateHelpers';
-import fields from '../reportFields';
-
 
 const automation = models.Automation;
 export const include = [
@@ -148,19 +145,24 @@ const filterQuery = (dateQuery, slackAutomation, emailAutomation, nokoAutomation
   return { myQueryCounter, automationRawQuery };
 };
 
+
 /**
- * Returns pagination in JSON format
+ * Returns paginated data in JSON format
  *
- * @param {Object} req request object
- * @param {Object} res response object
- * @returns {object} JSON object
+ * @param {*} date The range to query
+ * @param {*} slackAutomation Whether or not to query based on slack status
+ * @param {*} emailAutomation Whether or not to query based on email status
+ * @param {*} nokoAutomation Whether or not to query based on noko status
+ * @param {*} type Whether or not to query based on automation type
+ * @param {*} searchBy The field to search by
+ * @param {*} searchTerm The search term to use to search the specified searchBy field
+ * @param {*} page The page of the data to be returned
+ * @param {*} limit The size of data to be returned in a page
+ * @returns {object} JSON object with paginated data
  */
-const paginationData = async (req, res) => {
+const paginationData = async (date, slackAutomation, emailAutomation, nokoAutomation, type, searchBy, searchTerm, page, limit) => {
   const orderBy = order.map(item => item.join(' ')).join();
-  let limit = parseInt(req.query.limit, 10) || 10;
-  const {
-    date, slackAutomation, emailAutomation, nokoAutomation, type = null, searchBy, searchTerm,
-  } = req.query;
+  limit = parseInt(limit, 10) || 10;
   const querySettings = {
     replacements: [
       slackAutomation || 'success', emailAutomation || 'success', nokoAutomation || 'success',
@@ -175,13 +177,13 @@ const paginationData = async (req, res) => {
   if (limit === -1) {
     limit = data.count;
   }
-  const page = parseInt(req.query.page, 10) || 1;
+  page = parseInt(page, 10) || 1;
   const offset = limit * (page - 1);
 
   const { numberOfPages, nextPage, prevPage } = paginationMeta(page, data.count, limit);
   automationRawQuery += ` ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
   newData = await getAutomationDataFromIds(automationRawQuery, { ...querySettings }, { include, order });
-  return paginationResponse(res, newData, page, numberOfPages, data, nextPage, prevPage);
+  return paginationResponse(newData, page, numberOfPages, data, nextPage, prevPage);
 };
 
 export default class AutomationController {
@@ -195,12 +197,21 @@ export default class AutomationController {
 
   static async getAutomations(req, res) {
     try {
-      const { date = {} } = req.query;
-
-      if (!isValidDateFormat(date.to, date.from)) {
+      const params = req.query;
+      params.date = params.date || {};
+      if (!isValidDateFormat(params.date.to, params.date.from)) {
         throw new Error('Invalid date format provided please provide date in iso 8601 string');
       }
-      return await paginationData(req, res);
+      let response;
+      await paginationData(
+        params.date, params.slackAutomation, params.emailAutomation, params.nokoAutomation,
+        params.type, params.searchBy, params.searchTerm, params.page, params.limit,
+      )
+        .then((data) => {
+          response = data;
+        })
+        .catch(error => res.status(500).json({ error: error.message }));
+      return res.json(response);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -250,36 +261,25 @@ export default class AutomationController {
   // eslint-disable-next-line consistent-return
   static async postReport(req, res) {
     try {
-      const opts = { fields };
-      await AutomationController.getAutomations(req, res);
-      const json2csvParser = new Parser(opts);
-      const csv = json2csvParser.parse(newData);
-      const path = `${__dirname}/Reports.csv`;
-      fs.writeFile(path, csv, () => res.download(path));
+      const params = req.query;
+      params.date = params.date || {};
+      let response;
+      await paginationData(
+        params.date, params.slackAutomation, params.emailAutomation, params.nokoAutomation,
+        params.type, params.searchBy, params.searchTerm, params.page, params.limit,
+      )
+        .then((data) => {
+          response = data;
+        })
+        .catch(error => res.status(500).json({ error: error.message || error.name || error }));
+
+      stringify(response.data, { header: true }).pipe(res);
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="download-${Date.now()}.csv"`);
+      return res;
     } catch (e) {
       return res.status(500).json({ error: e.message });
-    }
-  }
-
-  /**
-   * @desc Sends the csv file to the frontend and deletes the local copy of the csv
-   *
-   * @param {object} req Get request object from client
-   * @param {object} res REST Response object
-   * @returns {object} Response containing status message and served report
-   */
-
-  static async getReport(req, res) {
-    try {
-      return res.status(200).sendFile(`${__dirname}/Reports.csv`, () => {
-        fs.unlink(`${__dirname}/Reports.csv`, (err) => {
-          if (err) {
-            res.status(404).json({ error: 'The file was not found' });
-          }
-        });
-      });
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
     }
   }
 }

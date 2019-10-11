@@ -28,7 +28,7 @@ const checkDateFormat = (date) => {
  * @param {*} res HTTP response object
  * @returns {object} JSON object
  */
-const upsellingPartnerPaginatedData = async (date, offset, limit, page, res) => {
+const upsellingPartnerPaginatedData = async (date, offset, limit, page) => {
   const type = 'onboarding';
 
   const { dateFrom, dateTo } = isValidStartDate(date);
@@ -36,7 +36,7 @@ const upsellingPartnerPaginatedData = async (date, offset, limit, page, res) => 
   const allData = await upsellingPartnerQuery(type, offset, limit, dateFrom, dateTo);
   const data = { count: allData.count.length };
   const { numberOfPages, nextPage, prevPage } = paginationMeta(page, data.count, limit);
-  return paginationResponse(res, allData.rows, page, numberOfPages, data, nextPage, prevPage, true);
+  return paginationResponse(allData.rows, page, numberOfPages, data, nextPage, prevPage, true);
 };
 
 /**
@@ -69,7 +69,8 @@ export default class DashboardController {
     const { date = {} } = req.query;
     try {
       checkDateFormat(date);
-      return await upsellingPartnerPaginatedData(date, offset, limit, page, res);
+      const data = await upsellingPartnerPaginatedData(date, offset, limit, page, res);
+      return res.json(data);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }

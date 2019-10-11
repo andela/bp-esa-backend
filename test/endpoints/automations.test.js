@@ -174,7 +174,7 @@ describe('Tests for automation endpoints\n', () => {
       )
       .set('authorization', userToken)
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res).to.have.status(500);
         expect(res.body)
           .to.have.property('error')
           .to.equal('date[from] cannot be greater than date[now] or today');
@@ -434,13 +434,15 @@ describe('Tests for creating a report', () => {
         done();
       });
   });
-  it('should fetch a created report', (done) => {
+
+  it('should return a 500 when an invalid query is made', (done) => {
     chai
       .request(app)
-      .get('/api/v1/automations/fetchReport')
+      .get('/api/v1/automations/downloadReport?type=errortest')
       .set('authorization', userToken)
       .end((err, res) => {
-        expect(res).to.have.status(200);
+        if (err) done(err);
+        expect(res).to.have.status(500);
         done();
       });
   });
