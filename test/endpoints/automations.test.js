@@ -174,7 +174,7 @@ describe('Tests for automation endpoints\n', () => {
       )
       .set('authorization', userToken)
       .end((err, res) => {
-        expect(res).to.have.status(400);
+        expect(res).to.have.status(500);
         expect(res.body)
           .to.have.property('error')
           .to.equal('date[from] cannot be greater than date[now] or today');
@@ -430,16 +430,6 @@ describe('Tests for creating a report', () => {
       .set('authorization', userToken)
       .end((err, res) => {
         if (err) done(err);
-        expect(res).to.have.status(200);
-        done();
-      });
-  });
-  it('should fetch a created report', (done) => {
-    chai
-      .request(app)
-      .get('/api/v1/automations/fetchReport')
-      .set('authorization', userToken)
-      .end((err, res) => {
         expect(res).to.have.status(200);
         done();
       });

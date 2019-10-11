@@ -89,7 +89,6 @@ export function formatAutomationResponse(payload, isFormat) {
 /**
  * Returns a response JSON object
  *
- * @param {object} res Response object
  * @param {object} allData data object returned from the database
  * @param {integer} page page number
  * @param {integer} numberOfPages total number of pages
@@ -99,13 +98,14 @@ export function formatAutomationResponse(payload, isFormat) {
  * @param {boolean} isFormat formmattting isn't needed
  * @returns {object} Response containing paginated object
  */
-export const paginationResponse = (res,
+export const paginationResponse = (
   allData,
   page,
   numberOfPages,
   data,
   nextPage,
-  prevPage, isFormat) => res.status(200).json({
+  prevPage, isFormat,
+) => ({
   status: 'success',
   message: 'Successfully fetched data',
   data: formatAutomationResponse(allData, isFormat),
