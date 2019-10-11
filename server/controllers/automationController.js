@@ -3,7 +3,6 @@
 /* eslint-disable no-console */
 import moment from 'moment';
 import * as util from 'util';
-import * as fs from 'fs';
 import stringify from 'csv-stringify';
 import models from '../models';
 import { paginationResponse, formatAutomationResponse } from '../utils/formatter';
@@ -198,24 +197,16 @@ export default class AutomationController {
 
   static async getAutomations(req, res) {
     try {
-      const {
-        date = {},
-        slackAutomation,
-        emailAutomation,
-        nokoAutomation,
-        type = null,
-        searchBy,
-        searchTerm,
-        page,
-        limit,
-      } = req.query;
-
-      if (!isValidDateFormat(date.to, date.from)) {
+      const params = req.query;
+      params.date = params.date || {};
+      if (!isValidDateFormat(params.date.to, params.date.from)) {
         throw new Error('Invalid date format provided please provide date in iso 8601 string');
       }
-
       let response;
-      await paginationData(date, slackAutomation, emailAutomation, nokoAutomation, type, searchBy, searchTerm, page, limit)
+      await paginationData(
+        params.date, params.slackAutomation, params.emailAutomation, params.nokoAutomation,
+        params.type, params.searchBy, params.searchTerm, params.page, params.limit,
+      )
         .then((data) => {
           response = data;
         })
@@ -270,57 +261,25 @@ export default class AutomationController {
   // eslint-disable-next-line consistent-return
   static async postReport(req, res) {
     try {
-      const {
-        date = {},
-        slackAutomation,
-        emailAutomation,
-        nokoAutomation,
-        type = null,
-        searchBy,
-        searchTerm,
-        page,
-        limit,
-      } = req.query;
-
+      const params = req.query;
+      params.date = params.date || {};
       let response;
-
-      await paginationData(date, slackAutomation, emailAutomation, nokoAutomation, type, searchBy, searchTerm, page, limit)
+      await paginationData(
+        params.date, params.slackAutomation, params.emailAutomation, params.nokoAutomation,
+        params.type, params.searchBy, params.searchTerm, params.page, params.limit,
+      )
         .then((data) => {
           response = data;
         })
-        .catch(error => res.status(500).json(error));
+        .catch(error => res.status(500).json({ error: error.message || error.name || error }));
 
-      stringify(response.data, {
-        header: true,
-      }).pipe(res);
+      stringify(response.data, { header: true }).pipe(res);
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="download-${Date.now()}.csv"`);
       return res;
     } catch (e) {
       return res.status(500).json({ error: e.message });
-    }
-  }
-
-  /**
-   * @desc Sends the csv file to the frontend and deletes the local copy of the csv
-   *
-   * @param {object} req Get request object from client
-   * @param {object} res REST Response object
-   * @returns {object} Response containing status message and served report
-   */
-
-  static async getReport(req, res) {
-    try {
-      return res.status(200).sendFile(`${__dirname}/Reports.csv`, () => {
-        fs.unlink(`${__dirname}/Reports.csv`, (err) => {
-          if (err) {
-            res.status(404).json({ error: 'The file was not found' });
-          }
-        });
-      });
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
     }
   }
 }

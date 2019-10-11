@@ -434,4 +434,16 @@ describe('Tests for creating a report', () => {
         done();
       });
   });
+
+  it('should return a 500 when an invalid query is made', (done) => {
+    chai
+      .request(app)
+      .get('/api/v1/automations/downloadReport?type=errortest')
+      .set('authorization', userToken)
+      .end((err, res) => {
+        if (err) done(err);
+        expect(res).to.have.status(500);
+        done();
+      });
+  });
 });
