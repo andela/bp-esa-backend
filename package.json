@@ -43,7 +43,7 @@
     "express": "^4.16.3",
     "express-validator": "^5.3.1",
     "faker": "^4.1.0",
-    "googleapis": "^33.0.0",
+    "googleapis": "^59.0.0",
     "http": "0.0.0",
     "http-proxy": "^1.17.0",
     "jsdoc": "^3.6.2",
